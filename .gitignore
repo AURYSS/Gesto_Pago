@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Flutter / Dart
+gesto_pago_app/.dart_tool/
+gesto_pago_app/build/
+gesto_pago_app/android/.gradle/
+gesto_pago_app/android/local.properties
+gesto_pago_app/ios/Pods/
+gesto_pago_app/ios/.symlinks/
+gesto_pago_app/linux/flutter/ephemeral/
+gesto_pago_app/macos/Flutter/ephemeral/
+gesto_pago_app/windows/flutter/ephemeral/
+gesto_pago_app/ios/flutter_ephemeral/
+
+# Gradle / Java (API)
+api-gesto-pago/.gradle/
+api-gesto-pago/build/
+api-gesto-pago/bin/
+api-gesto-pago/out/
+
+# Secretos locales (nunca subir)
+.env
+config.env

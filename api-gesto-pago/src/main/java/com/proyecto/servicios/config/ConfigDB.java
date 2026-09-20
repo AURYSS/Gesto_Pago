@@ -1,0 +1,106 @@
+package com.proyecto.servicios.config;
+
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import jakarta.persistence.EntityManagerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.core.env.Environment;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import javax.sql.DataSource;
+import java.util.HashMap;
+import java.util.Map;
+
+
+@Slf4j
+@Configuration
+@EnableTransactionManagement
+@EnableJpaRepositories(
+        basePackages = {
+                "com.proyecto.servicios.repositorys.sf",
+                "com.proyecto.servicios.repositorys.gestopago",
+                "com.proyecto.servicios.repositorys.auth",
+                "com.proyecto.servicios.repositorys.pago"
+        },
+        transactionManagerRef = "sfTransactionManager",
+        entityManagerFactoryRef = "sfEntityManagerFactory"
+)
+public class ConfigDB {
+    @Autowired
+    private Environment env;
+
+    @Bean(name="sfDatasource")
+    public DataSource sfDatasource(){
+        HikariConfig config=new HikariConfig();
+        try{
+            String url = env.getProperty("spring.datasource.url");
+            String schema = env.getProperty("spring.flyway.schemas");
+            if (url != null && schema != null && !schema.isBlank() && !url.contains("currentSchema=")) {
+                String sep = url.contains("?") ? "&" : "?";
+                url = url + sep + "currentSchema=" + schema;
+            }
+            config.setJdbcUrl(url);
+            config.setPassword(env.getProperty("spring.datasource.password"));
+            config.setUsername(env.getProperty("spring.datasource.username"));
+            config.setMaximumPoolSize(10);
+            config.setMaxLifetime(18800);
+            config.setConnectionTimeout(5000);
+            config.setValidationTimeout(5000);
+            config.setMinimumIdle(2);
+            config.setConnectionTestQuery("SELECT 1");
+            config.setPoolName("sfDatasource");
+
+        }catch (Exception e){
+            log.error("Ha ocurrido un error en la conexcion a base de datos, a causa de:",e);
+            return null;
+        }
+        return new HikariDataSource(config);
+    }
+
+    @Bean(name="sfEntityManagerFactory")
+    @DependsOn("flyway")
+    public LocalContainerEntityManagerFactoryBean sfEntityManagerFactory(){
+        LocalContainerEntityManagerFactoryBean em= new LocalContainerEntityManagerFactoryBean();
+        try{
+          em.setDataSource(sfDatasource());
+          em.setPackagesToScan(
+                  "com.proyecto.servicios.entity.sf",
+                  "com.proyecto.servicios.entity.gestopago",
+                  "com.proyecto.servicios.entity.auth",
+                  "com.proyecto.servicios.entity.pago"
+          );
+          em.setPersistenceUnitName("sfDatasource");
+            HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+            em.setJpaVendorAdapter(vendorAdapter);
+          Map<String, Object> properties=new HashMap<>();
+          properties.put("hibernate.hbm2ddl.auto", "none");
+            properties.put("hibernate.show-sql", false);
+            properties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+            properties.put("hibernate.default_schema", env.getProperty("spring.flyway.schemas", "public"));
+            properties.put("jakarta.persistence.query.timeout", 600000);
+
+
+        } catch (Exception e) {
+            log.error("Ha ocurrido un error en la conexion a base de datos, a causa de:",e);
+            return null;
+
+        }
+        return em;
+    }
+ @Bean(name="sfTransactionManager")
+ public PlatformTransactionManager sfTransactionManager(@Qualifier("sfEntityManagerFactory") EntityManagerFactory sfEntityManagerFactory){
+        return new JpaTransactionManager(sfEntityManagerFactory);
+
+ }
+
+}
