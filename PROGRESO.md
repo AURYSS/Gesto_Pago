@@ -1,6 +1,6 @@
 # Gesto Pago — Progreso y reanudación
 
-Estado guardado el 19-sep-2026 (noche). Ambos proyectos están versionados en git
+Estado guardado el 26-sep-2026. Ambos proyectos están versionados en git
 y listos para apagar la máquina. Esta nota sirve para retomar la sesión.
 
 ## Repos
@@ -15,24 +15,30 @@ y listos para apagar la máquina. Esta nota sirve para retomar la sesión.
   - Commit inicial `7e3789d` (296 archivos, solo código sin artefactos). Falta crear repo en GitHub y `git remote add origin <URL>` + `git push -u origin main`.
   - El `.env` con credenciales está copiado localmente pero **gitignored**.
 
-## Última sesión (19-sep-2026): login E2E funcionando en Chrome
-- **Login ya funciona de punta a punta** en web: `CHROME_EXECUTABLE="/Volumes/RespaldoMacbook/Google Chrome.app/Contents/MacOS/Google Chrome" flutter run -d chrome --web-port=3000` (Chrome vive en el disco externo; `--web-port=3000` coincide con el origen CORS permitido `http://localhost:3000`). API en `sh gradlew bootRun` (IntelliJ, :8080). Usuario: `admin@prueba.com`.
-- **Causa raíz de los errores genéricos:** Dio 5.11 envuelve en `DioException` (con original en `.error`) todo lo que lanzan los interceptores → ninguna `AppException` llegaba a los catches. Fix: `ApiClient.unwrap()` centraliza el desempaquetado y los 4 `*_remote` relanzan `throw ApiClient.unwrap(e)`. Test `test/core/network/unwrap_error_test.dart`.
-- **Bug de providers duplicados:** en `session_controller`, `catalogo_controller` y `pago_controller` había `authRepositoryProvider`/`catalogoRepositoryProvider`/`pagosRepositoryProvider` locales que lanzaban `UnimplementedError` y tapaban los reales de `app_providers.dart` → pantallas en blanco o "error inesperado". Eliminados los duplicados.
-- **Ciclo Riverpod roto:** `apiClientProvider` ya no depende de `sessionControllerProvider`; `SessionExpiredBridge` + `SessionExpiredBridgeProvider` (enlazado en `main.dart`) entrega `onSessionExpired`, igual que `TokenRefresherBridge`.
-- **Inicio/perfil:** `catalogo` ya se resuelve; `_TarjetaSeccion` de perfil ahora envuelve sus hijos en `Material(color: transparent)` para silenciar la aserción "ListTile background color or ink splashes may be invisible".
-- Extras previos de la sesión: `restore()` de splash con try/catch + tests; `ConfigDB` con `?` scan de repos/entities `pago`.
+## Sesión (26-sep-2026): migración de catálogos y pagos pendientes a BD
+- **Backend:**
+  - `V7__create_catalogo_marcas.sql`: tablas `catalogo_categorias` y `catalogo_marcas` con semilla de 6 categorías y 51 marcas con logo/color oficial.
+  - `CatalogoController`: endpoint `GET /catalogo/marcas` servido vía `CatalogoMarcaConsultaImpl` (JdbcTemplate). Test unitario `CatalogoMarcaConsultaImplTest`.
+  - `PagosServiceImpl.pendientes`: consulta transacciones reales del usuario (`PENDIENTE`, `EN_PROCESO`, `FALLIDA`) ordenadas por fecha descendente.
+  - `PagosController`: nuevo endpoint `GET /pagos/pendientes` autenticado por JWT. Test ampliado en `PagosServiceImplTest`.
+- **Flutter:**
+  - `CatalogoMarca`, `CatalogoCategoria` y agregación `CatalogoMarcas` en el dominio con resolución dinámica de marcas, logos y colores oficiales.
+  - Eliminado catálogo estático `gp_marcas.dart` y mapas estáticos en `GpAssets`. `GpCategoria` reemplazado por datos dinámicos.
+  - `MarcasController` y `PendientesController` implementados como `AsyncNotifier` reactivos con soporte de `refresh()`.
+  - `BrandMark` y `ServiceCard` reciben directamente los assets/colores desde el modelo de datos.
+  - `PendingPaymentItem` muestra insignias de estado real (`EstadoTransaccionBadge`) y botones de acción dinámicos (Confirmar, Reintentar, Pagar).
+  - l10n actualizado y regenerado (eliminadas claves obsoletas de vencimiento).
+  - Fixture `marcas_catalogo.json` y tests unitarios verificando resolución de marcas y existencia de todos los logos en disco.
 
 ## Hecho y verificado (todo en verde)
-- Backend: `sh gradlew compileJava` OK; 37 unit tests OK con:
-  `sh gradlew test --tests "com.proyecto.servicios.service.Impl.*" --tests "com.proyecto.servicios.config.security.*" --tests "com.proyecto.servicios.service.security.*"`
-- Flutter: `flutter analyze` 0 issues; `flutter test` 22/22 (con el test nuevo de unwrap);
-  `flutter build apk --debug` generó `build/app/outputs/flutter-apk/app-debug.apk` (previo).
+- Backend: `sh gradlew compileJava` OK; suite completa de tests de service en verde con:
+  `sh gradlew test --tests "com.proyecto.servicios.service.Impl.*"`
+- Flutter: `flutter analyze` 0 issues; `flutter test` 102/102 tests en verde.
 
 ## Pendiente (próxima sesión)
 - E2E real requiere levantar infra con docker compose (Postgres :5434, Redis :6379).
 - Icono de app / splash nativo / pulido Android.
-- Probar el flujo completo login→catálogo→pago→comprobante (catálogo llega del backend GestoPago getProductList).
+- Probar el flujo completo login→catálogo→pago→comprobante con transacciones pendientes en vivo.
 - En web/iOS el almacenamiento seguro se comporta distinto; verificar persistencia de sesión entre recargas.
 
 ## Comandos útiles
@@ -43,6 +49,8 @@ y listos para apagar la máquina. Esta nota sirve para retomar la sesión.
 
 ## Claves del diseño implementado
 - El subject del JWT es el **email**; PagosController resuelve email→`usuario_id`.
+- Catálogo de marcas y categorías reside en Postgres (`catalogo_marcas`, `catalogo_categorias`) y se expone en `GET /catalogo/marcas`.
+- Pagos pendientes salen de `transacciones` reales del usuario (`GET /pagos/pendientes`), mapeadas a `PagoPendiente` con flags `puedeConfirmar` y `puedeReintentar`.
 - Idempotencia por usuario: `UNIQUE(usuario_id, idempotency_key)`; upc = clave (3–15) o SHA-256 truncado; reintento tras FALLIDA reutiliza la fila; advisory lock serializa concurrentes.
 - Envío: sendTx fallo de red → EN_PROCESO (confirmable tras `gestopago.confirm-wait-seconds`, default 62); confirm 06/01 → APROBADA, 70 → FALLIDA; códigos 01/06 → APROBADA, 82 → EN_PROCESO, resto FALLIDA.
 - Flutter: `TokenRefresherBridge` y `SessionExpiredBridge` (enlazados en `main.dart`) rompen los ciclos `apiClientProvider`↔`authRepositoryProvider`/`SessionController`.
