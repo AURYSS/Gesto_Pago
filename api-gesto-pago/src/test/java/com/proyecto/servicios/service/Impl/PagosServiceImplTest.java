@@ -7,6 +7,7 @@ import com.proyecto.servicios.entity.pago.EventoTransaccion;
 import com.proyecto.servicios.entity.pago.Transaccion;
 import com.proyecto.servicios.exception.ApiException;
 import com.proyecto.servicios.model.CatalogoProductoCache;
+import com.proyecto.servicios.model.pago.PagoPendienteDto;
 import com.proyecto.servicios.model.pago.PagoRequestDto;
 import com.proyecto.servicios.model.pago.TransaccionDto;
 import com.proyecto.servicios.model.pago.VerificarReferenciaRequest;
@@ -16,6 +17,7 @@ import com.proyecto.servicios.repositorys.pago.TransaccionRepository;
 import com.proyecto.servicios.service.BloqueoIdempotencia;
 import com.proyecto.servicios.service.CatalogoConsulta;
 import com.proyecto.servicios.service.GestoPagoTokenService;
+import com.proyecto.servicios.service.HistorialPagosCache;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,8 +37,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -48,19 +53,25 @@ class PagosServiceImplTest {
 
     private static final String XML_SENDTX_EXITO = """
             <?xml version='1.0' encoding='UTF-8'?>
-            <RESPONSE>
+            <AUTORIZACION>
                 <ID_TX>1975170643</ID_TX>
                 <NUM_AUTORIZACION>100048015</NUM_AUTORIZACION>
                 <SALDO>30484.32</SALDO>
                 <COMISION>6.0</COMISION>
                 <FECHA>12/Mar/2024 15:10:48</FECHA>
                 <MONTO>701.99</MONTO>
-                <MENSAJE>
-                    <CODIGO>01</CODIGO>
-                    <TEXTO>Operacion realizada con exito</TEXTO>
-                    <REFERENCIA>25720381</REFERENCIA>
-                </MENSAJE>
-            </RESPONSE>
+                <CODIGO_MENSAJE>01</CODIGO_MENSAJE>
+                <MENSAJE>Operacion realizada con exito</MENSAJE>
+                <REFERENCIA>25720381</REFERENCIA>
+            </AUTORIZACION>
+            """;
+    private static final String XML_SENDTX_CARRIER_DOWN = """
+            <?xml version='1.0' encoding='UTF-8'?>
+            <AUTORIZACION> <NUM_AUTORIZACION>-1</NUM_AUTORIZACION><CODIGO_MENSAJE>03</CODIGO_MENSAJE><MENSAJE>Por el momento el carrier no responde, favor de intentar mas tarde.</MENSAJE></AUTORIZACION>
+            """;
+    private static final String XML_CONFIRM_DISPOSITIVO_NO_REGISTRADO = """
+            <?xml version='1.0' encoding='UTF-8'?>
+            <RESPONSE> <NUM_AUTORIZACION>-1</NUM_AUTORIZACION><MENSAJE><CODIGO>51</CODIGO><TEXTO>Dispositivo no registrado</TEXTO></MENSAJE></RESPONSE>
             """;
     private static final String XML_CONFIRM_EXITO = """
             <?xml version='1.0' encoding='UTF-8'?>
@@ -97,6 +108,8 @@ class PagosServiceImplTest {
     private CatalogoConsulta catalogoConsulta;
     @Mock
     private BloqueoIdempotencia bloqueoIdempotencia;
+    @Mock
+    private HistorialPagosCache historialPagosCache;
 
     private PagosServiceImpl service;
     private GestoPagoToken token;
@@ -105,7 +118,7 @@ class PagosServiceImplTest {
     void setUp() {
         service = new PagosServiceImpl(gestoPagoTokenService, gestoPagoTxClient,
                 transaccionRepository, eventoTransaccionRepository,
-                catalogoConsulta, bloqueoIdempotencia, 1, "DISP01", "083", 62);
+                catalogoConsulta, bloqueoIdempotencia, historialPagosCache, 1, "DISP01", "083", 62);
         token = new GestoPagoToken();
         token.setToken("token-de-prueba");
         lenient().when(gestoPagoTokenService.obtenerTokenActivo(1, "DISP01"))
@@ -211,9 +224,10 @@ class PagosServiceImplTest {
     @Test
     void verificarReferenciaDeProductoNoVerificableEsRechazada() {
         when(catalogoConsulta.buscarActivo(76, 205)).thenReturn(Optional.of(recarga()));
+        VerificarReferenciaRequest req = request(76, 205, "5577777777");
 
         ApiException error = assertThrows(ApiException.class,
-                () -> service.verificarReferencia(request(76, 205, "5577777777")));
+                () -> service.verificarReferencia(req));
         assertEquals("PAGO-002", error.getCode());
         verify(gestoPagoTxClient, never()).verifyReference(anyString(), any());
     }
@@ -317,18 +331,20 @@ class PagosServiceImplTest {
         CatalogoProductoCache p = new CatalogoProductoCache();
         p.setIdServicio(999);
         p.setIdProducto(1);
+        PagoRequestDto pagoReq = pago(p, "12345", new BigDecimal("50.00"));
 
         ApiException error = assertThrows(ApiException.class,
-                () -> service.crearTransaccion(1L, pago(p, "12345", new BigDecimal("50.00"))));
+                () -> service.crearTransaccion(1L, pagoReq));
         assertEquals("PAGO-003", error.getCode());
     }
 
     @Test
     void crearServicioSinMontoEsRechazado() {
         when(catalogoConsulta.buscarActivo(108, 272)).thenReturn(Optional.of(servicio()));
+        PagoRequestDto pagoReq = pago(servicio(), "5610440665", null);
 
         ApiException error = assertThrows(ApiException.class,
-                () -> service.crearTransaccion(1L, pago(servicio(), "5610440665", null)));
+                () -> service.crearTransaccion(1L, pagoReq));
         assertEquals("PAGO-004", error.getCode());
     }
 
@@ -349,18 +365,37 @@ class PagosServiceImplTest {
         when(gestoPagoTxClient.sendTx(anyString(), any()))
                 .thenReturn("""
                         <?xml version='1.0' encoding='UTF-8'?>
-                        <RESPONSE>
-                            <MENSAJE>
-                                <CODIGO>82</CODIGO>
-                                <TEXTO>Timeout alcanzado, transaccion no registrada</TEXTO>
-                            </MENSAJE>
-                        </RESPONSE>
+                        <AUTORIZACION>
+                            <NUM_AUTORIZACION>-1</NUM_AUTORIZACION>
+                            <CODIGO_MENSAJE>82</CODIGO_MENSAJE>
+                            <MENSAJE>Timeout alcanzado, transaccion no registrada</MENSAJE>
+                        </AUTORIZACION>
                         """);
 
         TransaccionDto dto = service.crearTransaccion(1L, pago(recarga(), "5577777777", null));
 
         assertEquals("EN_PROCESO", dto.getEstado());
         assertTrue(dto.getErrorMensaje().contains("Timeout"));
+    }
+
+    @Test
+    void crearConCarrierNoRespondeMarcaFallida() {
+        when(catalogoConsulta.buscarActivo(76, 205)).thenReturn(Optional.of(recarga()));
+        when(transaccionRepository.findByUsuarioIdAndIdempotencyKey(1L, "clave-idem-123"))
+                .thenReturn(Optional.empty());
+        when(transaccionRepository.save(any(Transaccion.class))).thenAnswer(inv -> {
+            Transaccion t = inv.getArgument(0);
+            t.setId(14L);
+            t.setCreatedAt(Instant.now());
+            t.setUpdatedAt(Instant.now());
+            return t;
+        });
+        when(gestoPagoTxClient.sendTx(anyString(), any())).thenReturn(XML_SENDTX_CARRIER_DOWN);
+
+        TransaccionDto dto = service.crearTransaccion(1L, pago(recarga(), "5577777777", null));
+
+        assertEquals("FALLIDA", dto.getEstado());
+        assertTrue(dto.getErrorMensaje().contains("carrier no responde"));
     }
 
     @Test
@@ -378,13 +413,11 @@ class PagosServiceImplTest {
         when(gestoPagoTxClient.sendTx(anyString(), any()))
                 .thenReturn("""
                         <?xml version='1.0' encoding='UTF-8'?>
-                        <RESPONSE>
+                        <AUTORIZACION>
                             <NUM_AUTORIZACION>100057766</NUM_AUTORIZACION>
-                            <MENSAJE>
-                                <CODIGO>06</CODIGO>
-                                <TEXTO>Upc ya fue registrado</TEXTO>
-                            </MENSAJE>
-                        </RESPONSE>
+                            <CODIGO_MENSAJE>06</CODIGO_MENSAJE>
+                            <MENSAJE>Upc ya fue registrado</MENSAJE>
+                        </AUTORIZACION>
                         """);
 
         TransaccionDto dto = service.crearTransaccion(1L, pago(recarga(), "5577777777", null));
@@ -441,6 +474,23 @@ class PagosServiceImplTest {
     }
 
     @Test
+    void confirmarDispositivoNoRegistradoMarcaFallida() {
+        when(catalogoConsulta.buscarActivo(76, 205)).thenReturn(Optional.of(recarga()));
+        Transaccion tx = transaccion(76, 205, EstadoTransaccion.EN_PROCESO, "clave-idem-123");
+        tx.setId(24L);
+        tx.setCreatedAt(Instant.now().minusSeconds(120));
+        when(transaccionRepository.findByIdAndUsuarioId(24L, 1L)).thenReturn(Optional.of(tx));
+        when(transaccionRepository.save(any(Transaccion.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(gestoPagoTxClient.confirmTx(anyString(), any()))
+                .thenReturn(XML_CONFIRM_DISPOSITIVO_NO_REGISTRADO);
+
+        TransaccionDto dto = service.confirmarTransaccion(1L, 24L);
+
+        assertEquals("FALLIDA", dto.getEstado());
+        assertEquals("Dispositivo no registrado", dto.getErrorMensaje());
+    }
+
+    @Test
     void confirmarDeTransaccionInexistenteEsRechazada() {
         when(transaccionRepository.findByIdAndUsuarioId(99L, 1L)).thenReturn(Optional.empty());
 
@@ -468,12 +518,124 @@ class PagosServiceImplTest {
         Transaccion b = transaccion(108, 272, EstadoTransaccion.PENDIENTE, "k2");
         b.setId(2L);
         when(transaccionRepository.findByUsuarioIdOrderByCreatedAtDesc(1L)).thenReturn(List.of(b, a));
+        when(historialPagosCache.obtener(1L)).thenReturn(Optional.empty());
 
         List<TransaccionDto> historial = service.historial(1L);
 
         assertEquals(2, historial.size());
         assertEquals("PENDIENTE", historial.get(0).getEstado());
         assertEquals("APROBADA", historial.get(1).getEstado());
+    }
+
+    @Test
+    void historialSeSirveDeRedisSinTocarPostgres() {
+        TransaccionDto enCache = new TransaccionDto();
+        enCache.setId(9L);
+        enCache.setEstado("APROBADA");
+        when(historialPagosCache.obtener(1L)).thenReturn(Optional.of(List.of(enCache)));
+
+        List<TransaccionDto> historial = service.historial(1L);
+
+        assertEquals(1, historial.size());
+        assertEquals(9L, historial.get(0).getId());
+        verify(transaccionRepository, never()).findByUsuarioIdOrderByCreatedAtDesc(anyLong());
+    }
+
+    @Test
+    void historialEnCacheMissConsultaPostgresYLLenaElCache() {
+        Transaccion a = transaccion(76, 205, EstadoTransaccion.APROBADA, "k1");
+        a.setId(1L);
+        when(historialPagosCache.obtener(1L)).thenReturn(Optional.empty());
+        when(transaccionRepository.findByUsuarioIdOrderByCreatedAtDesc(1L)).thenReturn(List.of(a));
+
+        service.historial(1L);
+
+        verify(historialPagosCache).guardar(eq(1L), anyList());
+    }
+
+    @Test
+    void unPagoAprobadoQuedaEnElHistorialDeRedis() {
+        when(catalogoConsulta.buscarActivo(76, 205)).thenReturn(Optional.of(recarga()));
+        when(transaccionRepository.findByUsuarioIdAndIdempotencyKey(anyLong(), anyString()))
+                .thenReturn(Optional.empty());
+        when(transaccionRepository.save(any(Transaccion.class))).thenAnswer(inv -> {
+            Transaccion tx = inv.getArgument(0);
+            if (tx.getId() == null) {
+                tx.setId(42L);
+            }
+            return tx;
+        });
+        when(gestoPagoTxClient.sendTx(anyString(), any())).thenReturn(XML_SENDTX_EXITO);
+
+        TransaccionDto dto = service.crearTransaccion(1L, pago(recarga(), "5577777777", new BigDecimal("100.00")));
+
+        assertEquals("APROBADA", dto.getEstado());
+        verify(historialPagosCache).registrar(eq(1L), argThat(t -> t.getId() != null
+                && t.getId() == 42L && "APROBADA".equals(t.getEstado())));
+    }
+
+    @Test
+    void siRedisEstaCaidoElHistorialSeSigueSirviendoDesdePostgres() {
+        Transaccion a = transaccion(76, 205, EstadoTransaccion.APROBADA, "k1");
+        a.setId(1L);
+        when(historialPagosCache.obtener(1L)).thenReturn(Optional.empty());
+        when(transaccionRepository.findByUsuarioIdOrderByCreatedAtDesc(1L)).thenReturn(List.of(a));
+        lenient().doThrow(new RuntimeException("redis caido"))
+                .when(historialPagosCache).guardar(anyLong(), anyList());
+
+        List<TransaccionDto> historial = service.historial(1L);
+
+        assertEquals(1, historial.size());
+        assertEquals(1L, historial.get(0).getId());
+    }
+
+    @Test
+    void siRedisEstaCaidoAlRegistrarElPagoEsteNoSePierde() {
+        when(catalogoConsulta.buscarActivo(76, 205)).thenReturn(Optional.of(recarga()));
+        when(transaccionRepository.findByUsuarioIdAndIdempotencyKey(anyLong(), anyString()))
+                .thenReturn(Optional.empty());
+        when(transaccionRepository.save(any(Transaccion.class))).thenAnswer(inv -> {
+            Transaccion tx = inv.getArgument(0);
+            if (tx.getId() == null) {
+                tx.setId(42L);
+            }
+            return tx;
+        });
+        when(gestoPagoTxClient.sendTx(anyString(), any())).thenReturn(XML_SENDTX_EXITO);
+        lenient().doThrow(new RuntimeException("redis caido"))
+                .when(historialPagosCache).registrar(anyLong(), any());
+
+        TransaccionDto dto = service.crearTransaccion(1L, pago(recarga(), "5577777777", new BigDecimal("100.00")));
+
+        assertEquals("APROBADA", dto.getEstado());
+    }
+
+    @Test
+    void pendientesDevuelveSoloEstadosPendientesYOrdenados() {
+        Transaccion a = transaccion(76, 205, EstadoTransaccion.EN_PROCESO, "k1");
+        a.setId(101L);
+        Transaccion b = transaccion(108, 272, EstadoTransaccion.FALLIDA, "k2");
+        b.setId(102L);
+
+        when(transaccionRepository.findByUsuarioIdAndEstadoInOrderByCreatedAtDesc(
+                eq(1L), argThat(estados -> estados != null && estados.size() == 3
+                        && estados.contains(EstadoTransaccion.PENDIENTE)
+                        && estados.contains(EstadoTransaccion.EN_PROCESO)
+                        && estados.contains(EstadoTransaccion.FALLIDA))))
+                .thenReturn(List.of(a, b));
+
+        List<PagoPendienteDto> pendientes = service.pendientes(1L);
+
+        assertEquals(2, pendientes.size());
+        assertEquals(101L, pendientes.get(0).getId());
+        assertEquals("EN_PROCESO", pendientes.get(0).getEstado());
+        assertTrue(pendientes.get(0).getPuedeConfirmar());
+        assertFalse(pendientes.get(0).getPuedeReintentar());
+
+        assertEquals(102L, pendientes.get(1).getId());
+        assertEquals("FALLIDA", pendientes.get(1).getEstado());
+        assertFalse(pendientes.get(1).getPuedeConfirmar());
+        assertTrue(pendientes.get(1).getPuedeReintentar());
     }
 
     private Transaccion transaccion(Integer idServicio, Integer idProducto,

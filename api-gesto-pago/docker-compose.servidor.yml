@@ -1,0 +1,48 @@
+# Despliegue del API GestoPago en el servidor (entorno Aurora)
+# Uso:  cp .env.server.example .env.server  &&  $EDITOR .env.server  &&  docker compose -f docker-compose.servidor.yml up -d
+name: aurora
+
+services:
+  api:
+    image: bryanarrendon/gesto-pago:latest
+    container_name: aurora-api
+    restart: unless-stopped
+    pull_policy: always
+    # Variables reales (secretos) en .env.server -> NO se sube a git ni a la imagen
+    env_file:
+      - .env.server
+    environment:
+      # Postgres 17 y Redis 8.10.1 ya corren como aurora-postgres17 / aurora-redis810.
+      # Al estar en la misma red aurora-net se les llama por nombre de contenedor.
+      SPRING_DATASOURCE_URL: jdbc:postgresql://aurora-postgres17:5432/${POSTGRES_DB:-aurora_pagos}
+      DB_SCHEMA: ${DB_SCHEMA:-aurora_pagos}
+      REDIS_HOST: aurora-redis810
+      REDIS_PORT: "6379"
+      # Ajustes de producción
+      SPRING_JPA_SHOW_SQL: "false"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      SERVER_SHUTDOWN: graceful
+      SPRING_LIFECYCLE_TIMEOUT_PER_SHUTDOWN_PHASE: "20"
+      TZ: America/Mexico_City
+    ports:
+      # Solo Tailscale (100.91.46.42) y localhost; no queda expuesto a la LAN
+      - "127.0.0.1:8080:8080"
+      - "100.91.46.42:8080:8080"
+    networks:
+      - aurora-net
+    # Para que Spring cierre conexiones abiertas antes de que muera el contenedor
+    stop_grace_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 900M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  aurora-net:
+    external: true
+    name: aurora-net

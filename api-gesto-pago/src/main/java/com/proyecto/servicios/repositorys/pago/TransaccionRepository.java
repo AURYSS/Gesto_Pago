@@ -5,6 +5,7 @@ import com.proyecto.servicios.entity.pago.Transaccion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +17,9 @@ public interface TransaccionRepository extends JpaRepository<Transaccion, Long> 
     Optional<Transaccion> findByUsuarioIdAndIdempotencyKey(Long usuarioId, String idempotencyKey);
 
     List<Transaccion> findByUsuarioIdOrderByCreatedAtDesc(Long usuarioId);
+
+    List<Transaccion> findByUsuarioIdAndEstadoInOrderByCreatedAtDesc(
+            Long usuarioId, Collection<EstadoTransaccion> estados);
 
     List<Transaccion> findByEstado(EstadoTransaccion estado);
 }

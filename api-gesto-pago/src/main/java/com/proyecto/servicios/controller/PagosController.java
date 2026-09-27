@@ -1,6 +1,7 @@
 package com.proyecto.servicios.controller;
 
 import com.proyecto.servicios.exception.ApiException;
+import com.proyecto.servicios.model.pago.PagoPendienteDto;
 import com.proyecto.servicios.model.pago.PagoRequestDto;
 import com.proyecto.servicios.model.pago.TransaccionDto;
 import com.proyecto.servicios.model.pago.VerificarReferenciaRequest;
@@ -62,6 +63,12 @@ public class PagosController {
     @Operation(summary = "Historial de transacciones del usuario")
     public ResponseEntity<List<TransaccionDto>> historial(Authentication authentication) {
         return ResponseEntity.ok(pagosService.historial(usuarioId(authentication)));
+    }
+
+    @GetMapping(value = "/pendientes", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Pagos pendientes del usuario (en proceso, pendientes o fallidos reintentables)")
+    public ResponseEntity<List<PagoPendienteDto>> pendientes(Authentication authentication) {
+        return ResponseEntity.ok(pagosService.pendientes(usuarioId(authentication)));
     }
 
     private Long usuarioId(Authentication authentication) {

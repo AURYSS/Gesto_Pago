@@ -1,0 +1,32 @@
+name: aurora
+
+services:
+
+  redis:
+    image: redis:7-alpine
+    container_name: aurora-redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  sonarqube:
+    image: sonarqube:10.5-community
+    container_name: aurora-sonarqube
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    volumes:
+      - aurora-sonarqube-data:/opt/sonarqube/data
+      - aurora-sonarqube-extensions:/opt/sonarqube/extensions
+      - aurora-sonarqube-logs:/opt/sonarqube/logs
+
+volumes:
+  aurora-sonarqube-data:
+  aurora-sonarqube-extensions:
+  aurora-sonarqube-logs:

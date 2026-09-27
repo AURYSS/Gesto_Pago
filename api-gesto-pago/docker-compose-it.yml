@@ -1,15 +1,29 @@
+name: aurora-it
+
 services:
   postgres-it:
     image: postgres:16-alpine
-    container_name: prueba-postgres
+    container_name: aurora-postgres-it
     environment:
-      POSTGRES_DB: prueba_it
-      POSTGRES_USER: prueba
-      POSTGRES_PASSWORD: prueba123
+      POSTGRES_DB: aurora_it
+      POSTGRES_USER: aurora
+      POSTGRES_PASSWORD: aurora123
     ports:
       - "5434:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U prueba -d prueba_it"]
+      test: ["CMD-SHELL", "pg_isready -U aurora -d aurora_it"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis-it:
+    image: redis:7-alpine
+    container_name: aurora-redis-it
+    ports:
+      - "6380:6379"
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 10

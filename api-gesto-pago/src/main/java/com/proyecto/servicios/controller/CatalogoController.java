@@ -2,7 +2,10 @@ package com.proyecto.servicios.controller;
 
 import com.proyecto.servicios.model.CatalogoProductoCache;
 import com.proyecto.servicios.model.CatalogoSyncResult;
+import com.proyecto.servicios.model.catalogo.CatalogoMarcasResponse;
+import com.proyecto.servicios.service.CatalogoMarcaConsulta;
 import com.proyecto.servicios.service.CatalogoSyncService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,6 +21,7 @@ import java.util.List;
 public class CatalogoController {
 
     private final CatalogoSyncService catalogoSyncService;
+    private final CatalogoMarcaConsulta catalogoMarcaConsulta;
 
     @PostMapping(value = "/catalogo/sincronizar", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CatalogoSyncResult> sincronizar() {
@@ -30,5 +34,11 @@ public class CatalogoController {
     @GetMapping(value = "/catalogo/productos", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<CatalogoProductoCache>> productos() {
         return new ResponseEntity<>(catalogoSyncService.obtenerProductosActivos(), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/catalogo/marcas", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Catalogo de marcas con su categoria, color y logo")
+    public ResponseEntity<CatalogoMarcasResponse> marcas() {
+        return new ResponseEntity<>(catalogoMarcaConsulta.obtenerMarcas(), HttpStatus.OK);
     }
 }
