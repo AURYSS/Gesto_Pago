@@ -17,6 +17,10 @@ abstract final class GpMoney {
     return _formateador.format(valor);
   }
 
+  /// Igual que [format] pero para cantidades calculadas en la app, como
+  /// las cuotas de un plan. Evita convertir a string en cada pantalla.
+  static String formatMonto(double monto) => _formateador.format(monto);
+
   /// Solo dígitos/decimal para entrada en campos de texto.
   static String sanitizarEntrada(String texto) {
     final limpiado = texto.replaceAll(',', '.').replaceAll(RegExp(r'[^0-9.]'), '');

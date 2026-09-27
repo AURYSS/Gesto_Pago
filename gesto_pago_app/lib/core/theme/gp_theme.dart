@@ -21,6 +21,12 @@ abstract final class GpSpacing {
   static const double page = 16;
 }
 
+/// Tipografia de la app. Inter se empaqueta en el binario (ver `pubspec.yaml`),
+/// asi que no hay dependencia de red ni de Google Fonts en ejecucion.
+abstract final class GpFonts {
+  static const String familia = 'Inter';
+}
+
 /// Definiciones de estilo centralizadas (light y dark). Las pantallas
 /// consumen el tema y evitan estilos ad-hoc.
 abstract final class GpTheme {
@@ -32,20 +38,24 @@ abstract final class GpTheme {
     final scheme = ColorScheme.fromSeed(
       seedColor: GpColors.seed,
       brightness: brightness,
-      primary: oscuro ? GpColors.verdeClaro : GpColors.verde,
-      onPrimary: oscuro ? GpColors.esmeraldaOscuro : GpColors.sobreVerde,
+      primary: oscuro ? GpColors.menta : GpColors.verde,
+      onPrimary: oscuro ? GpColors.sobreMenta : GpColors.sobreVerde,
     ).copyWith(
       surface: oscuro ? GpColors.superficieOscura : GpColors.superficieClara,
       onSurface: oscuro ? GpColors.textoOscuro : GpColors.textoClaro,
       error: oscuro ? GpColors.errorOscuro : GpColors.error,
       outline: oscuro ? GpColors.bordeOscuro : GpColors.bordeClaro,
-      surfaceContainerHighest:
-          oscuro ? GpColors.bordeOscuro.withValues(alpha: 0.4) : const Color(0xFFEDF1EE),
+      surfaceContainerHighest: oscuro
+          ? GpColors.superficieElevadaOscura
+          : const Color(0xFFEDF1EE),
     );
 
     final base = ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
+      // Sin esto Flutter aplica Roboto y las hojas de estilo del theme
+      // heredarian la fuente del sistema.
+      fontFamily: GpFonts.familia,
       scaffoldBackgroundColor: oscuro ? GpColors.fondoOscuro : GpColors.fondoClaro,
     );
 
@@ -181,38 +191,78 @@ abstract final class GpTheme {
         linearTrackColor: schemeGe.surfaceContainerHighest,
       ),
       textTheme: base.textTheme.copyWith(
+        // `fontFamily` se repite en cada estilo a proposito: ThemeData lo
+        // inyecta al construir el TextTheme original, pero los estilos que
+        // copiamos aqui lo nacen con la familia nula y terminarian
+        // resolviendo a la fuente del sistema.
         displaySmall: TextStyle(
+          fontFamily: GpFonts.familia,
           fontSize: 32,
           fontWeight: FontWeight.w800,
           letterSpacing: -0.5,
           color: schemeGe.onSurface,
         ),
         headlineMedium: TextStyle(
+          fontFamily: GpFonts.familia,
           fontSize: 24,
           fontWeight: FontWeight.w700,
           letterSpacing: -0.3,
           color: schemeGe.onSurface,
         ),
+        headlineSmall: TextStyle(
+          fontFamily: GpFonts.familia,
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.2,
+          color: schemeGe.onSurface,
+        ),
         titleLarge: TextStyle(
+          fontFamily: GpFonts.familia,
           fontSize: 18,
           fontWeight: FontWeight.w700,
+          letterSpacing: -0.1,
           color: schemeGe.onSurface,
         ),
         titleMedium: TextStyle(
+          fontFamily: GpFonts.familia,
           fontSize: 16,
           fontWeight: FontWeight.w600,
           color: schemeGe.onSurface,
         ),
-        bodyLarge: TextStyle(fontSize: 16, color: schemeGe.onSurface),
-        bodyMedium: TextStyle(fontSize: 14, color: schemeGe.onSurface),
+        titleSmall: TextStyle(
+          fontFamily: GpFonts.familia,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: schemeGe.onSurface,
+        ),
+        bodyLarge: TextStyle(
+          fontFamily: GpFonts.familia,
+          fontSize: 16,
+          color: schemeGe.onSurface,
+        ),
+        bodyMedium: TextStyle(
+          fontFamily: GpFonts.familia,
+          fontSize: 14,
+          color: schemeGe.onSurface,
+        ),
+        // Subtitulos y metadatos: gris claro, nunca negro sobre fondo
+        // oscuro, para que la jerarquia se lea sin romper el contraste.
         bodySmall: TextStyle(
+          fontFamily: GpFonts.familia,
           fontSize: 13,
           color: schemeGe.onSurfaceVariant,
         ),
         labelLarge: TextStyle(
+          fontFamily: GpFonts.familia,
           fontSize: 14,
           fontWeight: FontWeight.w600,
           color: schemeGe.onSurface,
+        ),
+        labelSmall: TextStyle(
+          fontFamily: GpFonts.familia,
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+          color: schemeGe.onSurfaceVariant,
         ),
       ),
     );

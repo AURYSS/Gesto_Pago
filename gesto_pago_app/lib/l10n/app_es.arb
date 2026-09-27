@@ -123,5 +123,111 @@
   "perfilLogoutConfirm": "¿Cerrar sesión?",
   "perfilLogoutConfirmMessage": "Necesitarás tu contraseña para volver a entrar.",
   "pagoReferenceRequired": "Ingresa la referencia",
-  "pagoServicioNoDisponible": "El servicio no está disponible."
+  "pagoServicioNoDisponible": "El servicio no está disponible.",
+  "cardPayAction": "Pagar",
+  "themeDark": "Oscuro",
+  "themeLight": "Claro",
+  "themeSwitchToLight": "Cambiar a modo claro",
+  "themeSwitchToDark": "Cambiar a modo oscuro",
+  "plazosTitle": "Paga en plazos",
+  "plazosSubtitle": "Compara el costo de financiar tu pago.",
+  "plazosMonths": "{months} meses",
+  "plazosPerMonth": "/ mes",
+  "plazosTotal": "Total a pagar",
+  "plazosCost": "Costo del financiamiento",
+  "plazosSinCosto": "Sin costo",
+  "plazosRate": "{rate}% anual",
+  "plazosSelect": "Elegir {months} meses",
+  "plazosPlanLabel": "Plan de {months} meses",
+  "plazosDisclaimer": "Simulacion de calculo. El monto final y las condiciones los define el proveedor.",
+  "valReferenciaVacia": "Escribe la referencia del pago.",
+  "valReferenciaFormato": "La referencia solo admite letras y numeros.",
+  "valReferenciaMovil": "El numero de movil debe tener 10 digitos.",
+  "valReferenciaCuenta": "Revisa los datos de la cuenta o recibo.",
+  "valReferenciaLargo": "La referencia no tiene el largo esperado.",
+  "valReferenciaCorto": "La referencia esta incompleta.",
+  "valReferenciaDigito": "La referencia debe incluir el digito verificador completo.",
+  "@cardPayAction": {},
+  "@themeDark": {},
+  "@themeLight": {},
+  "@themeSwitchToLight": {},
+  "@themeSwitchToDark": {},
+  "@plazosTitle": {},
+  "@plazosSubtitle": {},
+  "@plazosMonths": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "@plazosPerMonth": {},
+  "@plazosTotal": {},
+  "@plazosCost": {},
+  "@plazosSinCosto": {},
+  "@plazosRate": {
+    "placeholders": {
+      "rate": {
+        "type": "double"
+      }
+    }
+  },
+  "@plazosSelect": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "@plazosPlanLabel": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "@plazosDisclaimer": {},
+  "@valReferenciaVacia": {},
+  "@valReferenciaFormato": {},
+  "@valReferenciaMovil": {},
+  "@valReferenciaCuenta": {},
+  "@valReferenciaLargo": {},
+  "@valReferenciaCorto": {},
+  "@valReferenciaDigito": {},
+  "homePopulares": "Servicios populares",
+  "homePopularesSub": "Los mas usados",
+  "homeTodosServicios": "Todos los servicios",
+  "homeTodosServiciosSub": "{count} disponibles",
+  "gridDesde": "desde",
+  "catTiempoAire": "Tiempo Aire",
+  "catInternet": "Internet",
+  "catTelevision": "TV",
+  "catEntretenimiento": "Entretenimiento",
+  "catServicios": "Servicios",
+  "catTransporte": "Transporte",
+  "pendientesTitulo": "Pagos pendientes",
+  "pendientesSub": "En proceso, pendientes o por reintentar",
+  "pendientesVacio": "No tienes pagos pendientes.",
+  "cardTodos": "Ver todos",
+  "@homeTodosServiciosSub": {
+    "description": "Subtitulo de la seccion de todos los servicios",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeResultados": "{count, plural, =0{Sin resultados} =1{1 resultado} other{{count} resultados}}",
+  "@homeResultados": {
+    "description": "Conteo de resultados de busqueda",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeVerTodos": "Ver todos",
+  "@homeVerTodos": {
+    "description": "Acción que abre el listado completo del catálogo"
+  }
 }

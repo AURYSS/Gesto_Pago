@@ -123,5 +123,111 @@
   "perfilThemeDark": "Dark",
   "perfilLogout": "Sign out",
   "perfilLogoutConfirm": "Sign out?",
-  "perfilLogoutConfirmMessage": "You will need your password to sign back in."
+  "perfilLogoutConfirmMessage": "You will need your password to sign back in.",
+  "cardPayAction": "Pay",
+  "themeDark": "Dark",
+  "themeLight": "Light",
+  "themeSwitchToLight": "Switch to light mode",
+  "themeSwitchToDark": "Switch to dark mode",
+  "plazosTitle": "Pay in installments",
+  "plazosSubtitle": "Compare the cost of financing your payment.",
+  "plazosMonths": "{months} months",
+  "plazosPerMonth": "/ month",
+  "plazosTotal": "Total to pay",
+  "plazosCost": "Financing cost",
+  "plazosSinCosto": "No cost",
+  "plazosRate": "{rate}% annual",
+  "plazosSelect": "Choose {months} months",
+  "plazosPlanLabel": "{months}-month plan",
+  "plazosDisclaimer": "Calculation estimate. The provider sets the final amount and terms.",
+  "valReferenciaVacia": "Enter the payment reference.",
+  "valReferenciaFormato": "The reference only accepts letters and numbers.",
+  "valReferenciaMovil": "The mobile number must have 10 digits.",
+  "valReferenciaCuenta": "Review the account or receipt details.",
+  "valReferenciaLargo": "The reference has an unexpected length.",
+  "valReferenciaCorto": "The reference is incomplete.",
+  "valReferenciaDigito": "The reference must include the full check digit.",
+  "@cardPayAction": {},
+  "@themeDark": {},
+  "@themeLight": {},
+  "@themeSwitchToLight": {},
+  "@themeSwitchToDark": {},
+  "@plazosTitle": {},
+  "@plazosSubtitle": {},
+  "@plazosMonths": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "@plazosPerMonth": {},
+  "@plazosTotal": {},
+  "@plazosCost": {},
+  "@plazosSinCosto": {},
+  "@plazosRate": {
+    "placeholders": {
+      "rate": {
+        "type": "double"
+      }
+    }
+  },
+  "@plazosSelect": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "@plazosPlanLabel": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "@plazosDisclaimer": {},
+  "@valReferenciaVacia": {},
+  "@valReferenciaFormato": {},
+  "@valReferenciaMovil": {},
+  "@valReferenciaCuenta": {},
+  "@valReferenciaLargo": {},
+  "@valReferenciaCorto": {},
+  "@valReferenciaDigito": {},
+  "homePopulares": "Popular services",
+  "homePopularesSub": "Most used",
+  "homeTodosServicios": "All services",
+  "homeTodosServiciosSub": "{count} available",
+  "gridDesde": "from",
+  "catTiempoAire": "Mobile",
+  "catInternet": "Internet",
+  "catTelevision": "TV",
+  "catEntretenimiento": "Entertainment",
+  "catServicios": "Services",
+  "catTransporte": "Transport",
+  "pendientesTitulo": "Pending payments",
+  "pendientesSub": "In process, pending or to retry",
+  "pendientesVacio": "You have no pending payments.",
+  "cardTodos": "See all",
+  "@homeTodosServiciosSub": {
+    "description": "Subtitulo de la seccion de todos los servicios",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeResultados": "{count, plural, =0{No results} =1{1 result} other{{count} results}}",
+  "@homeResultados": {
+    "description": "Conteo de resultados de busqueda",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeVerTodos": "See all",
+  "@homeVerTodos": {
+    "description": "Acción que abre el listado completo del catálogo"
+  }
 }

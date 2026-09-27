@@ -7,6 +7,8 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/auth/presentation/splash_screen.dart';
 import '../../features/catalogo/presentation/inicio_screen.dart';
+import '../../features/catalogo/presentation/marca_detalle_screen.dart';
+import '../../features/catalogo/presentation/todos_servicios_screen.dart';
 import '../../features/pagos/presentation/comprobante_screen.dart';
 import '../../features/pagos/presentation/historial_screen.dart';
 import '../../features/pagos/presentation/pago_screen.dart';
@@ -67,6 +69,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/home',
                 builder: (_, _) => const InicioScreen(),
+              ),
+              // Listado completo del catalogo. Comparte la rama del home
+              // para que la barra inferior no desaparezca al entrar.
+              GoRoute(
+                path: '/servicios',
+                builder: (context, state) {
+                  final categoria = state.uri.queryParameters['categoria'];
+                  return TodosServiciosScreen(categoriaInicial: categoria);
+                },
+              ),
+              GoRoute(
+                path: '/marca/:slug',
+                builder: (context, state) {
+                  final slug = state.pathParameters['slug']!;
+                  return MarcaDetalleScreen(slug: slug);
+                },
               ),
             ],
           ),

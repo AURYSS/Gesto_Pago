@@ -395,4 +395,146 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get perfilLogoutConfirmMessage =>
       'Necesitarás tu contraseña para volver a entrar.';
+
+  @override
+  String get cardPayAction => 'Pagar';
+
+  @override
+  String get themeDark => 'Oscuro';
+
+  @override
+  String get themeLight => 'Claro';
+
+  @override
+  String get themeSwitchToLight => 'Cambiar a modo claro';
+
+  @override
+  String get themeSwitchToDark => 'Cambiar a modo oscuro';
+
+  @override
+  String get plazosTitle => 'Paga en plazos';
+
+  @override
+  String get plazosSubtitle => 'Compara el costo de financiar tu pago.';
+
+  @override
+  String plazosMonths(int months) {
+    return '$months meses';
+  }
+
+  @override
+  String get plazosPerMonth => '/ mes';
+
+  @override
+  String get plazosTotal => 'Total a pagar';
+
+  @override
+  String get plazosCost => 'Costo del financiamiento';
+
+  @override
+  String get plazosSinCosto => 'Sin costo';
+
+  @override
+  String plazosRate(double rate) {
+    return '$rate% anual';
+  }
+
+  @override
+  String plazosSelect(int months) {
+    return 'Elegir $months meses';
+  }
+
+  @override
+  String plazosPlanLabel(int months) {
+    return 'Plan de $months meses';
+  }
+
+  @override
+  String get plazosDisclaimer =>
+      'Simulacion de calculo. El monto final y las condiciones los define el proveedor.';
+
+  @override
+  String get valReferenciaVacia => 'Escribe la referencia del pago.';
+
+  @override
+  String get valReferenciaFormato =>
+      'La referencia solo admite letras y numeros.';
+
+  @override
+  String get valReferenciaMovil => 'El numero de movil debe tener 10 digitos.';
+
+  @override
+  String get valReferenciaCuenta => 'Revisa los datos de la cuenta o recibo.';
+
+  @override
+  String get valReferenciaLargo => 'La referencia no tiene el largo esperado.';
+
+  @override
+  String get valReferenciaCorto => 'La referencia esta incompleta.';
+
+  @override
+  String get valReferenciaDigito =>
+      'La referencia debe incluir el digito verificador completo.';
+
+  @override
+  String get homePopulares => 'Servicios populares';
+
+  @override
+  String get homePopularesSub => 'Los mas usados';
+
+  @override
+  String get homeTodosServicios => 'Todos los servicios';
+
+  @override
+  String homeTodosServiciosSub(int count) {
+    return '$count disponibles';
+  }
+
+  @override
+  String get gridDesde => 'desde';
+
+  @override
+  String get catTiempoAire => 'Tiempo Aire';
+
+  @override
+  String get catInternet => 'Internet';
+
+  @override
+  String get catTelevision => 'TV';
+
+  @override
+  String get catEntretenimiento => 'Entretenimiento';
+
+  @override
+  String get catServicios => 'Servicios';
+
+  @override
+  String get catTransporte => 'Transporte';
+
+  @override
+  String get pendientesTitulo => 'Pagos pendientes';
+
+  @override
+  String get pendientesSub => 'En proceso, pendientes o por reintentar';
+
+  @override
+  String get pendientesVacio => 'No tienes pagos pendientes.';
+
+  @override
+  String get cardTodos => 'Ver todos';
+
+  @override
+  String homeResultados(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count resultados',
+      one: '1 resultado',
+      zero: 'Sin resultados',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeVerTodos => 'Ver todos';
 }

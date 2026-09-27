@@ -67,5 +67,8 @@ final personaRepositoryProvider = Provider<PersonaRepository>((ref) {
   return PersonaRepositoryImpl(PersonaRemote(ref.watch(apiClientProvider).dio));
 });
 
-/// Preferencia de tema del usuario (system/light/dark). En memoria por ahora.
-final themeModeProvider = StateProvider<ThemeMode>((_) => ThemeMode.system);
+/// Preferencia de tema del usuario. Gesto Pago es una app de finanzas: el
+/// modo oscuro es la experiencia por defecto (mas comoda en la calle y
+/// mejor con la bateria del telefono), pero se respeta el toggle de la app.
+/// En memoria por ahora, asi que al reiniciar vuelve a oscuro.
+final themeModeProvider = StateProvider<ThemeMode>((_) => ThemeMode.dark);

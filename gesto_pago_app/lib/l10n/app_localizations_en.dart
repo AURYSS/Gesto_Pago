@@ -395,4 +395,146 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get perfilLogoutConfirmMessage =>
       'You will need your password to sign back in.';
+
+  @override
+  String get cardPayAction => 'Pay';
+
+  @override
+  String get themeDark => 'Dark';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeSwitchToLight => 'Switch to light mode';
+
+  @override
+  String get themeSwitchToDark => 'Switch to dark mode';
+
+  @override
+  String get plazosTitle => 'Pay in installments';
+
+  @override
+  String get plazosSubtitle => 'Compare the cost of financing your payment.';
+
+  @override
+  String plazosMonths(int months) {
+    return '$months months';
+  }
+
+  @override
+  String get plazosPerMonth => '/ month';
+
+  @override
+  String get plazosTotal => 'Total to pay';
+
+  @override
+  String get plazosCost => 'Financing cost';
+
+  @override
+  String get plazosSinCosto => 'No cost';
+
+  @override
+  String plazosRate(double rate) {
+    return '$rate% annual';
+  }
+
+  @override
+  String plazosSelect(int months) {
+    return 'Choose $months months';
+  }
+
+  @override
+  String plazosPlanLabel(int months) {
+    return '$months-month plan';
+  }
+
+  @override
+  String get plazosDisclaimer =>
+      'Calculation estimate. The provider sets the final amount and terms.';
+
+  @override
+  String get valReferenciaVacia => 'Enter the payment reference.';
+
+  @override
+  String get valReferenciaFormato =>
+      'The reference only accepts letters and numbers.';
+
+  @override
+  String get valReferenciaMovil => 'The mobile number must have 10 digits.';
+
+  @override
+  String get valReferenciaCuenta => 'Review the account or receipt details.';
+
+  @override
+  String get valReferenciaLargo => 'The reference has an unexpected length.';
+
+  @override
+  String get valReferenciaCorto => 'The reference is incomplete.';
+
+  @override
+  String get valReferenciaDigito =>
+      'The reference must include the full check digit.';
+
+  @override
+  String get homePopulares => 'Popular services';
+
+  @override
+  String get homePopularesSub => 'Most used';
+
+  @override
+  String get homeTodosServicios => 'All services';
+
+  @override
+  String homeTodosServiciosSub(int count) {
+    return '$count available';
+  }
+
+  @override
+  String get gridDesde => 'from';
+
+  @override
+  String get catTiempoAire => 'Mobile';
+
+  @override
+  String get catInternet => 'Internet';
+
+  @override
+  String get catTelevision => 'TV';
+
+  @override
+  String get catEntretenimiento => 'Entertainment';
+
+  @override
+  String get catServicios => 'Services';
+
+  @override
+  String get catTransporte => 'Transport';
+
+  @override
+  String get pendientesTitulo => 'Pending payments';
+
+  @override
+  String get pendientesSub => 'In process, pending or to retry';
+
+  @override
+  String get pendientesVacio => 'You have no pending payments.';
+
+  @override
+  String get cardTodos => 'See all';
+
+  @override
+  String homeResultados(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results',
+      one: '1 result',
+      zero: 'No results',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeVerTodos => 'See all';
 }

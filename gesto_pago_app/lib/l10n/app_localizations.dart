@@ -841,6 +841,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You will need your password to sign back in.'**
   String get perfilLogoutConfirmMessage;
+
+  /// No description provided for @cardPayAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay'**
+  String get cardPayAction;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeDark;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeLight;
+
+  /// No description provided for @themeSwitchToLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to light mode'**
+  String get themeSwitchToLight;
+
+  /// No description provided for @themeSwitchToDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to dark mode'**
+  String get themeSwitchToDark;
+
+  /// No description provided for @plazosTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay in installments'**
+  String get plazosTitle;
+
+  /// No description provided for @plazosSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare the cost of financing your payment.'**
+  String get plazosSubtitle;
+
+  /// No description provided for @plazosMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'{months} months'**
+  String plazosMonths(int months);
+
+  /// No description provided for @plazosPerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'/ month'**
+  String get plazosPerMonth;
+
+  /// No description provided for @plazosTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total to pay'**
+  String get plazosTotal;
+
+  /// No description provided for @plazosCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Financing cost'**
+  String get plazosCost;
+
+  /// No description provided for @plazosSinCosto.
+  ///
+  /// In en, this message translates to:
+  /// **'No cost'**
+  String get plazosSinCosto;
+
+  /// No description provided for @plazosRate.
+  ///
+  /// In en, this message translates to:
+  /// **'{rate}% annual'**
+  String plazosRate(double rate);
+
+  /// No description provided for @plazosSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose {months} months'**
+  String plazosSelect(int months);
+
+  /// No description provided for @plazosPlanLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{months}-month plan'**
+  String plazosPlanLabel(int months);
+
+  /// No description provided for @plazosDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculation estimate. The provider sets the final amount and terms.'**
+  String get plazosDisclaimer;
+
+  /// No description provided for @valReferenciaVacia.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the payment reference.'**
+  String get valReferenciaVacia;
+
+  /// No description provided for @valReferenciaFormato.
+  ///
+  /// In en, this message translates to:
+  /// **'The reference only accepts letters and numbers.'**
+  String get valReferenciaFormato;
+
+  /// No description provided for @valReferenciaMovil.
+  ///
+  /// In en, this message translates to:
+  /// **'The mobile number must have 10 digits.'**
+  String get valReferenciaMovil;
+
+  /// No description provided for @valReferenciaCuenta.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the account or receipt details.'**
+  String get valReferenciaCuenta;
+
+  /// No description provided for @valReferenciaLargo.
+  ///
+  /// In en, this message translates to:
+  /// **'The reference has an unexpected length.'**
+  String get valReferenciaLargo;
+
+  /// No description provided for @valReferenciaCorto.
+  ///
+  /// In en, this message translates to:
+  /// **'The reference is incomplete.'**
+  String get valReferenciaCorto;
+
+  /// No description provided for @valReferenciaDigito.
+  ///
+  /// In en, this message translates to:
+  /// **'The reference must include the full check digit.'**
+  String get valReferenciaDigito;
+
+  /// No description provided for @homePopulares.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular services'**
+  String get homePopulares;
+
+  /// No description provided for @homePopularesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Most used'**
+  String get homePopularesSub;
+
+  /// No description provided for @homeTodosServicios.
+  ///
+  /// In en, this message translates to:
+  /// **'All services'**
+  String get homeTodosServicios;
+
+  /// Subtitulo de la seccion de todos los servicios
+  ///
+  /// In en, this message translates to:
+  /// **'{count} available'**
+  String homeTodosServiciosSub(int count);
+
+  /// No description provided for @gridDesde.
+  ///
+  /// In en, this message translates to:
+  /// **'from'**
+  String get gridDesde;
+
+  /// No description provided for @catTiempoAire.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile'**
+  String get catTiempoAire;
+
+  /// No description provided for @catInternet.
+  ///
+  /// In en, this message translates to:
+  /// **'Internet'**
+  String get catInternet;
+
+  /// No description provided for @catTelevision.
+  ///
+  /// In en, this message translates to:
+  /// **'TV'**
+  String get catTelevision;
+
+  /// No description provided for @catEntretenimiento.
+  ///
+  /// In en, this message translates to:
+  /// **'Entertainment'**
+  String get catEntretenimiento;
+
+  /// No description provided for @catServicios.
+  ///
+  /// In en, this message translates to:
+  /// **'Services'**
+  String get catServicios;
+
+  /// No description provided for @catTransporte.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport'**
+  String get catTransporte;
+
+  /// No description provided for @pendientesTitulo.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending payments'**
+  String get pendientesTitulo;
+
+  /// No description provided for @pendientesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'In process, pending or to retry'**
+  String get pendientesSub;
+
+  /// No description provided for @pendientesVacio.
+  ///
+  /// In en, this message translates to:
+  /// **'You have no pending payments.'**
+  String get pendientesVacio;
+
+  /// No description provided for @cardTodos.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get cardTodos;
+
+  /// Conteo de resultados de busqueda
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No results} =1{1 result} other{{count} results}}'**
+  String homeResultados(int count);
+
+  /// Acción que abre el listado completo del catálogo
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get homeVerTodos;
 }
 
 class _AppLocalizationsDelegate
