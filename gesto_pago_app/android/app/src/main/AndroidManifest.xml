@@ -1,7 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- La app consulta el catalogo y cobra; sin esto el release no tiene red.
+         Flutter solo lo declaraba en los manifest de debug y profile, asi que
+         un build de release fallaba al hacer cualquier peticion. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
-        android:label="gesto_pago_app"
+        android:label="@string/app_name"
         android:name="${applicationName}"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

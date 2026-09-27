@@ -28,3 +28,25 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+
+  assets:
+    - assets/logos/
+    - assets/images/
+    - assets/images/marcas/
+    - assets/images/auth/
+    - assets/images/home/
+    - assets/images/logo/
+
+  # Inter se empaqueta en el binario: la app no depende de red ni de
+  # Google Fonts en tiempo de ejecucion.
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700

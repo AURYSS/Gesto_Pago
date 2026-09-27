@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Nombre que se ve en el launcher. Flutter deja el nombre del paquete
+         por defecto ("gesto_pago_app"), que se ve como un proyecto de
+         desarrollo al abrir la app. -->
+    <string name="app_name">Gesto Pago</string>
+</resources>
