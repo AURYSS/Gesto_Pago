@@ -1,3 +1,4 @@
+import '../domain/catalogo_marca.dart';
 import '../domain/catalogo_producto.dart';
 import '../domain/catalogo_repository.dart';
 import 'catalogo_remote.dart';
@@ -9,4 +10,7 @@ class CatalogoRepositoryImpl implements CatalogoRepository {
 
   @override
   Future<List<CatalogoProducto>> obtenerProductos() => _remote.obtenerProductos();
+
+  @override
+  Future<CatalogoMarcas> obtenerMarcas() => _remote.obtenerMarcas();
 }

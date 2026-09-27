@@ -6,10 +6,12 @@ import '../../../core/format/gp_money.dart';
 import '../../../core/format/message_de_error.dart';
 import '../../../core/theme/gp_colors.dart';
 import '../../../core/theme/gp_theme.dart';
+import '../../../core/validation/referencia_validator.dart';
 import '../../../core/widgets/money_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../catalogo/application/catalogo_controller.dart';
 import '../../catalogo/domain/catalogo_producto.dart';
+import '../../plazos/presentation/calculadora_plazos.dart';
 import '../application/pago_controller.dart';
 
 /// Captura los datos del pago, verifica contra el proveedor y lo ejecuta.
@@ -26,11 +28,17 @@ class PagoScreen extends ConsumerStatefulWidget {
 class _PagoScreenState extends ConsumerState<PagoScreen> {
   final _referenciaController = TextEditingController();
   final _montoController = TextEditingController();
+  final _referenciaFocus = FocusNode();
+
+  /// Error de formato de la referencia, mostrado bajo el campo sin
+  /// necesidad de que el usuario vuelva a tocar "verificar".
+  String? _errorReferencia;
 
   @override
   void dispose() {
     _referenciaController.dispose();
     _montoController.dispose();
+    _referenciaFocus.dispose();
     super.dispose();
   }
 
@@ -47,17 +55,49 @@ class _PagoScreenState extends ConsumerState<PagoScreen> {
     return null;
   }
 
-  Future<void> _verificar() async {
+  /// Valida la referencia contra las reglas del producto antes de
+  /// golpear al proveedor. Evita un viaje de red para un error que la
+  /// app ya puede detectar, y da una causa concreta al usuario.
+  ///
+  /// Devuelve la referencia ya normalizada, o null si no es valida (en
+  /// ese caso el error queda en [_errorReferencia]).
+  String? _validarReferencia(BuildContext context, CatalogoProducto producto) {
+    final resultado = ReferenciaValidator.validar(
+      _referenciaController.text,
+      tipoReferencia: producto.tipoReferencia,
+      conDigitoVerificador: producto.hasDigitoVerificador,
+    );
+
+    if (resultado.valido) {
+      setState(() => _errorReferencia = null);
+      return _referenciaController.text.trim();
+    }
+
     final l = AppLocalizations.of(context);
+    final clave = resultado.mensaje ?? ReferenciaValidator.errorFormato;
+    setState(() => _errorReferencia = _traducirError(clave, l));
+    return null;
+  }
+
+  /// Traduce la clave interna del validador a texto del idioma activo.
+  String _traducirError(String clave, AppLocalizations l) => switch (clave) {
+        ReferenciaValidator.errorVacio => l.pagoReferenceRequired,
+        ReferenciaValidator.errorFormato => l.valReferenciaFormato,
+        ReferenciaValidator.errorMovil => l.valReferenciaMovil,
+        ReferenciaValidator.errorCuenta => l.valReferenciaCuenta,
+        ReferenciaValidator.errorLargo => l.valReferenciaLargo,
+        ReferenciaValidator.errorCorto => l.valReferenciaCorto,
+        ReferenciaValidator.errorDigito => l.valReferenciaDigito,
+        _ => l.valReferenciaFormato,
+      };
+
+  Future<void> _verificar() async {
     final producto = _producto(context);
     if (producto == null) {
       return;
     }
-    final referencia = _referenciaController.text.trim();
-    if (referencia.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l.pagoReferenceRequired)),
-      );
+    final referencia = _validarReferencia(context, producto);
+    if (referencia == null) {
       return;
     }
     await ref.read(pagoControllerProvider.notifier).verificarReferencia(
@@ -78,11 +118,9 @@ class _PagoScreenState extends ConsumerState<PagoScreen> {
     if (producto == null) {
       return;
     }
-    final referencia = _referenciaController.text.trim();
-    if (referencia.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l.pagoReferenceRequired)),
-      );
+    final referencia = _validarReferencia(context, producto);
+    if (referencia == null) {
+      _referenciaFocus.requestFocus();
       return;
     }
 
@@ -153,6 +191,36 @@ class _PagoScreenState extends ConsumerState<PagoScreen> {
     }
   }
 
+  /// Monto base para proyectar los plazos.
+  ///
+  /// Prioriza lo que el usuario capturó; si el campo no aplica, usa el
+  /// precio del catálogo; si la verificación devolvió un monto del
+  /// proveedor, ese manda porque es el monto real a pagar. Devuelve null
+  /// cuando no hay nada confiable que proyectar.
+  double? _montoParaPlazos() {
+    final capturado = double.tryParse(_montoController.text.trim());
+    if (capturado != null && capturado > 0) {
+      return capturado;
+    }
+
+    final verificado = ref.read(pagoControllerProvider).verificacion?.monto;
+    if (verificado != null) {
+      final valor = double.tryParse(verificado.trim());
+      if (valor != null && valor > 0) {
+        return valor;
+      }
+    }
+
+    final producto = _producto(context);
+    if (producto != null && !producto.esPagoServicio) {
+      final precio = double.tryParse(producto.precio);
+      if (precio != null && precio > 0) {
+        return precio;
+      }
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -185,12 +253,21 @@ class _PagoScreenState extends ConsumerState<PagoScreen> {
             const SizedBox(height: 10),
             TextField(
               controller: _referenciaController,
+              focusNode: _referenciaFocus,
               enabled: !estado.estaOcupado,
               keyboardType: TextInputType.number,
               onSubmitted: (_) => _verificar(),
+              // El error se limpia al escribir: si el usuario corrige,
+              // no debe tener que volver a enviar para saber que ya va bien.
+              onChanged: (_) {
+                if (_errorReferencia != null) {
+                  setState(() => _errorReferencia = null);
+                }
+              },
               decoration: InputDecoration(
                 labelText: l.pagoReferenceLabel,
                 hintText: l.pagoReferenceHint,
+                errorText: _errorReferencia,
               ),
             ),
             const SizedBox(height: 16),
@@ -222,6 +299,12 @@ class _PagoScreenState extends ConsumerState<PagoScreen> {
             if (estado.error != null) ...[
               const SizedBox(height: 16),
               _ErrorBanner(mensaje: messageDeError(context, estado.error!)),
+            ],
+            // Solo tiene sentido proyectar plazos sobre un monto que ya se
+            // conoce: precio del catalogo o el que devolvio la verificacion.
+            if (_montoParaPlazos() != null) ...[
+              const SizedBox(height: 28),
+              CalculadoraPlazos(monto: _montoParaPlazos()!),
             ],
           ],
         ),

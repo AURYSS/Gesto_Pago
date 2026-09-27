@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/network/app_exception.dart';
+import '../domain/pago_pendiente.dart';
 import '../domain/transaccion.dart';
 
 class PagosRemote {
@@ -56,6 +57,19 @@ class PagosRemote {
         return const [];
       }
       return data.map((e) => Transaccion.fromJson(e as Map<String, dynamic>)).toList();
+    } catch (e) {
+      throw ApiClient.unwrap(e);
+    }
+  }
+
+  Future<List<PagoPendiente>> pendientes() async {
+    try {
+      final response = await _dio.get('/pagos/pendientes');
+      final data = response.data;
+      if (data is! List) {
+        return const [];
+      }
+      return data.map((e) => PagoPendiente.fromJson(e as Map<String, dynamic>)).toList();
     } catch (e) {
       throw ApiClient.unwrap(e);
     }

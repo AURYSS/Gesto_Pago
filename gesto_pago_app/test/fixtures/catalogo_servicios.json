@@ -1,0 +1,2178 @@
+[
+ {
+  "servicio": "Bait",
+  "idServicio": 1487,
+  "idProducto": 10034,
+  "precio": "30.0",
+  "producto": "Mi Bait $30",
+  "cantidad": 22
+ },
+ {
+  "servicio": "Telcel Datos",
+  "idServicio": 3584,
+  "idProducto": 20304,
+  "precio": "10.0",
+  "producto": "Paquete Ilimitado 10",
+  "cantidad": 22
+ },
+ {
+  "servicio": "Pase",
+  "idServicio": 687,
+  "idProducto": 9357,
+  "precio": "0.0",
+  "producto": "Consulta Saldo",
+  "cantidad": 20
+ },
+ {
+  "servicio": "Telcel",
+  "idServicio": 133,
+  "idProducto": 582,
+  "precio": "10.0",
+  "producto": "Recarga $10",
+  "cantidad": 19
+ },
+ {
+  "servicio": "Oui Movil",
+  "idServicio": 78,
+  "idProducto": 12871,
+  "precio": "10.0",
+  "producto": "Recarga $10",
+  "cantidad": 18
+ },
+ {
+  "servicio": "Movistar",
+  "idServicio": 124,
+  "idProducto": 373,
+  "precio": "10.0",
+  "producto": "Recarga $10",
+  "cantidad": 16
+ },
+ {
+  "servicio": "BigCel",
+  "idServicio": 3175,
+  "idProducto": 18902,
+  "precio": "40.0",
+  "producto": "big 3",
+  "cantidad": 14
+ },
+ {
+  "servicio": "Cinepolis",
+  "idServicio": 151,
+  "idProducto": 5898,
+  "precio": "50.0",
+  "producto": "Cinepolis Tradicional 1 boleto (Lun-Jue)",
+  "cantidad": 14
+ },
+ {
+  "servicio": "EasyTrip",
+  "idServicio": 3071,
+  "idProducto": 18278,
+  "precio": "0.0",
+  "producto": "Consula de Saldo",
+  "cantidad": 14
+ },
+ {
+  "servicio": "Flash Mobile",
+  "idServicio": 683,
+  "idProducto": 5639,
+  "precio": "10.0",
+  "producto": "Recarga $10",
+  "cantidad": 14
+ },
+ {
+  "servicio": "Telcel Paquetes Amigo",
+  "idServicio": 159,
+  "idProducto": 19598,
+  "precio": "10.0",
+  "producto": "Amigo Sin Limite $10",
+  "cantidad": 14
+ },
+ {
+  "servicio": "Televia",
+  "idServicio": 38,
+  "idProducto": 17173,
+  "precio": "0.0",
+  "producto": "Consulta Saldo",
+  "cantidad": 14
+ },
+ {
+  "servicio": "Telcel Paquetes de Datos",
+  "idServicio": 160,
+  "idProducto": 19602,
+  "precio": "10.0",
+  "producto": "Internet Amigo 10",
+  "cantidad": 13
+ },
+ {
+  "servicio": "Virgin Mobile Paquetes",
+  "idServicio": 1556,
+  "idProducto": 19476,
+  "precio": "25.0",
+  "producto": "Paquete VIRGIN $25",
+  "cantidad": 12
+ },
+ {
+  "servicio": "ChipMacropay",
+  "idServicio": 3155,
+  "idProducto": 18787,
+  "precio": "50.0",
+  "producto": "Chipmacropay50",
+  "cantidad": 11
+ },
+ {
+  "servicio": "Internet para el Bienestar",
+  "idServicio": 2962,
+  "idProducto": 18141,
+  "precio": "50.0",
+  "producto": "Internet para el Bienestar 50 RS Ilimitado",
+  "cantidad": 10
+ },
+ {
+  "servicio": "Ultracel",
+  "idServicio": 2152,
+  "idProducto": 18093,
+  "precio": "55.0",
+  "producto": "ULTRACEL 55",
+  "cantidad": 10
+ },
+ {
+  "servicio": "ABIB",
+  "idServicio": 2284,
+  "idProducto": 14293,
+  "precio": "50.0",
+  "producto": "ABIB 50",
+  "cantidad": 9
+ },
+ {
+  "servicio": "AT-T",
+  "idServicio": 115,
+  "idProducto": 577,
+  "precio": "10.0",
+  "producto": "Recarga $10",
+  "cantidad": 9
+ },
+ {
+  "servicio": "Beneleit Movil",
+  "idServicio": 2281,
+  "idProducto": 14251,
+  "precio": "70.0",
+  "producto": "Semanal 2GB",
+  "cantidad": 9
+ },
+ {
+  "servicio": "Netwey Internet Prepagado",
+  "idServicio": 126,
+  "idProducto": 19466,
+  "precio": "99.0",
+  "producto": "Movil Semanal (10GB - 7dias )",
+  "cantidad": 9
+ },
+ {
+  "servicio": "Unefon",
+  "idServicio": 116,
+  "idProducto": 579,
+  "precio": "10.0",
+  "producto": "Recarga $10",
+  "cantidad": 9
+ },
+ {
+  "servicio": "Diri",
+  "idServicio": 1446,
+  "idProducto": 9807,
+  "precio": "59.0",
+  "producto": "Plan Conoce",
+  "cantidad": 8
+ },
+ {
+  "servicio": "Kaspersky",
+  "idServicio": 3382,
+  "idProducto": 19852,
+  "precio": "499.0",
+  "producto": "Kaspersky Standard 1 Disp",
+  "cantidad": 8
+ },
+ {
+  "servicio": "MiMovil",
+  "idServicio": 1386,
+  "idProducto": 9516,
+  "precio": "50.0",
+  "producto": "Mimovil 3",
+  "cantidad": 8
+ },
+ {
+  "servicio": "Norton",
+  "idServicio": 3349,
+  "idProducto": 19696,
+  "precio": "299.0",
+  "producto": "Norton Antivirus Plus 1 Usuario 1 Ano",
+  "cantidad": 8
+ },
+ {
+  "servicio": "Pillofon",
+  "idServicio": 1449,
+  "idProducto": 19137,
+  "precio": "69.0",
+  "producto": "Plan Bara",
+  "cantidad": 8
+ },
+ {
+  "servicio": "Telmovil",
+  "idServicio": 1493,
+  "idProducto": 19110,
+  "precio": "40.0",
+  "producto": "TELMOVIL 40-3D (Basico)",
+  "cantidad": 8
+ },
+ {
+  "servicio": "WiMo Movil",
+  "idServicio": 696,
+  "idProducto": 5728,
+  "precio": "75.0",
+  "producto": "Wimo 75",
+  "cantidad": 8
+ },
+ {
+  "servicio": "Bitdefender",
+  "idServicio": 670,
+  "idProducto": 20142,
+  "precio": "499.0",
+  "producto": "BITDEFENDER ANTIVIRUS PLUS 1 Ano 1 Usuario",
+  "cantidad": 7
+ },
+ {
+  "servicio": "Coppel Dinero Electronico",
+  "idServicio": 164,
+  "idProducto": 584,
+  "precio": "100.0",
+  "producto": "Coppel $100",
+  "cantidad": 7
+ },
+ {
+  "servicio": "JRMovil",
+  "idServicio": 1532,
+  "idProducto": 10247,
+  "precio": "60.0",
+  "producto": "JR 7 2G",
+  "cantidad": 7
+ },
+ {
+  "servicio": "Newww Celular",
+  "idServicio": 1490,
+  "idProducto": 18257,
+  "precio": "80.0",
+  "producto": "Conecta 6GB",
+  "cantidad": 7
+ },
+ {
+  "servicio": "VIX Premium",
+  "idServicio": 977,
+  "idProducto": 7100,
+  "precio": "150.0",
+  "producto": "VIX Premium $150",
+  "cantidad": 7
+ },
+ {
+  "servicio": "Valor Telefonia Movil",
+  "idServicio": 1257,
+  "idProducto": 8706,
+  "precio": "70.0",
+  "producto": "VALOR 6GB 7Dias RRSS",
+  "cantidad": 7
+ },
+ {
+  "servicio": "Cinepolis Dulceria",
+  "idServicio": 854,
+  "idProducto": 6245,
+  "precio": "100.0",
+  "producto": "Combo Nachos (Nachos y Refresco Med)",
+  "cantidad": 6
+ },
+ {
+  "servicio": "Free Fire",
+  "idServicio": 986,
+  "idProducto": 7121,
+  "precio": "19.0",
+  "producto": "Free Fire 100 Diamonds",
+  "cantidad": 6
+ },
+ {
+  "servicio": "FreedomPop",
+  "idServicio": 1128,
+  "idProducto": 7890,
+  "precio": "30.0",
+  "producto": "Recarga $30",
+  "cantidad": 6
+ },
+ {
+  "servicio": "Gobierno de la Ciudad de Mexico",
+  "idServicio": 931,
+  "idProducto": 6886,
+  "precio": "0.0",
+  "producto": "Predial (vigentes y vencidos)",
+  "cantidad": 6
+ },
+ {
+  "servicio": "Google Play",
+  "idServicio": 669,
+  "idProducto": 5611,
+  "precio": "100.0",
+  "producto": "Google Play $100",
+  "cantidad": 6
+ },
+ {
+  "servicio": "Krispy Kreme",
+  "idServicio": 146,
+  "idProducto": 19386,
+  "precio": "60.0",
+  "producto": "Dona Glaseada y Cafe Americano Ch",
+  "cantidad": 6
+ },
+ {
+  "servicio": "LikePhone",
+  "idServicio": 140,
+  "idProducto": 453,
+  "precio": "77.0",
+  "producto": "Plan LikeFlash",
+  "cantidad": 6
+ },
+ {
+  "servicio": "McAfee",
+  "idServicio": 3262,
+  "idProducto": 19437,
+  "precio": "599.0",
+  "producto": "MCAFEE PROTECCION TOTAL 1 DISP",
+  "cantidad": 6
+ },
+ {
+  "servicio": "PlayStation",
+  "idServicio": 143,
+  "idProducto": 457,
+  "precio": "190.0",
+  "producto": "PlayStation Store $10usd",
+  "cantidad": 6
+ },
+ {
+  "servicio": "Soriana Movil",
+  "idServicio": 1458,
+  "idProducto": 9876,
+  "precio": "30.0",
+  "producto": "Mas Ahorro 3 dias",
+  "cantidad": 6
+ },
+ {
+  "servicio": "Spot1 Mobile",
+  "idServicio": 3189,
+  "idProducto": 19680,
+  "precio": "40.0",
+  "producto": "2GB 3D RSILIM",
+  "cantidad": 6
+ },
+ {
+  "servicio": "Ultracel Portatil",
+  "idServicio": 2158,
+  "idProducto": 13525,
+  "precio": "125.0",
+  "producto": "PORTATIL 125",
+  "cantidad": 6
+ },
+ {
+  "servicio": "Valor Internet Movil",
+  "idServicio": 1260,
+  "idProducto": 18229,
+  "precio": "110.0",
+  "producto": "MiFi 6GB",
+  "cantidad": 6
+ },
+ {
+  "servicio": "Yobi",
+  "idServicio": 1428,
+  "idProducto": 9735,
+  "precio": "30.0",
+  "producto": "Recarga $30",
+  "cantidad": 6
+ },
+ {
+  "servicio": "Amazon",
+  "idServicio": 71,
+  "idProducto": 200,
+  "precio": "100.0",
+  "producto": "Amazon $100",
+  "cantidad": 5
+ },
+ {
+  "servicio": "AmeShop",
+  "idServicio": 135,
+  "idProducto": 12718,
+  "precio": "300.0",
+  "producto": "Tarjeta Regalo $300",
+  "cantidad": 5
+ },
+ {
+  "servicio": "Cinemex Dulceria",
+  "idServicio": 3338,
+  "idProducto": 19639,
+  "precio": "115.0",
+  "producto": "Combo Palomitas (Palomitas y Ref Gde)",
+  "cantidad": 5
+ },
+ {
+  "servicio": "Cinepolis VIP",
+  "idServicio": 749,
+  "idProducto": 5912,
+  "precio": "120.0",
+  "producto": "Cinepolis 4DX - 1 boleto",
+  "cantidad": 5
+ },
+ {
+  "servicio": "ComparTfon",
+  "idServicio": 157,
+  "idProducto": 525,
+  "precio": "30.0",
+  "producto": "Recarga $30",
+  "cantidad": 5
+ },
+ {
+  "servicio": "Ecobici",
+  "idServicio": 3356,
+  "idProducto": 19733,
+  "precio": "127.0",
+  "producto": "Membresia 1 Dia",
+  "cantidad": 5
+ },
+ {
+  "servicio": "Innovasport",
+  "idServicio": 737,
+  "idProducto": 5885,
+  "precio": "300.0",
+  "producto": "Tarjeta $300",
+  "cantidad": 5
+ },
+ {
+  "servicio": "JRMovil MiFi",
+  "idServicio": 1529,
+  "idProducto": 10259,
+  "precio": "130.0",
+  "producto": "JR5 MiFi",
+  "cantidad": 5
+ },
+ {
+  "servicio": "Librerias Gandhi",
+  "idServicio": 1313,
+  "idProducto": 9023,
+  "precio": "300.0",
+  "producto": "Certificado Gandhi $300",
+  "cantidad": 5
+ },
+ {
+  "servicio": "Netflix",
+  "idServicio": 178,
+  "idProducto": 7030,
+  "precio": "300.0",
+  "producto": "Netflix $300",
+  "cantidad": 5
+ },
+ {
+  "servicio": "Simon",
+  "idServicio": 161,
+  "idProducto": 562,
+  "precio": "50.0",
+  "producto": "Toston",
+  "cantidad": 5
+ },
+ {
+  "servicio": "Starbucks Card",
+  "idServicio": 775,
+  "idProducto": 5997,
+  "precio": "200.0",
+  "producto": "Starbucks Card $200",
+  "cantidad": 5
+ },
+ {
+  "servicio": "Ultracel Internet Hogar - Negocios",
+  "idServicio": 2155,
+  "idProducto": 13504,
+  "precio": "99.0",
+  "producto": "HOGAR 99",
+  "cantidad": 5
+ },
+ {
+  "servicio": "Valor Internet en Casa",
+  "idServicio": 1263,
+  "idProducto": 8661,
+  "precio": "99.0",
+  "producto": "Internet en Casa 5MB 20GB",
+  "cantidad": 5
+ },
+ {
+  "servicio": "Vasanta Movilidad",
+  "idServicio": 3162,
+  "idProducto": 19296,
+  "precio": "150.0",
+  "producto": "SUPER 30",
+  "cantidad": 5
+ },
+ {
+  "servicio": "Xbox Game Pass Core",
+  "idServicio": 144,
+  "idProducto": 19821,
+  "precio": "219.0",
+  "producto": "Xbox Game Pass Premium 1 mes",
+  "cantidad": 5
+ },
+ {
+  "servicio": "big Conecta",
+  "idServicio": 3176,
+  "idProducto": 18908,
+  "precio": "149.0",
+  "producto": "big Conecta 5",
+  "cantidad": 5
+ },
+ {
+  "servicio": "big Hogar",
+  "idServicio": 3177,
+  "idProducto": 18913,
+  "precio": "129.0",
+  "producto": "big Hogar 20",
+  "cantidad": 5
+ },
+ {
+  "servicio": "¡Recorcholis!",
+  "idServicio": 3265,
+  "idProducto": 19454,
+  "precio": "80.0",
+  "producto": "Recarga $100 Bonus",
+  "cantidad": 5
+ },
+ {
+  "servicio": "Aportaciones Voluntarias AFORE",
+  "idServicio": 838,
+  "idProducto": 6187,
+  "precio": "50.0",
+  "producto": "Aportacion Voluntaria $50",
+  "cantidad": 4
+ },
+ {
+  "servicio": "Cinemex Platino",
+  "idServicio": 2029,
+  "idProducto": 12658,
+  "precio": "140.0",
+  "producto": "Sala Platino 1 boleto",
+  "cantidad": 4
+ },
+ {
+  "servicio": "Elektra Tarjeta de Regalo",
+  "idServicio": 3575,
+  "idProducto": 20258,
+  "precio": "300.0",
+  "producto": "Tarjeta $300",
+  "cantidad": 4
+ },
+ {
+  "servicio": "Enviaflores.com",
+  "idServicio": 835,
+  "idProducto": 6184,
+  "precio": "300.0",
+  "producto": "EnviaFlores $300",
+  "cantidad": 4
+ },
+ {
+  "servicio": "FacturaFiel",
+  "idServicio": 148,
+  "idProducto": 6205,
+  "precio": "100.0",
+  "producto": "FacturaFiel $100 (25 folios)",
+  "cantidad": 4
+ },
+ {
+  "servicio": "Kaspersky Internet Security",
+  "idServicio": 149,
+  "idProducto": 463,
+  "precio": "399.0",
+  "producto": "Kaspersky Internet Security (1 dispositivo)",
+  "cantidad": 4
+ },
+ {
+  "servicio": "Netwey Movil",
+  "idServicio": 88,
+  "idProducto": 18672,
+  "precio": "45.0",
+  "producto": "Movil 3 Dias (2GB - 3dias)",
+  "cantidad": 4
+ },
+ {
+  "servicio": "Prepago con Montos Variables",
+  "idServicio": 158,
+  "idProducto": 530,
+  "precio": "0.0",
+  "producto": "Amazon",
+  "cantidad": 4
+ },
+ {
+  "servicio": "Telcel Pospago",
+  "idServicio": 734,
+  "idProducto": 5880,
+  "precio": "0.0",
+  "producto": "Consulta de Saldo",
+  "cantidad": 4
+ },
+ {
+  "servicio": "Traspaso GestoPago",
+  "idServicio": 105,
+  "idProducto": 270,
+  "precio": "0.0",
+  "producto": "Abono Gestopago",
+  "cantidad": 4
+ },
+ {
+  "servicio": "Tricomx",
+  "idServicio": 1526,
+  "idProducto": 10235,
+  "precio": "50.0",
+  "producto": "Paquete $50",
+  "cantidad": 4
+ },
+ {
+  "servicio": "VID Mexicana",
+  "idServicio": 3358,
+  "idProducto": 19779,
+  "precio": "500.0",
+  "producto": "VID Mexicana $500",
+  "cantidad": 4
+ },
+ {
+  "servicio": "Xbox",
+  "idServicio": 786,
+  "idProducto": 6049,
+  "precio": "200.0",
+  "producto": "Xbox Tarjeta $200",
+  "cantidad": 4
+ },
+ {
+  "servicio": "Youtube Premium",
+  "idServicio": 3586,
+  "idProducto": 20315,
+  "precio": "99.0",
+  "producto": "YouTube Premium Lite",
+  "cantidad": 4
+ },
+ {
+  "servicio": "Bait Internet Portatil",
+  "idServicio": 2170,
+  "idProducto": 13564,
+  "precio": "110.0",
+  "producto": "Internet Portatil $110",
+  "cantidad": 3
+ },
+ {
+  "servicio": "Cinemex",
+  "idServicio": 576,
+  "idProducto": 5276,
+  "precio": "60.0",
+  "producto": "Cinemex Tradicional 1 Boleto",
+  "cantidad": 3
+ },
+ {
+  "servicio": "Cinemex Tradicional",
+  "idServicio": 1975,
+  "idProducto": 12121,
+  "precio": "60.0",
+  "producto": "Cinemex Tradicional 1 Boleto",
+  "cantidad": 3
+ },
+ {
+  "servicio": "CrunchyRoll",
+  "idServicio": 703,
+  "idProducto": 5757,
+  "precio": "119.0",
+  "producto": "Membresia Premium 1 mes",
+  "cantidad": 3
+ },
+ {
+  "servicio": "Fortnite",
+  "idServicio": 3374,
+  "idProducto": 19828,
+  "precio": "200.0",
+  "producto": "Tarjeta Fortnite 200",
+  "cantidad": 3
+ },
+ {
+  "servicio": "Microsoft Office",
+  "idServicio": 895,
+  "idProducto": 6421,
+  "precio": "1929.0",
+  "producto": "365 Personal 2026",
+  "cantidad": 3
+ },
+ {
+  "servicio": "MoonFlow",
+  "idServicio": 3315,
+  "idProducto": 19548,
+  "precio": "0.0",
+  "producto": "Efectivo",
+  "cantidad": 3
+ },
+ {
+  "servicio": "Oriflame",
+  "idServicio": 80,
+  "idProducto": 624,
+  "precio": "0.0",
+  "producto": "Pedidos Disponibles",
+  "cantidad": 3
+ },
+ {
+  "servicio": "Promos Incomm",
+  "idServicio": 1170,
+  "idProducto": 8109,
+  "precio": "100.0",
+  "producto": "Spotify $100 - 1 mes",
+  "cantidad": 3
+ },
+ {
+  "servicio": "Razer Gold",
+  "idServicio": 3464,
+  "idProducto": 20080,
+  "precio": "200.0",
+  "producto": "Razer Gold $200",
+  "cantidad": 3
+ },
+ {
+  "servicio": "Roblox",
+  "idServicio": 147,
+  "idProducto": 7809,
+  "precio": "200.0",
+  "producto": "Roblox $200",
+  "cantidad": 3
+ },
+ {
+  "servicio": "SKY - VeTv",
+  "idServicio": 168,
+  "idProducto": 593,
+  "precio": "0.0",
+  "producto": "Consulta de Saldo SKY",
+  "cantidad": 3
+ },
+ {
+  "servicio": "Tinder +",
+  "idServicio": 3083,
+  "idProducto": 18858,
+  "precio": "135.0",
+  "producto": "Tinder Plus 1 Mes",
+  "cantidad": 3
+ },
+ {
+  "servicio": "Tinder Gold",
+  "idServicio": 3165,
+  "idProducto": 18861,
+  "precio": "220.0",
+  "producto": "Tinder Gold 1 Mes",
+  "cantidad": 3
+ },
+ {
+  "servicio": "Youtube Music",
+  "idServicio": 3585,
+  "idProducto": 20312,
+  "precio": "129.0",
+  "producto": "YouTube Music 1 Mes",
+  "cantidad": 3
+ },
+ {
+  "servicio": "AT-T Pospago",
+  "idServicio": 108,
+  "idProducto": 398,
+  "precio": "0.0",
+  "producto": "Consulta de Saldo",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Airalo",
+  "idServicio": 3470,
+  "idProducto": 20094,
+  "precio": "10.0",
+  "producto": "hello africa 3GB 30D SS",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Bait Internet en Casa",
+  "idServicio": 1591,
+  "idProducto": 10927,
+  "precio": "99.0",
+  "producto": "Mi Bait en Casa $99 (30GB x 7dias)",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Blizzard",
+  "idServicio": 790,
+  "idProducto": 6061,
+  "precio": "150.0",
+  "producto": "Blizzard $150",
+  "cantidad": 2
+ },
+ {
+  "servicio": "CEA (Queretaro)",
+  "idServicio": 765,
+  "idProducto": 5962,
+  "precio": "0.0",
+  "producto": "Consulta de Saldo",
+  "cantidad": 2
+ },
+ {
+  "servicio": "CFE",
+  "idServicio": 166,
+  "idProducto": 7357,
+  "precio": "0.0",
+  "producto": "Consulta de Saldo",
+  "cantidad": 2
+ },
+ {
+  "servicio": "CIAPACOV (Colima)",
+  "idServicio": 1295,
+  "idProducto": 8924,
+  "precio": "0.0",
+  "producto": "Consulta de Saldo CIPACOV",
+  "cantidad": 2
+ },
+ {
+  "servicio": "CineDot IMAX",
+  "idServicio": 3134,
+  "idProducto": 18603,
+  "precio": "79.0",
+  "producto": "CineDot IMAX 1 Boleto",
+  "cantidad": 2
+ },
+ {
+  "servicio": "CineDot Tradicional",
+  "idServicio": 3133,
+  "idProducto": 18602,
+  "precio": "42.0",
+  "producto": "CineDot Tradicional 1 Boleto",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Cinemex Premium",
+  "idServicio": 2032,
+  "idProducto": 12664,
+  "precio": "90.0",
+  "producto": "Sala Premium 1 Boleto",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Dish",
+  "idServicio": 61,
+  "idProducto": 625,
+  "precio": "0.0",
+  "producto": "Consulta Saldo",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Free Fire (usuarios Telcel)",
+  "idServicio": 3362,
+  "idProducto": 19604,
+  "precio": "22.0",
+  "producto": "Paquete Free Fire 22",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Gobierno de Coahuila",
+  "idServicio": 1254,
+  "idProducto": 8580,
+  "precio": "0.0",
+  "producto": "Secretaria de Finanzas de Coahula",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Gobierno de Estado de Mexico",
+  "idServicio": 699,
+  "idProducto": 5752,
+  "precio": "10.0",
+  "producto": "Formato Universal de Pago (Pago de Derechos, Control Vehicular, Declaraciones, Predial)",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Gobierno de Queretaro",
+  "idServicio": 188,
+  "idProducto": 7836,
+  "precio": "0.0",
+  "producto": "Consulta de Saldo",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Gobierno de Tlaxcala",
+  "idServicio": 755,
+  "idProducto": 5943,
+  "precio": "0.0",
+  "producto": "Secretaria de Planeacion y Finanzas",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Hasbro City",
+  "idServicio": 3167,
+  "idProducto": 18874,
+  "precio": "399.0",
+  "producto": "Entrada Regular 1 Boleto",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Herbalife",
+  "idServicio": 132,
+  "idProducto": 9549,
+  "precio": "0.0",
+  "producto": "Consulta de Saldo",
+  "cantidad": 2
+ },
+ {
+  "servicio": "HughesNet",
+  "idServicio": 1422,
+  "idProducto": 9672,
+  "precio": "0.0",
+  "producto": "Consulta de Saldo",
+  "cantidad": 2
+ },
+ {
+  "servicio": "IZZI Telecom",
+  "idServicio": 76,
+  "idProducto": 520,
+  "precio": "0.0",
+  "producto": "Consulta de Saldo Izzi Telecom",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Infonavit",
+  "idServicio": 53,
+  "idProducto": 182,
+  "precio": "0.0",
+  "producto": "Credito Infonavit",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Inphonity",
+  "idServicio": 3068,
+  "idProducto": 18070,
+  "precio": "0.0",
+  "producto": "Consulta de Saldo",
+  "cantidad": 2
+ },
+ {
+  "servicio": "JMAS (Chihuahua)",
+  "idServicio": 54,
+  "idProducto": 17636,
+  "precio": "0.0",
+  "producto": "Consulta de Saldo JMAS",
+  "cantidad": 2
+ },
+ {
+  "servicio": "MIAA (Aguascalietes)",
+  "idServicio": 3333,
+  "idProducto": 19735,
+  "precio": "0.0",
+  "producto": "Saldo Agua Aguascalientes",
+  "cantidad": 2
+ },
+ {
+  "servicio": "MVSHub",
+  "idServicio": 2164,
+  "idProducto": 13552,
+  "precio": "0.0",
+  "producto": "Consulta Saldo",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Megacable",
+  "idServicio": 167,
+  "idProducto": 594,
+  "precio": "0.0",
+  "producto": "Consulta de Saldo Megacable",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Minecraft",
+  "idServicio": 889,
+  "idProducto": 6403,
+  "precio": "209.0",
+  "producto": "Minecoins 1720",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Montepio Luz Savinon",
+  "idServicio": 3153,
+  "idProducto": 18766,
+  "precio": "0.0",
+  "producto": "Consulta de saldo",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Movistar Pospago",
+  "idServicio": 87,
+  "idProducto": 5874,
+  "precio": "0.0",
+  "producto": "Consulta de Saldo",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Naturgy (Gas Natural)",
+  "idServicio": 64,
+  "idProducto": 7276,
+  "precio": "0.0",
+  "producto": "Consulta de Saldo",
+  "cantidad": 2
+ },
+ {
+  "servicio": "NetTV",
+  "idServicio": 130,
+  "idProducto": 7866,
+  "precio": "0.0",
+  "producto": "Consulta de Saldo",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Netwey",
+  "idServicio": 1161,
+  "idProducto": 8007,
+  "precio": "0.0",
+  "producto": "Recarga Netwey",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Nintendo Switch Online",
+  "idServicio": 892,
+  "idProducto": 6412,
+  "precio": "169.0",
+  "producto": "Nintendo Switch Online 3 meses",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Nintendo eShop",
+  "idServicio": 141,
+  "idProducto": 454,
+  "precio": "200.0",
+  "producto": "Nintendo Tarjeta $200",
+  "cantidad": 2
+ },
+ {
+  "servicio": "On Internet",
+  "idServicio": 1517,
+  "idProducto": 10190,
+  "precio": "0.0",
+  "producto": "Consulta Saldo",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Prime Video",
+  "idServicio": 1479,
+  "idProducto": 9978,
+  "precio": "99.0",
+  "producto": "Amazon Prime 1 mes",
+  "cantidad": 2
+ },
+ {
+  "servicio": "SADM (Monterrey)",
+  "idServicio": 55,
+  "idProducto": 7273,
+  "precio": "0.0",
+  "producto": "Consulta de Saldo",
+  "cantidad": 2
+ },
+ {
+  "servicio": "SEGIAGUA (CDMX)",
+  "idServicio": 97,
+  "idProducto": 9375,
+  "precio": "0.0",
+  "producto": "Consulta Saldo",
+  "cantidad": 2
+ },
+ {
+  "servicio": "StarGo",
+  "idServicio": 1547,
+  "idProducto": 10541,
+  "precio": "0.0",
+  "producto": "Consulta de Saldo",
+  "cantidad": 2
+ },
+ {
+  "servicio": "StarTV",
+  "idServicio": 183,
+  "idProducto": 6004,
+  "precio": "0.0",
+  "producto": "Consulta de Saldo",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Telcel Amigo Entretenimiento",
+  "idServicio": 3084,
+  "idProducto": 18467,
+  "precio": "50.0",
+  "producto": "Amigo Entretenimiento $50",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Telmex",
+  "idServicio": 107,
+  "idProducto": 7270,
+  "precio": "0.0",
+  "producto": "Consulta de Saldo",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Totalplay",
+  "idServicio": 85,
+  "idProducto": 397,
+  "precio": "0.0",
+  "producto": "Consulta de Saldo",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Wizz",
+  "idServicio": 688,
+  "idProducto": 7289,
+  "precio": "0.0",
+  "producto": "Consulta de Saldo",
+  "cantidad": 2
+ },
+ {
+  "servicio": "Xbox Game Pass Ultimate",
+  "idServicio": 847,
+  "idProducto": 6683,
+  "precio": "339.0",
+  "producto": "Microsoft Game Pass Ultimate 1 mes",
+  "cantidad": 2
+ },
+ {
+  "servicio": "AGUAKAN (Cancun)",
+  "idServicio": 56,
+  "idProducto": 185,
+  "precio": "10.0",
+  "producto": "Agua Cancun (Mun. de Benito Juarez y de Isla Mujeres)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "AMD (Durango Dgo.)",
+  "idServicio": 111,
+  "idProducto": 276,
+  "precio": "10.0",
+  "producto": "Aguas del Municipio de Durango",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Acuario Inbursa",
+  "idServicio": 899,
+  "idProducto": 6443,
+  "precio": "350.0",
+  "producto": "Acuario Inbursa (1 Entrada)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Aguas de Saltillo",
+  "idServicio": 187,
+  "idProducto": 656,
+  "precio": "10.0",
+  "producto": "Aguas de Saltillo",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Aportacion AFORE",
+  "idServicio": 778,
+  "idProducto": 6023,
+  "precio": "0.0",
+  "producto": "Aportaciones Voluntarias a AFORE",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Aportacion SAR",
+  "idServicio": 792,
+  "idProducto": 6064,
+  "precio": "0.0",
+  "producto": "Aportacion Voluntaria a AFORE",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Arabela",
+  "idServicio": 121,
+  "idProducto": 368,
+  "precio": "10.0",
+  "producto": "Arabela",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Avon",
+  "idServicio": 79,
+  "idProducto": 209,
+  "precio": "10.0",
+  "producto": "Avon",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Axtel",
+  "idServicio": 57,
+  "idProducto": 186,
+  "precio": "10.0",
+  "producto": "Axtel",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Aztlan Parque Urbano",
+  "idServicio": 3136,
+  "idProducto": 18618,
+  "precio": "250.0",
+  "producto": "Entrada General 1 Boleto",
+  "cantidad": 1
+ },
+ {
+  "servicio": "BBVA",
+  "idServicio": 3469,
+  "idProducto": 20093,
+  "precio": "12.0",
+  "producto": "Envio de Dinero",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Bachillerato Universidad Tres Culturas",
+  "idServicio": 3529,
+  "idProducto": 20175,
+  "precio": "10.0",
+  "producto": "Bachillerato Universidad Tres Culturas",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Banamex",
+  "idServicio": 3483,
+  "idProducto": 20107,
+  "precio": "12.0",
+  "producto": "Envio de dinero",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Banco Azteca",
+  "idServicio": 3494,
+  "idProducto": 20119,
+  "precio": "12.0",
+  "producto": "Envio de Dinero",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Bancoppel",
+  "idServicio": 3489,
+  "idProducto": 20114,
+  "precio": "12.0",
+  "producto": "Envio de dinero",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Banorte",
+  "idServicio": 3491,
+  "idProducto": 20116,
+  "precio": "12.0",
+  "producto": "Envio de dinero",
+  "cantidad": 1
+ },
+ {
+  "servicio": "BlueTelecom",
+  "idServicio": 771,
+  "idProducto": 5971,
+  "precio": "10.0",
+  "producto": "BlueTelecom",
+  "cantidad": 1
+ },
+ {
+  "servicio": "CAPA (Bacalar)",
+  "idServicio": 3515,
+  "idProducto": 20161,
+  "precio": "10.0",
+  "producto": "CAPA (Bacalar)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "CAPA (Chetumal)",
+  "idServicio": 3522,
+  "idProducto": 20168,
+  "precio": "10.0",
+  "producto": "CAPA (Chetumal)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "CAPA (Felipe Carrillo Puerto)",
+  "idServicio": 3520,
+  "idProducto": 20166,
+  "precio": "10.0",
+  "producto": "CAPA (Felipe Carrillo Puerto)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "CAPA (Jose Maria Morelos)",
+  "idServicio": 3517,
+  "idProducto": 20163,
+  "precio": "10.0",
+  "producto": "CAPA (Jose Maria Morelos)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "CAPA (Lazaro Cardenas)",
+  "idServicio": 3521,
+  "idProducto": 20167,
+  "precio": "10.0",
+  "producto": "CAPA (Lazaro Cardenas)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "CAPA (Tulum)",
+  "idServicio": 3516,
+  "idProducto": 20162,
+  "precio": "10.0",
+  "producto": "CAPA (Tulum)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "CAPAMA (Acapulco)",
+  "idServicio": 3514,
+  "idProducto": 20160,
+  "precio": "10.0",
+  "producto": "CAPAMA (Acapulco)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "CAPAMA (Apatzingan)",
+  "idServicio": 3524,
+  "idProducto": 20170,
+  "precio": "10.0",
+  "producto": "CAPAMA (Apatzingan)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "CAPASMIH",
+  "idServicio": 3095,
+  "idProducto": 18478,
+  "precio": "10.0",
+  "producto": "Agua Potable y Alcantarillado de Ixmiquilpan",
+  "cantidad": 1
+ },
+ {
+  "servicio": "CAPDAM (Manzanillo)",
+  "idServicio": 3523,
+  "idProducto": 20169,
+  "precio": "10.0",
+  "producto": "CAPDAM (Manzanillo)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "CESPE (Ensenada)",
+  "idServicio": 1514,
+  "idProducto": 10127,
+  "precio": "10.0",
+  "producto": "CESPE (Agua de Ensenada)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "CESPM (Mexicali)",
+  "idServicio": 1511,
+  "idProducto": 10124,
+  "precio": "10.0",
+  "producto": "CESPM (Agua de Mexicali)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "CESPT (Tijuana)",
+  "idServicio": 175,
+  "idProducto": 621,
+  "precio": "10.0",
+  "producto": "Comision Estatal de Servicios Publicos de Tijuana",
+  "cantidad": 1
+ },
+ {
+  "servicio": "CMAPAS (Salamanca Gto.)",
+  "idServicio": 60,
+  "idProducto": 189,
+  "precio": "10.0",
+  "producto": "Agua Potable y Alcantarillado de Salamanca",
+  "cantidad": 1
+ },
+ {
+  "servicio": "CMAS (Xalapa)",
+  "idServicio": 3525,
+  "idProducto": 20171,
+  "precio": "10.0",
+  "producto": "CMAS (Xalapa)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "COAPAM (Comitan)",
+  "idServicio": 3527,
+  "idProducto": 20173,
+  "precio": "10.0",
+  "producto": "COAPAM (Comitan)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "COMAPA (Nuevo Laredo Tam.)",
+  "idServicio": 186,
+  "idProducto": 655,
+  "precio": "10.0",
+  "producto": "Comision Municipal de Agua Potable",
+  "cantidad": 1
+ },
+ {
+  "servicio": "COMAPA CV (Ciudad Victoria)",
+  "idServicio": 3309,
+  "idProducto": 19541,
+  "precio": "10.0",
+  "producto": "Agua de CD. Victoria",
+  "cantidad": 1
+ },
+ {
+  "servicio": "COMAPA ZC (Tampico Tamaulipas y Conurbada)",
+  "idServicio": 3308,
+  "idProducto": 19540,
+  "precio": "10.0",
+  "producto": "Comision Municipal de Agua Potable",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Caliente",
+  "idServicio": 3202,
+  "idProducto": 19379,
+  "precio": "10.0",
+  "producto": "Caliente",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Caliente.Mx",
+  "idServicio": 3193,
+  "idProducto": 19019,
+  "precio": "0.0",
+  "producto": "CalienteMx",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Call of Duty (usuarios Telcel)",
+  "idServicio": 3367,
+  "idProducto": 19810,
+  "precio": "30.0",
+  "producto": "Paquete COD Mobile 1",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Colegio Humanista Mexicano SC",
+  "idServicio": 3530,
+  "idProducto": 20176,
+  "precio": "10.0",
+  "producto": "Colegio Humanista Mexicano SC",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Compania Mexicana de Gas",
+  "idServicio": 184,
+  "idProducto": 653,
+  "precio": "10.0",
+  "producto": "Cia. Mexicana de Gas",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Distribuidora D Lemi",
+  "idServicio": 3415,
+  "idProducto": 20019,
+  "precio": "10.0",
+  "producto": "Distribuidora D Lemi",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Elektra Credito",
+  "idServicio": 3583,
+  "idProducto": 20298,
+  "precio": "12.0",
+  "producto": "Pago de Credito",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Elektra.com",
+  "idServicio": 841,
+  "idProducto": 6190,
+  "precio": "10.0",
+  "producto": "Elektra.com",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Engie MaxiGas",
+  "idServicio": 756,
+  "idProducto": 5944,
+  "precio": "10.0",
+  "producto": "Engie MaxiGas",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Enlace",
+  "idServicio": 3440,
+  "idProducto": 20055,
+  "precio": "10.0",
+  "producto": "Enlace",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Estrella Blanca",
+  "idServicio": 2176,
+  "idProducto": 13582,
+  "precio": "0.0",
+  "producto": "Venta de Boletos",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Finsus",
+  "idServicio": 3485,
+  "idProducto": 20110,
+  "precio": "12.0",
+  "producto": "Envio de dinero",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Fuller",
+  "idServicio": 83,
+  "idProducto": 213,
+  "precio": "10.0",
+  "producto": "Fuller Cosmetics",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Gobierno de CDMX",
+  "idServicio": 94,
+  "idProducto": 236,
+  "precio": "0.0",
+  "producto": "Tesoreria de la CDMX",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Gobierno de Chihuahua",
+  "idServicio": 65,
+  "idProducto": 19809,
+  "precio": "10.0",
+  "producto": "Gobierno de Chihuahua",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Gobierno de Durango",
+  "idServicio": 3370,
+  "idProducto": 19814,
+  "precio": "10.0",
+  "producto": "Gobierno de Durango",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Gobierno de Hidalgo",
+  "idServicio": 758,
+  "idProducto": 5946,
+  "precio": "10.0",
+  "producto": "Secretaria de Hacienda del Estado de Hidalgo",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Gobierno de Jalisco",
+  "idServicio": 797,
+  "idProducto": 670,
+  "precio": "0.0",
+  "producto": "Tesoreria del Estado de Jalisco",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Gobierno de Michoacan",
+  "idServicio": 757,
+  "idProducto": 5945,
+  "precio": "10.0",
+  "producto": "Secretaria de Finanzas y Administracion",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Gobierno de Morelos",
+  "idServicio": 3531,
+  "idProducto": 20177,
+  "precio": "10.0",
+  "producto": "Gobierno de Morelos",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Gobierno de Nayarit",
+  "idServicio": 3532,
+  "idProducto": 20178,
+  "precio": "10.0",
+  "producto": "Gobierno de Nayarit",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Gobierno de Oaxaca",
+  "idServicio": 3368,
+  "idProducto": 19812,
+  "precio": "10.0",
+  "producto": "Gobierno de Oaxaca",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Gobierno de Sinaloa",
+  "idServicio": 3088,
+  "idProducto": 18471,
+  "precio": "10.0",
+  "producto": "Servicio de Administracion Tributaria de Sinaloa",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Gobierno de Sonora",
+  "idServicio": 3369,
+  "idProducto": 19813,
+  "precio": "10.0",
+  "producto": "Gobierno de Sonora",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Gobierno de Tabasco",
+  "idServicio": 759,
+  "idProducto": 5948,
+  "precio": "0.0",
+  "producto": "Secretaria de Planeacion y Finanzas",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Gobierno de Veracruz",
+  "idServicio": 3366,
+  "idProducto": 19811,
+  "precio": "10.0",
+  "producto": "Gobierno de Veracruz",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Gobierno de Zacatecas",
+  "idServicio": 3365,
+  "idProducto": 19808,
+  "precio": "10.0",
+  "producto": "Gobierno de Zacatecas",
+  "cantidad": 1
+ },
+ {
+  "servicio": "HSBC",
+  "idServicio": 3490,
+  "idProducto": 20115,
+  "precio": "12.0",
+  "producto": "Envio de dinero",
+  "cantidad": 1
+ },
+ {
+  "servicio": "INTERAPAS (San Luis Potosi)",
+  "idServicio": 177,
+  "idProducto": 623,
+  "precio": "10.0",
+  "producto": "Organismo Intermunicipal Metropolitano de Agua Potable",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Ilusion",
+  "idServicio": 122,
+  "idProducto": 369,
+  "precio": "10.0",
+  "producto": "Ilusion",
+  "cantidad": 1
+ },
+ {
+  "servicio": "JAPAMI (Irapuato)",
+  "idServicio": 1298,
+  "idProducto": 8930,
+  "precio": "10.0",
+  "producto": "Agua de Irapuato Gto",
+  "cantidad": 1
+ },
+ {
+  "servicio": "JAPAY (Yucatan)",
+  "idServicio": 3519,
+  "idProducto": 20165,
+  "precio": "10.0",
+  "producto": "JAPAY (Yucatan)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "JMAS (Juarez)",
+  "idServicio": 3307,
+  "idProducto": 19539,
+  "precio": "10.0",
+  "producto": "Aguas de Ciudad Juarez",
+  "cantidad": 1
+ },
+ {
+  "servicio": "JUMAPA (Celaya)",
+  "idServicio": 66,
+  "idProducto": 195,
+  "precio": "10.0",
+  "producto": "Agua Potable y Alcantarillado de Celaya",
+  "cantidad": 1
+ },
+ {
+  "servicio": "JUMAPAM (Mazatlan)",
+  "idServicio": 1508,
+  "idProducto": 10121,
+  "precio": "10.0",
+  "producto": "JUMAPAM (Agua de Mazatlan)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Jafra",
+  "idServicio": 156,
+  "idProducto": 523,
+  "precio": "0.0",
+  "producto": "JAFRA",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Kaspersky Cloud Password Manager",
+  "idServicio": 3246,
+  "idProducto": 19377,
+  "precio": "368.76",
+  "producto": "1 Usuario, 1 Ano",
+  "cantidad": 1
+ },
+ {
+  "servicio": "KeepCash",
+  "idServicio": 3394,
+  "idProducto": 19890,
+  "precio": "0.0",
+  "producto": "Pago Complementario",
+  "cantidad": 1
+ },
+ {
+  "servicio": "KingsBet",
+  "idServicio": 3390,
+  "idProducto": 19879,
+  "precio": "100.0",
+  "producto": "KingsBet",
+  "cantidad": 1
+ },
+ {
+  "servicio": "LBEL Belcorp",
+  "idServicio": 123,
+  "idProducto": 370,
+  "precio": "10.0",
+  "producto": "LBEL Belcorp",
+  "cantidad": 1
+ },
+ {
+  "servicio": "MVNO Airalo",
+  "idServicio": 3557,
+  "idProducto": 20213,
+  "precio": "0.0",
+  "producto": "Recarga Airalo",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Mercado Pago",
+  "idServicio": 3495,
+  "idProducto": 20120,
+  "precio": "12.0",
+  "producto": "Envio de Dinero",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Mercado Pago envio",
+  "idServicio": 3316,
+  "idProducto": 19549,
+  "precio": "12.0",
+  "producto": "Envio de dinero",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Mexbet.Mx",
+  "idServicio": 3192,
+  "idProducto": 19018,
+  "precio": "10.0",
+  "producto": "Mexbet",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Municipio de Chalco",
+  "idServicio": 3538,
+  "idProducto": 20184,
+  "precio": "10.0",
+  "producto": "Municipio de Chalco",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Municipio de Colima",
+  "idServicio": 3535,
+  "idProducto": 20181,
+  "precio": "10.0",
+  "producto": "Municipio de Colima",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Municipio de Garcia (Nuevo Leon)",
+  "idServicio": 3537,
+  "idProducto": 20183,
+  "precio": "10.0",
+  "producto": "Municipio de Garcia (Nuevo Leon)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Municipio de Orizaba",
+  "idServicio": 3539,
+  "idProducto": 20185,
+  "precio": "10.0",
+  "producto": "Municipio de Orizaba",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Municipio de San Luis Potosi",
+  "idServicio": 3533,
+  "idProducto": 20179,
+  "precio": "10.0",
+  "producto": "Municipio de San Luis Potosi",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Municipio de San Pedro Tlaquepaque (Jalisco)",
+  "idServicio": 3115,
+  "idProducto": 18499,
+  "precio": "10.0",
+  "producto": "Tesoreria de San Pedro Tlaquepaque",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Municipio de Tlajomulco de Zuniga (Jalisco)",
+  "idServicio": 3110,
+  "idProducto": 18493,
+  "precio": "10.0",
+  "producto": "Tesoreria del Municipio de Tlajomulco de Zuniga",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Municipio de Tlaxcala",
+  "idServicio": 3536,
+  "idProducto": 20182,
+  "precio": "10.0",
+  "producto": "Municipio de Tlaxcala",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Municipio de Valle de Bravo",
+  "idServicio": 3534,
+  "idProducto": 20180,
+  "precio": "10.0",
+  "producto": "Municipio de Valle de Bravo",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Municipio de Zacatecas",
+  "idServicio": 112,
+  "idProducto": 277,
+  "precio": "10.0",
+  "producto": "Pago del Impuesto Predial",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Natura",
+  "idServicio": 127,
+  "idProducto": 391,
+  "precio": "10.0",
+  "producto": "Natura",
+  "cantidad": 1
+ },
+ {
+  "servicio": "NaturalBesa",
+  "idServicio": 832,
+  "idProducto": 6181,
+  "precio": "10.0",
+  "producto": "NaturalBesa",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Nu",
+  "idServicio": 3487,
+  "idProducto": 20112,
+  "precio": "12.0",
+  "producto": "Envio de dinero",
+  "cantidad": 1
+ },
+ {
+  "servicio": "OOAPAS (Rincon de Romos)",
+  "idServicio": 3400,
+  "idProducto": 19918,
+  "precio": "10.0",
+  "producto": "Agua y Alcantarillado de Rincon de Romos",
+  "cantidad": 1
+ },
+ {
+  "servicio": "OPDAPAS (Chicoloapan)",
+  "idServicio": 3401,
+  "idProducto": 19919,
+  "precio": "10.0",
+  "producto": "Agua y Alcantarillado de Chicoloapan",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Omnibus de Mexico",
+  "idServicio": 63,
+  "idProducto": 192,
+  "precio": "10.0",
+  "producto": "Omnibus de Mexico",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Otros Bancos",
+  "idServicio": 3484,
+  "idProducto": 20109,
+  "precio": "12.0",
+  "producto": "Envio de dinero",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Pasaportes de Cuautitlan Izcalli",
+  "idServicio": 3540,
+  "idProducto": 20186,
+  "precio": "10.0",
+  "producto": "Pasaportes de Cuautitlan Izcalli",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Plata",
+  "idServicio": 3486,
+  "idProducto": 20111,
+  "precio": "12.0",
+  "producto": "Envio de dinero",
+  "cantidad": 1
+ },
+ {
+  "servicio": "PuntoPay",
+  "idServicio": 3314,
+  "idProducto": 19547,
+  "precio": "12.0",
+  "producto": "PuntoPay",
+  "cantidad": 1
+ },
+ {
+  "servicio": "PuntoPay Tarjeta",
+  "idServicio": 3171,
+  "idProducto": 18883,
+  "precio": "0.0",
+  "producto": "Punto Cash",
+  "cantidad": 1
+ },
+ {
+  "servicio": "SCAPSJ (Jiutepec)",
+  "idServicio": 3399,
+  "idProducto": 19917,
+  "precio": "10.0",
+  "producto": "Agua y Alcantarillado de Jiutepec",
+  "cantidad": 1
+ },
+ {
+  "servicio": "SEAPAL (Puerto Vallarta)",
+  "idServicio": 176,
+  "idProducto": 622,
+  "precio": "10.0",
+  "producto": "Sistema de los Servicios de Agua Potable y Alcantarillado",
+  "cantidad": 1
+ },
+ {
+  "servicio": "SIAPA (Guadalajara)",
+  "idServicio": 77,
+  "idProducto": 206,
+  "precio": "10.0",
+  "producto": "Sistema Intermunicipal de Agua Potable y Alcantarillado",
+  "cantidad": 1
+ },
+ {
+  "servicio": "SIAPA (Tepic)",
+  "idServicio": 3526,
+  "idProducto": 20172,
+  "precio": "10.0",
+  "producto": "SIAPA (Tepic)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "SIMAPAG (Guanajuato)",
+  "idServicio": 3518,
+  "idProducto": 20164,
+  "precio": "10.0",
+  "producto": "SIMAPAG (Guanajuato)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "SIMAS (Torreon)",
+  "idServicio": 1292,
+  "idProducto": 8921,
+  "precio": "10.0",
+  "producto": "Agua de Torreon",
+  "cantidad": 1
+ },
+ {
+  "servicio": "SMAPAJ (Jaral del Progreso)",
+  "idServicio": 3528,
+  "idProducto": 20174,
+  "precio": "10.0",
+  "producto": "SMAPAJ (Jaral del Progreso)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "SOAPAP (Puebla)",
+  "idServicio": 728,
+  "idProducto": 5870,
+  "precio": "10.0",
+  "producto": "Agua de Puebla PARA TODOS",
+  "cantidad": 1
+ },
+ {
+  "servicio": "SOFIPA",
+  "idServicio": 189,
+  "idProducto": 658,
+  "precio": "8.0",
+  "producto": "Credito SOFIPA",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Santander",
+  "idServicio": 3492,
+  "idProducto": 20117,
+  "precio": "12.0",
+  "producto": "Envio de dinero",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Scotiabank",
+  "idServicio": 3488,
+  "idProducto": 20113,
+  "precio": "12.0",
+  "producto": "Envio de dinero",
+  "cantidad": 1
+ },
+ {
+  "servicio": "SeaLand",
+  "idServicio": 3023,
+  "idProducto": 17630,
+  "precio": "260.0",
+  "producto": "SeaLand Guadalajara (1 Entrada)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Solidaridad por Colombia",
+  "idServicio": 3545,
+  "idProducto": 20191,
+  "precio": "0.0",
+  "producto": "Solidaridad por Colombia",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Spotify",
+  "idServicio": 577,
+  "idProducto": 5280,
+  "precio": "129.0",
+  "producto": "Spotify - 1 Mes",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Stanhome",
+  "idServicio": 192,
+  "idProducto": 661,
+  "precio": "10.0",
+  "producto": "Stanhome",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Swiss Just",
+  "idServicio": 82,
+  "idProducto": 212,
+  "precio": "10.0",
+  "producto": "SwissJust",
+  "cantidad": 1
+ },
+ {
+  "servicio": "TP Go Credito",
+  "idServicio": 3441,
+  "idProducto": 20056,
+  "precio": "10.0",
+  "producto": "TP Go Credito",
+  "cantidad": 1
+ },
+ {
+  "servicio": "TP Go Delivery",
+  "idServicio": 3442,
+  "idProducto": 20057,
+  "precio": "10.0",
+  "producto": "TP Go Delivery",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Terramar Brands",
+  "idServicio": 173,
+  "idProducto": 619,
+  "precio": "10.0",
+  "producto": "Terramar Brands",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Tufesa",
+  "idServicio": 3002,
+  "idProducto": 17450,
+  "precio": "0.0",
+  "producto": "Venta de Boletos",
+  "cantidad": 1
+ },
+ {
+  "servicio": "UPA by ¡Recorcholis!",
+  "idServicio": 3266,
+  "idProducto": 19459,
+  "precio": "260.0",
+  "producto": "UPA by ¡Recorcholis! (1 Entrada General)",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Universidad Aztlan",
+  "idServicio": 3360,
+  "idProducto": 19784,
+  "precio": "10.0",
+  "producto": "Universidad Aztlan",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Universidad Insurgentes",
+  "idServicio": 3378,
+  "idProducto": 19834,
+  "precio": "10.0",
+  "producto": "Universidad Insurgentes",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Universidad de Ciencias y Artes de Chiapas",
+  "idServicio": 3353,
+  "idProducto": 19815,
+  "precio": "10.0",
+  "producto": "Universidad de Ciencias y Artes de Chiapas",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Yanbal",
+  "idServicio": 131,
+  "idProducto": 394,
+  "precio": "10.0",
+  "producto": "Yanbal Unique",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Yves Rocher",
+  "idServicio": 81,
+  "idProducto": 211,
+  "precio": "8.0",
+  "producto": "Yves Rocher",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Zermat",
+  "idServicio": 193,
+  "idProducto": 662,
+  "precio": "10.0",
+  "producto": "Zermat",
+  "cantidad": 1
+ },
+ {
+  "servicio": "Zeta Gas",
+  "idServicio": 128,
+  "idProducto": 5265,
+  "precio": "10.0",
+  "producto": "Zeta Gas",
+  "cantidad": 1
+ },
+ {
+  "servicio": "¡Kataplum!",
+  "idServicio": 2245,
+  "idProducto": 13954,
+  "precio": "320.0",
+  "producto": "Kataporte (1 Entrada)",
+  "cantidad": 1
+ }
+]

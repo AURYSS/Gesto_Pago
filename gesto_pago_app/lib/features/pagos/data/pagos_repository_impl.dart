@@ -1,3 +1,4 @@
+import '../domain/pago_pendiente.dart';
 import '../domain/pagos_repository.dart';
 import '../domain/transaccion.dart';
 import 'pagos_remote.dart';
@@ -16,6 +17,9 @@ class PagosRepositoryImpl implements PagosRepository {
 
   @override
   Future<List<Transaccion>> historial() => _remote.historial();
+
+  @override
+  Future<List<PagoPendiente>> pendientes() => _remote.pendientes();
 
   @override
   Future<VerificacionReferencia> verificarReferencia({

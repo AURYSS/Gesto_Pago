@@ -1,3 +1,4 @@
+import 'pago_pendiente.dart';
 import 'transaccion.dart';
 
 /// Parámetros para iniciar un pago de servicio.
@@ -40,4 +41,6 @@ abstract interface class PagosRepository {
   Future<Transaccion> confirmarTransaccion(int id);
 
   Future<List<Transaccion>> historial();
+
+  Future<List<PagoPendiente>> pendientes();
 }
