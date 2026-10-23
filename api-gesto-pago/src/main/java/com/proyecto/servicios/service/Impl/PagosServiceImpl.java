@@ -7,9 +7,12 @@ import com.proyecto.servicios.entity.pago.EventoTransaccion;
 import com.proyecto.servicios.entity.pago.Transaccion;
 import com.proyecto.servicios.exception.ApiException;
 import com.proyecto.servicios.model.CatalogoProductoCache;
+import com.proyecto.servicios.model.gestopago.Firma;
 import com.proyecto.servicios.model.gestopago.GestoPagoMensajeOperacion;
 import com.proyecto.servicios.model.gestopago.GestoPagoOperacionResponse;
 import com.proyecto.servicios.model.idempotencia.ClaveIdempotencia;
+import com.proyecto.servicios.model.pago.PagarServicioRequestDto;
+import com.proyecto.servicios.model.pago.PagarServicioResponseDto;
 import com.proyecto.servicios.model.pago.PagoPendienteDto;
 import com.proyecto.servicios.model.pago.PagoRequestDto;
 import com.proyecto.servicios.model.pago.TransaccionDto;
@@ -19,11 +22,13 @@ import com.proyecto.servicios.repositorys.pago.EventoTransaccionRepository;
 import com.proyecto.servicios.repositorys.pago.TransaccionRepository;
 import com.proyecto.servicios.service.BloqueoIdempotencia;
 import com.proyecto.servicios.service.CatalogoConsulta;
+import com.proyecto.servicios.service.FirmaService;
 import com.proyecto.servicios.service.GestoPagoTokenService;
 import com.proyecto.servicios.service.HistorialPagosCache;
 import com.proyecto.servicios.service.PagosService;
 import javax.xml.parsers.DocumentBuilderFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -49,6 +54,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -76,6 +82,7 @@ public class PagosServiceImpl implements PagosService {
     private final CatalogoConsulta catalogoConsulta;
     private final BloqueoIdempotencia bloqueoIdempotencia;
     private final HistorialPagosCache historialPagosCache;
+    private final FirmaService firmaService;
     private final Integer idDistribuidor;
     private final String codigoDispositivo;
     private final String unidad;
@@ -88,6 +95,25 @@ public class PagosServiceImpl implements PagosService {
                             CatalogoConsulta catalogoConsulta,
                             BloqueoIdempotencia bloqueoIdempotencia,
                             HistorialPagosCache historialPagosCache,
+                            Integer idDistribuidor,
+                            String codigoDispositivo,
+                            String unidad,
+                            long esperaConfirmacionSegundos) {
+        this(gestoPagoTokenService, gestoPagoTxClient, transaccionRepository,
+                eventoTransaccionRepository, catalogoConsulta, bloqueoIdempotencia,
+                historialPagosCache, new FirmaServiceImpl("gestopago-secret"),
+                idDistribuidor, codigoDispositivo, unidad, esperaConfirmacionSegundos);
+    }
+
+    @Autowired
+    public PagosServiceImpl(GestoPagoTokenService gestoPagoTokenService,
+                            GestoPagoTxClient gestoPagoTxClient,
+                            TransaccionRepository transaccionRepository,
+                            EventoTransaccionRepository eventoTransaccionRepository,
+                            CatalogoConsulta catalogoConsulta,
+                            BloqueoIdempotencia bloqueoIdempotencia,
+                            HistorialPagosCache historialPagosCache,
+                            FirmaService firmaService,
                             @Value("${gestopago.auth.id-distribuidor}") Integer idDistribuidor,
                             @Value("${gestopago.auth.codigo-dispositivo}") String codigoDispositivo,
                             @Value("${gestopago.unidad:083}") String unidad,
@@ -99,6 +125,7 @@ public class PagosServiceImpl implements PagosService {
         this.catalogoConsulta = catalogoConsulta;
         this.bloqueoIdempotencia = bloqueoIdempotencia;
         this.historialPagosCache = historialPagosCache;
+        this.firmaService = firmaService;
         this.idDistribuidor = idDistribuidor;
         this.codigoDispositivo = codigoDispositivo;
         this.unidad = unidad;
@@ -150,9 +177,15 @@ public class PagosServiceImpl implements PagosService {
         registrarEvento(transaccion.getId(), EstadoTransaccion.PENDIENTE, "API",
                 "Transaccion registrada para envio al proveedor");
 
+        String horaLocal = HORA_LOCAL.format(Instant.now());
+        Map<String, String> body = cuerpoSendTxConHora(producto, request.getReferencia(), null,
+                monto, transaccion.getUpc(), horaLocal);
+        Firma firma = construirFirma(producto, body, request.getReferencia(), monto, transaccion.getUpc(), horaLocal);
+        firmaService.encriptar(firma);
+
         try {
-            GestoPagoOperacionResponse respuesta = operar(() -> gestoPagoTxClient.sendTx(
-                    token(), cuerpoSendTx(producto, request.getReferencia(), monto, transaccion.getUpc())));
+            String bearerToken = token();
+            GestoPagoOperacionResponse respuesta = operar(() -> gestoPagoTxClient.sendTx(bearerToken, body));
             aplicarResultadoSendTx(transaccion, respuesta);
         } catch (Exception e) {
             log.warn("sendTx no concluyo para transaccion id={}, quedara en proceso", transaccion.getId(), e);
@@ -160,6 +193,102 @@ public class PagosServiceImpl implements PagosService {
                     "El proveedor no respondio; el resultado se confirmara despues");
         }
         return TransaccionDto.from(transaccion);
+    }
+
+    @Override
+    @Transactional
+    public PagarServicioResponseDto pagarServicio(Long usuarioId, PagarServicioRequestDto request) {
+        String referencia = request.referenciaEfectiva();
+        if (referencia == null || referencia.isBlank()) {
+            throw ApiException.referenciaInvalida();
+        }
+
+        CatalogoProductoCache producto = resolverProductoParaPago(request);
+        BigDecimal monto = montoAutorizado(producto, request.getMontoPago());
+
+        String claveBase = (request.getUpc() != null && !request.getUpc().isBlank())
+                ? request.getUpc().trim()
+                : UUID.randomUUID().toString();
+        String upcGenerado = upc(claveBase);
+        String horaLocal = (request.getHoraLocal() != null && !request.getHoraLocal().isBlank())
+                ? request.getHoraLocal().trim()
+                : HORA_LOCAL.format(Instant.now());
+
+        Map<String, String> body = cuerpoSendTxConHora(
+                producto, referencia, request.getTelefono(), monto, upcGenerado, horaLocal);
+
+        // Paso 1: Firmar (crear instancia de Firma y encriptarla)
+        Firma firmaObj = construirFirma(producto, body, referencia, monto, upcGenerado, horaLocal);
+        String firmaEncriptada = firmaService.encriptar(firmaObj);
+        log.info("Paso 1 [Firmar]: Firma encriptada generada para upc={}", upcGenerado);
+
+        Transaccion transaccion = null;
+        if (usuarioId != null) {
+            String idempotencyKey = claveBase.length() <= 36 ? claveBase : claveBase.substring(0, 36);
+            Optional<Transaccion> previa = transaccionRepository
+                    .findByUsuarioIdAndIdempotencyKey(usuarioId, idempotencyKey);
+            transaccion = prepararTransaccion(previa.orElse(null), usuarioId, producto,
+                    referencia, monto, idempotencyKey);
+            transaccion.setUpc(upcGenerado);
+            transaccionRepository.save(transaccion);
+            registrarEvento(transaccion.getId(), EstadoTransaccion.PENDIENTE, "API",
+                    "Transaccion firmada y registrada para envio al proveedor");
+        }
+
+        // Paso 2: Obtener Token y Paso 3: Enviar sendTx
+        EstadoTransaccion estadoFinal = EstadoTransaccion.PENDIENTE;
+        GestoPagoOperacionResponse respuesta = null;
+        String codigoMensaje = null;
+        String textoMensaje = null;
+
+        try {
+            String bearerToken = token();
+            log.info("Paso 2 [Obtener Token]: Token activo obtenido para distribuidor={}", idDistribuidor);
+
+            log.info("Paso 3 [Enviar sendTx]: Enviando sendTx para idServicio={}, idProducto={}, upc={}",
+                    producto.getIdServicio(), producto.getIdProducto(), upcGenerado);
+            respuesta = operar(() -> gestoPagoTxClient.sendTx(bearerToken, body));
+
+            if (transaccion != null) {
+                aplicarResultadoSendTx(transaccion, respuesta);
+                estadoFinal = transaccion.getEstado();
+            } else {
+                estadoFinal = determinarEstadoSendTx(respuesta);
+            }
+            GestoPagoMensajeOperacion msg = respuesta.getMensaje();
+            codigoMensaje = msg == null ? null : msg.getCodigo();
+            textoMensaje = msg == null ? null : msg.getTexto();
+        } catch (Exception e) {
+            log.warn("sendTx no concluyo para upc={}, quedara en proceso", upcGenerado, e);
+            estadoFinal = EstadoTransaccion.EN_PROCESO;
+            textoMensaje = "El proveedor no respondio; el resultado se confirmara despues";
+            if (transaccion != null) {
+                cambiarEstado(transaccion, EstadoTransaccion.EN_PROCESO, "API", textoMensaje);
+            }
+        }
+
+        GestoPagoMensajeOperacion msg = respuesta == null ? null : respuesta.getMensaje();
+        return PagarServicioResponseDto.builder()
+                .idTransaccion(transaccion == null ? null : transaccion.getId())
+                .idServicio(producto.getIdServicio())
+                .idProducto(producto.getIdProducto())
+                .telefono(body.get("telefono"))
+                .referencia(referencia)
+                .horaLocal(horaLocal)
+                .montoPago(monto.toPlainString())
+                .upc(upcGenerado)
+                .firma(firmaEncriptada)
+                .estado(estadoFinal.name())
+                .codigoMensaje(codigoMensaje)
+                .mensaje(textoMensaje)
+                .idTx(respuesta == null ? null : primeroNoVacio(respuesta.getIdTx(), msg == null ? null : msg.getIdTx()))
+                .numAutorizacion(respuesta == null ? null : respuesta.getNumAutorizacion())
+                .saldo(respuesta == null ? null : primeroNoVacio(respuesta.getSaldo(), msg == null ? null : msg.getSaldo()))
+                .comision(respuesta == null ? null : respuesta.getComision())
+                .pin(msg == null ? null : msg.getPin())
+                .legend(msg == null ? null : msg.getLegend())
+                .fecha(respuesta == null ? null : respuesta.getFecha())
+                .build();
     }
 
     @Override
@@ -235,6 +364,38 @@ public class PagosServiceImpl implements PagosService {
     private CatalogoProductoCache productoOExcepcion(Integer idServicio, Integer idProducto) {
         return catalogoConsulta.buscarActivo(idServicio, idProducto)
                 .orElseThrow(ApiException::productoNoDisponible);
+    }
+
+    private CatalogoProductoCache resolverProductoParaPago(PagarServicioRequestDto request) {
+        Optional<CatalogoProductoCache> enCatalogo =
+                catalogoConsulta.buscarActivo(request.getIdServicio(), request.getIdProducto());
+        if (enCatalogo.isPresent()) {
+            return enCatalogo.get();
+        }
+        if (request.getMontoPago() == null) {
+            throw ApiException.productoNoDisponible();
+        }
+        CatalogoProductoCache fallback = new CatalogoProductoCache();
+        fallback.setIdServicio(request.getIdServicio());
+        fallback.setIdProducto(request.getIdProducto());
+        fallback.setServicio("Servicio " + request.getIdServicio());
+        fallback.setProducto("Producto " + request.getIdProducto());
+        short tipoFront = request.getTipoFront() != null ? request.getTipoFront() : (short) 2;
+        fallback.setTipoFront(tipoFront);
+        fallback.setPrecio(request.getMontoPago());
+        return fallback;
+    }
+
+    private EstadoTransaccion determinarEstadoSendTx(GestoPagoOperacionResponse respuesta) {
+        GestoPagoMensajeOperacion mensaje = respuesta.getMensaje();
+        String codigo = mensaje == null ? null : mensaje.getCodigo();
+        if (CODIGO_EXITO.equals(codigo) || esDuplicadoAplicado(respuesta)) {
+            return EstadoTransaccion.APROBADA;
+        }
+        if (CODIGO_TIMEOUT.equals(codigo)) {
+            return EstadoTransaccion.EN_PROCESO;
+        }
+        return EstadoTransaccion.FALLIDA;
     }
 
     private BigDecimal montoAutorizado(CatalogoProductoCache producto, BigDecimal solicitado) {
@@ -331,12 +492,21 @@ public class PagosServiceImpl implements PagosService {
 
     private Map<String, String> cuerpoSendTx(CatalogoProductoCache producto, String referencia,
                                              BigDecimal monto, String upc) {
+        return cuerpoSendTxConHora(producto, referencia, null, monto, upc, HORA_LOCAL.format(Instant.now()));
+    }
+
+    private Map<String, String> cuerpoSendTxConHora(CatalogoProductoCache producto, String referencia,
+                                                    String telefonoExplicito, BigDecimal monto,
+                                                    String upc, String horaLocal) {
         boolean pagoServicio = producto.getTipoFront() != null && producto.getTipoFront() == 2;
+        String tel = (telefonoExplicito != null && !telefonoExplicito.isBlank())
+                ? telefonoExplicito.trim()
+                : telefono(producto, referencia, pagoServicio);
         Map<String, String> body = new HashMap<>();
         body.put("idProducto", String.valueOf(producto.getIdProducto()));
         body.put("idServicio", String.valueOf(producto.getIdServicio()));
-        body.put("telefono", telefono(producto, referencia, pagoServicio));
-        body.put("horaLocal", HORA_LOCAL.format(Instant.now()));
+        body.put("telefono", tel);
+        body.put("horaLocal", horaLocal);
         body.put("upc", upc);
         body.put("unidad", unidad);
         if (pagoServicio) {
@@ -344,6 +514,22 @@ public class PagosServiceImpl implements PagosService {
             body.put("montoPago", monto.toPlainString());
         }
         return body;
+    }
+
+    private Firma construirFirma(CatalogoProductoCache producto, Map<String, String> body,
+                                 String referencia, BigDecimal monto, String upc, String horaLocal) {
+        return Firma.builder()
+                .idDistribuidor(idDistribuidor)
+                .codigoDispositivo(codigoDispositivo)
+                .idServicio(producto.getIdServicio())
+                .idProducto(producto.getIdProducto())
+                .telefono(body.get("telefono"))
+                .referencia(referencia)
+                .horaLocal(horaLocal)
+                .montoPago(monto.toPlainString())
+                .upc(upc)
+                .unidad(unidad)
+                .build();
     }
 
     private String telefono(CatalogoProductoCache producto, String referencia, boolean pagoServicio) {
@@ -371,8 +557,13 @@ public class PagosServiceImpl implements PagosService {
     }
 
     private String token() {
-        GestoPagoToken token = gestoPagoTokenService
-                .obtenerTokenActivo(idDistribuidor, codigoDispositivo)
+        Optional<GestoPagoToken> existente = gestoPagoTokenService
+                .obtenerTokenActivo(idDistribuidor, codigoDispositivo);
+        if (existente.isEmpty() || existente.get().getToken() == null || existente.get().getToken().isBlank()) {
+            gestoPagoTokenService.renovarToken();
+            existente = gestoPagoTokenService.obtenerTokenActivo(idDistribuidor, codigoDispositivo);
+        }
+        GestoPagoToken token = existente
                 .orElseThrow(() -> new IllegalStateException("No hay token GestoPago guardado"));
         return "Bearer " + token.getToken();
     }
