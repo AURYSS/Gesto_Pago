@@ -1,6 +1,8 @@
 package com.proyecto.servicios.controller;
 
 import com.proyecto.servicios.exception.ApiException;
+import com.proyecto.servicios.model.pago.PagarServicioRequestDto;
+import com.proyecto.servicios.model.pago.PagarServicioResponseDto;
 import com.proyecto.servicios.model.pago.PagoPendienteDto;
 import com.proyecto.servicios.model.pago.PagoRequestDto;
 import com.proyecto.servicios.model.pago.TransaccionDto;
@@ -36,6 +38,13 @@ public class PagosController {
     public PagosController(PagosService pagosService, UsuarioRepository usuarioRepository) {
         this.pagosService = pagosService;
         this.usuarioRepository = usuarioRepository;
+    }
+
+    @PostMapping(value = "/pagar-servicio", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Pagar servicio ejecutando el flujo: Firmar -> Obtener Token -> Enviar sendTx")
+    public ResponseEntity<PagarServicioResponseDto> pagarServicio(
+            @Valid @RequestBody PagarServicioRequestDto request, Authentication authentication) {
+        return ResponseEntity.ok(pagosService.pagarServicio(usuarioIdOpcional(authentication), request));
     }
 
     @PostMapping(value = "/verificar-referencia", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -76,5 +85,14 @@ public class PagosController {
         return usuarioRepository.findByEmail(email)
                 .map(u -> u.getId())
                 .orElseThrow(ApiException::noAutenticado);
+    }
+
+    private Long usuarioIdOpcional(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return null;
+        }
+        return usuarioRepository.findByEmail(authentication.getName())
+                .map(u -> u.getId())
+                .orElse(null);
     }
 }

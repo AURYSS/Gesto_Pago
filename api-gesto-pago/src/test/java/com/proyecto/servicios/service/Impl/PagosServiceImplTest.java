@@ -7,6 +7,9 @@ import com.proyecto.servicios.entity.pago.EventoTransaccion;
 import com.proyecto.servicios.entity.pago.Transaccion;
 import com.proyecto.servicios.exception.ApiException;
 import com.proyecto.servicios.model.CatalogoProductoCache;
+import com.proyecto.servicios.model.gestopago.Firma;
+import com.proyecto.servicios.model.pago.PagarServicioRequestDto;
+import com.proyecto.servicios.model.pago.PagarServicioResponseDto;
 import com.proyecto.servicios.model.pago.PagoPendienteDto;
 import com.proyecto.servicios.model.pago.PagoRequestDto;
 import com.proyecto.servicios.model.pago.TransaccionDto;
@@ -636,6 +639,63 @@ class PagosServiceImplTest {
         assertEquals("FALLIDA", pendientes.get(1).getEstado());
         assertFalse(pendientes.get(1).getPuedeConfirmar());
         assertTrue(pendientes.get(1).getPuedeReintentar());
+    }
+
+    @Test
+    void pagarServicioEjecutaFlujoFirmarObtenerTokenYEnviarSendTx() {
+        when(catalogoConsulta.buscarActivo(108, 272)).thenReturn(Optional.of(servicio()));
+        when(gestoPagoTxClient.sendTx(eq("Bearer token-de-prueba"), any())).thenReturn(XML_SENDTX_EXITO);
+
+        PagarServicioRequestDto req = PagarServicioRequestDto.builder()
+                .idServicio(108)
+                .idProducto(272)
+                .referencia("25720381")
+                .montoPago(new BigDecimal("701.99"))
+                .build();
+
+        PagarServicioResponseDto res = service.pagarServicio(null, req);
+
+        assertEquals("APROBADA", res.getEstado());
+        assertEquals(108, res.getIdServicio());
+        assertEquals(272, res.getIdProducto());
+        assertEquals("25720381", res.getReferencia());
+        assertNotNull(res.getHoraLocal());
+        assertEquals(14, res.getHoraLocal().length());
+        assertNotNull(res.getUpc());
+        assertEquals(15, res.getUpc().length());
+        assertNotNull(res.getFirma());
+        assertEquals("100048015", res.getNumAutorizacion());
+        assertEquals("1975170643", res.getIdTx());
+
+        FirmaServiceImpl firmaService = new FirmaServiceImpl("gestopago-secret");
+        Firma desencriptada = firmaService.desencriptar(res.getFirma());
+        assertEquals(108, desencriptada.getIdServicio());
+        assertEquals(272, desencriptada.getIdProducto());
+        assertEquals("25720381", desencriptada.getReferencia());
+        assertEquals(res.getHoraLocal(), desencriptada.getHoraLocal());
+        assertEquals("701.99", desencriptada.getMontoPago());
+        assertEquals(res.getUpc(), desencriptada.getUpc());
+    }
+
+    @Test
+    void pagarServicioRenuevaTokenSiNoExisteEnBaseDeDatos() {
+        when(gestoPagoTokenService.obtenerTokenActivo(1, "DISP01"))
+                .thenReturn(Optional.empty())
+                .thenReturn(Optional.of(token));
+        when(catalogoConsulta.buscarActivo(108, 272)).thenReturn(Optional.of(servicio()));
+        when(gestoPagoTxClient.sendTx(eq("Bearer token-de-prueba"), any())).thenReturn(XML_SENDTX_EXITO);
+
+        PagarServicioRequestDto req = PagarServicioRequestDto.builder()
+                .idServicio(108)
+                .idProducto(272)
+                .telefono("25720381")
+                .montoPago(new BigDecimal("701.99"))
+                .build();
+
+        PagarServicioResponseDto res = service.pagarServicio(null, req);
+
+        verify(gestoPagoTokenService, times(1)).renovarToken();
+        assertEquals("APROBADA", res.getEstado());
     }
 
     private Transaccion transaccion(Integer idServicio, Integer idProducto,
