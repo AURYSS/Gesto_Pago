@@ -16,6 +16,8 @@ public interface TransaccionRepository extends JpaRepository<Transaccion, Long> 
 
     Optional<Transaccion> findByUsuarioIdAndIdempotencyKey(Long usuarioId, String idempotencyKey);
 
+    Optional<Transaccion> findFirstByUpcOrderByCreatedAtDesc(String upc);
+
     List<Transaccion> findByUsuarioIdOrderByCreatedAtDesc(Long usuarioId);
 
     List<Transaccion> findByUsuarioIdAndEstadoInOrderByCreatedAtDesc(
