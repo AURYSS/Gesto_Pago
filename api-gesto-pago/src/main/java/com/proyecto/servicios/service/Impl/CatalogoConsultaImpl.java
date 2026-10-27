@@ -28,9 +28,12 @@ public class CatalogoConsultaImpl implements CatalogoConsulta {
     };
 
     private final JdbcTemplate jdbcTemplate;
+    private final String schema;
 
-    public CatalogoConsultaImpl(JdbcTemplate jdbcTemplate) {
+    public CatalogoConsultaImpl(JdbcTemplate jdbcTemplate,
+                                @org.springframework.beans.factory.annotation.Value("${spring.flyway.schemas:gestor_pagos}") String schema) {
         this.jdbcTemplate = jdbcTemplate;
+        this.schema = schema;
     }
 
     @Override
@@ -38,7 +41,7 @@ public class CatalogoConsultaImpl implements CatalogoConsulta {
         return jdbcTemplate.query(
                 "SELECT id_servicio, id_producto, servicio, producto, id_cat_tipo_servicio, "
                         + "tipo_front, tipo_referencia, precio, legend, has_digito_verificador, show_ayuda "
-                        + "FROM v_catalogo_activo WHERE id_servicio = ? AND id_producto = ?",
+                        + "FROM " + schema + ".v_catalogo_activo WHERE id_servicio = ? AND id_producto = ?",
                 MAPPER, idServicio, idProducto).stream().findFirst();
     }
 }
