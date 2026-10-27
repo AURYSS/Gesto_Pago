@@ -18,6 +18,8 @@ public interface PagosService {
 
     PagarServicioResponseDto pagarServicio(Long usuarioId, PagarServicioRequestDto request);
 
+    PagarServicioResponseDto confirmarServicio(Long usuarioId, PagarServicioRequestDto request);
+
     TransaccionDto confirmarTransaccion(Long usuarioId, Long id);
 
     List<TransaccionDto> historial(Long usuarioId);
