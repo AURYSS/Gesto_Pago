@@ -47,6 +47,13 @@ public class PagosController {
         return ResponseEntity.ok(pagosService.pagarServicio(usuarioIdOpcional(authentication), request));
     }
 
+    @PostMapping(value = "/confirmar-servicio", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Conciliar una operacion en proceso contra confirmTx.do del proveedor")
+    public ResponseEntity<PagarServicioResponseDto> confirmarServicio(
+            @Valid @RequestBody PagarServicioRequestDto request, Authentication authentication) {
+        return ResponseEntity.ok(pagosService.confirmarServicio(usuarioIdOpcional(authentication), request));
+    }
+
     @PostMapping(value = "/verificar-referencia", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Verificar una referencia contra el proveedor")
     public ResponseEntity<VerificarReferenciaResponse> verificarReferencia(
@@ -81,9 +88,17 @@ public class PagosController {
     }
 
     private Long usuarioId(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            throw ApiException.noAutenticado();
+        }
         String email = authentication.getName();
         return usuarioRepository.findByEmail(email)
-                .map(u -> u.getId())
+                .map(u -> {
+                    if (!Boolean.TRUE.equals(u.getActivo())) {
+                        throw ApiException.cuentaInactiva();
+                    }
+                    return u.getId();
+                })
                 .orElseThrow(ApiException::noAutenticado);
     }
 
@@ -92,7 +107,12 @@ public class PagosController {
             return null;
         }
         return usuarioRepository.findByEmail(authentication.getName())
-                .map(u -> u.getId())
+                .map(u -> {
+                    if (!Boolean.TRUE.equals(u.getActivo())) {
+                        throw ApiException.cuentaInactiva();
+                    }
+                    return u.getId();
+                })
                 .orElse(null);
     }
 }

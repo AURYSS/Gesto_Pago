@@ -24,9 +24,11 @@ import java.math.BigDecimal;
 public class PagarServicioRequestDto {
 
     @NotNull(message = "idServicio es obligatorio")
+    @Positive(message = "idServicio debe ser mayor a 0")
     private Integer idServicio;
 
     @NotNull(message = "idProducto es obligatorio")
+    @Positive(message = "idProducto debe ser mayor a 0")
     private Integer idProducto;
 
     @Size(max = 100, message = "El telefono no puede exceder 100 caracteres")

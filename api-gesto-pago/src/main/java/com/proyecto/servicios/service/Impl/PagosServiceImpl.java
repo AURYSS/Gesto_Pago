@@ -203,12 +203,14 @@ public class PagosServiceImpl implements PagosService {
             throw ApiException.referenciaInvalida();
         }
 
-        CatalogoProductoCache producto = resolverProductoParaPago(request);
+        CatalogoProductoCache producto = productoOExcepcion(request.getIdServicio(), request.getIdProducto());
         BigDecimal monto = montoAutorizado(producto, request.getMontoPago());
 
-        String claveBase = (request.getUpc() != null && !request.getUpc().isBlank())
+        boolean tieneUpcExplicito = request.getUpc() != null && !request.getUpc().isBlank();
+        String claveBase = tieneUpcExplicito
                 ? request.getUpc().trim()
                 : UUID.randomUUID().toString();
+        String idempotencyKey = claveBase.length() <= 36 ? claveBase : claveBase.substring(0, 36);
         String upcGenerado = upc(claveBase);
         String horaLocal = (request.getHoraLocal() != null && !request.getHoraLocal().isBlank())
                 ? request.getHoraLocal().trim()
@@ -222,11 +224,45 @@ public class PagosServiceImpl implements PagosService {
         String firmaEncriptada = firmaService.encriptar(firmaObj);
         log.info("Paso 1 [Firmar]: Firma encriptada generada para upc={}", upcGenerado);
 
+        // Control de concurrencia y prevencion de cargos duplicados
+        bloqueoIdempotencia.adquirir(new ClaveIdempotencia(usuarioId != null ? usuarioId : 0L, idempotencyKey));
+
+        Optional<Transaccion> previa = Optional.empty();
+        if (usuarioId != null) {
+            previa = transaccionRepository.findByUsuarioIdAndIdempotencyKey(usuarioId, idempotencyKey);
+        } else if (tieneUpcExplicito) {
+            previa = transaccionRepository.findFirstByUpcOrderByCreatedAtDesc(upcGenerado);
+        }
+
+        if (previa.isPresent()
+                && previa.get().getEstado() != EstadoTransaccion.FALLIDA
+                && previa.get().getEstado() != EstadoTransaccion.RECHAZADA) {
+            Transaccion existente = previa.get();
+            return PagarServicioResponseDto.builder()
+                    .idTransaccion(existente.getId())
+                    .idServicio(existente.getIdServicio())
+                    .idProducto(existente.getIdProducto())
+                    .telefono(body.get("telefono"))
+                    .referencia(existente.getReferencia())
+                    .horaLocal(horaLocal)
+                    .montoPago(existente.getMonto().toPlainString())
+                    .upc(existente.getUpc())
+                    .firma(firmaEncriptada)
+                    .estado(existente.getEstado().name())
+                    .codigoMensaje(existente.getEstado() == EstadoTransaccion.APROBADA ? CODIGO_EXITO : CODIGO_TIMEOUT)
+                    .mensaje(existente.getErrorMensaje() != null
+                            ? existente.getErrorMensaje()
+                            : "Operacion previamente registrada (idempotente)")
+                    .idTx(existente.getIdTx())
+                    .numAutorizacion(existente.getNumeroAutorizacion())
+                    .comision(existente.getComision() != null ? existente.getComision().toPlainString() : null)
+                    .pin(existente.getPin())
+                    .legend(existente.getLegend())
+                    .build();
+        }
+
         Transaccion transaccion = null;
         if (usuarioId != null) {
-            String idempotencyKey = claveBase.length() <= 36 ? claveBase : claveBase.substring(0, 36);
-            Optional<Transaccion> previa = transaccionRepository
-                    .findByUsuarioIdAndIdempotencyKey(usuarioId, idempotencyKey);
             transaccion = prepararTransaccion(previa.orElse(null), usuarioId, producto,
                     referencia, monto, idempotencyKey);
             transaccion.setUpc(upcGenerado);
@@ -278,6 +314,98 @@ public class PagosServiceImpl implements PagosService {
                 .montoPago(monto.toPlainString())
                 .upc(upcGenerado)
                 .firma(firmaEncriptada)
+                .estado(estadoFinal.name())
+                .codigoMensaje(codigoMensaje)
+                .mensaje(textoMensaje)
+                .idTx(respuesta == null ? null : primeroNoVacio(respuesta.getIdTx(), msg == null ? null : msg.getIdTx()))
+                .numAutorizacion(respuesta == null ? null : respuesta.getNumAutorizacion())
+                .saldo(respuesta == null ? null : primeroNoVacio(respuesta.getSaldo(), msg == null ? null : msg.getSaldo()))
+                .comision(respuesta == null ? null : respuesta.getComision())
+                .pin(msg == null ? null : msg.getPin())
+                .legend(msg == null ? null : msg.getLegend())
+                .fecha(respuesta == null ? null : respuesta.getFecha())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public PagarServicioResponseDto confirmarServicio(Long usuarioId, PagarServicioRequestDto request) {
+        String referencia = request.referenciaEfectiva();
+        if (referencia == null || referencia.isBlank()) {
+            throw ApiException.referenciaInvalida();
+        }
+        if (request.getUpc() == null || request.getUpc().isBlank()) {
+            throw new ApiException("PAGO-005", "El upc es obligatorio para conciliar la transaccion",
+                    HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        CatalogoProductoCache producto = productoOExcepcion(request.getIdServicio(), request.getIdProducto());
+        BigDecimal monto = montoAutorizado(producto, request.getMontoPago());
+        String upcConciliacion = upc(request.getUpc().trim());
+        String horaLocal = (request.getHoraLocal() != null && !request.getHoraLocal().isBlank())
+                ? request.getHoraLocal().trim()
+                : HORA_LOCAL.format(Instant.now());
+
+        Optional<Transaccion> existente = transaccionRepository.findFirstByUpcOrderByCreatedAtDesc(upcConciliacion);
+        if (existente.isPresent() && esEstadoFinal(existente.get().getEstado())) {
+            Transaccion tx = existente.get();
+            return PagarServicioResponseDto.builder()
+                    .idTransaccion(tx.getId())
+                    .idServicio(tx.getIdServicio())
+                    .idProducto(tx.getIdProducto())
+                    .referencia(tx.getReferencia())
+                    .horaLocal(horaLocal)
+                    .montoPago(tx.getMonto().toPlainString())
+                    .upc(tx.getUpc())
+                    .estado(tx.getEstado().name())
+                    .mensaje(tx.getErrorMensaje() != null ? tx.getErrorMensaje() : "Transaccion ya conciliada")
+                    .idTx(tx.getIdTx())
+                    .numAutorizacion(tx.getNumeroAutorizacion())
+                    .build();
+        }
+
+        Map<String, String> body = cuerpoSendTxConHora(
+                producto, referencia, request.getTelefono(), monto, upcConciliacion, horaLocal);
+
+        EstadoTransaccion estadoFinal = EstadoTransaccion.EN_PROCESO;
+        GestoPagoOperacionResponse respuesta = null;
+        String codigoMensaje = null;
+        String textoMensaje = null;
+
+        try {
+            respuesta = operar(() -> gestoPagoTxClient.confirmTx(token(), body));
+            if (existente.isPresent()) {
+                aplicarResultadoConfirmTx(existente.get(), respuesta);
+                estadoFinal = existente.get().getEstado();
+            } else {
+                GestoPagoMensajeOperacion msg = respuesta.getMensaje();
+                String codigo = msg == null ? null : msg.getCodigo();
+                if (CODIGO_EXITO.equals(codigo) || CODIGO_DUPLICADO.equals(codigo)) {
+                    estadoFinal = EstadoTransaccion.APROBADA;
+                } else if (CODIGO_TIMEOUT.equals(codigo)) {
+                    estadoFinal = EstadoTransaccion.EN_PROCESO;
+                } else {
+                    estadoFinal = EstadoTransaccion.FALLIDA;
+                }
+            }
+            GestoPagoMensajeOperacion msg = respuesta.getMensaje();
+            codigoMensaje = msg == null ? null : msg.getCodigo();
+            textoMensaje = msg == null ? null : msg.getTexto();
+        } catch (Exception e) {
+            log.warn("confirmTx no concluyo para upc={}, se mantiene en proceso", upcConciliacion, e);
+            textoMensaje = "No fue posible confirmar con el proveedor; la operacion continua en proceso";
+        }
+
+        GestoPagoMensajeOperacion msg = respuesta == null ? null : respuesta.getMensaje();
+        return PagarServicioResponseDto.builder()
+                .idTransaccion(existente.map(Transaccion::getId).orElse(null))
+                .idServicio(producto.getIdServicio())
+                .idProducto(producto.getIdProducto())
+                .telefono(body.get("telefono"))
+                .referencia(referencia)
+                .horaLocal(horaLocal)
+                .montoPago(monto.toPlainString())
+                .upc(upcConciliacion)
                 .estado(estadoFinal.name())
                 .codigoMensaje(codigoMensaje)
                 .mensaje(textoMensaje)
@@ -362,28 +490,11 @@ public class PagosServiceImpl implements PagosService {
     }
 
     private CatalogoProductoCache productoOExcepcion(Integer idServicio, Integer idProducto) {
-        return catalogoConsulta.buscarActivo(idServicio, idProducto)
-                .orElseThrow(ApiException::productoNoDisponible);
-    }
-
-    private CatalogoProductoCache resolverProductoParaPago(PagarServicioRequestDto request) {
-        Optional<CatalogoProductoCache> enCatalogo =
-                catalogoConsulta.buscarActivo(request.getIdServicio(), request.getIdProducto());
-        if (enCatalogo.isPresent()) {
-            return enCatalogo.get();
-        }
-        if (request.getMontoPago() == null) {
+        if (idServicio == null || idServicio <= 0 || idProducto == null || idProducto <= 0) {
             throw ApiException.productoNoDisponible();
         }
-        CatalogoProductoCache fallback = new CatalogoProductoCache();
-        fallback.setIdServicio(request.getIdServicio());
-        fallback.setIdProducto(request.getIdProducto());
-        fallback.setServicio("Servicio " + request.getIdServicio());
-        fallback.setProducto("Producto " + request.getIdProducto());
-        short tipoFront = request.getTipoFront() != null ? request.getTipoFront() : (short) 2;
-        fallback.setTipoFront(tipoFront);
-        fallback.setPrecio(request.getMontoPago());
-        return fallback;
+        return catalogoConsulta.buscarActivo(idServicio, idProducto)
+                .orElseThrow(ApiException::productoNoDisponible);
     }
 
     private EstadoTransaccion determinarEstadoSendTx(GestoPagoOperacionResponse respuesta) {
@@ -400,10 +511,21 @@ public class PagosServiceImpl implements PagosService {
 
     private BigDecimal montoAutorizado(CatalogoProductoCache producto, BigDecimal solicitado) {
         if (producto.getTipoFront() != null && producto.getTipoFront() == 1) {
-            return producto.getPrecio();
+            BigDecimal precioCatalogo = producto.getPrecio();
+            if (precioCatalogo == null || precioCatalogo.compareTo(BigDecimal.ZERO) <= 0) {
+                throw ApiException.montoInvalido();
+            }
+            if (solicitado != null && solicitado.compareTo(precioCatalogo) != 0) {
+                throw ApiException.montoInvalido();
+            }
+            return precioCatalogo.setScale(2, RoundingMode.UNNECESSARY);
         }
         if (solicitado == null || solicitado.compareTo(BigDecimal.ZERO) <= 0
                 || solicitado.scale() > 2) {
+            throw ApiException.montoInvalido();
+        }
+        if (producto.getPrecio() != null && producto.getPrecio().compareTo(BigDecimal.ZERO) > 0
+                && solicitado.compareTo(producto.getPrecio()) != 0) {
             throw ApiException.montoInvalido();
         }
         return solicitado.setScale(2, RoundingMode.UNNECESSARY);
@@ -457,6 +579,12 @@ public class PagosServiceImpl implements PagosService {
         if (CODIGO_EXITO.equals(codigo) || CODIGO_DUPLICADO.equals(codigo)) {
             aplicarDatosExito(transaccion, respuesta);
             cambiarEstado(transaccion, EstadoTransaccion.APROBADA, ORIGEN_PROVEEDOR, texto);
+            return;
+        }
+        if (CODIGO_TIMEOUT.equals(codigo)) {
+            transaccion.setErrorMensaje(texto);
+            cambiarEstado(transaccion, EstadoTransaccion.EN_PROCESO, ORIGEN_PROVEEDOR,
+                    "Timeout al confirmar; se mantiene en proceso para reintento posterior");
             return;
         }
         transaccion.setErrorMensaje(texto);
@@ -559,13 +687,30 @@ public class PagosServiceImpl implements PagosService {
     private String token() {
         Optional<GestoPagoToken> existente = gestoPagoTokenService
                 .obtenerTokenActivo(idDistribuidor, codigoDispositivo);
-        if (existente.isEmpty() || existente.get().getToken() == null || existente.get().getToken().isBlank()) {
+        if (existente.isEmpty() || !esTokenValido(existente.get())) {
             gestoPagoTokenService.renovarToken();
             existente = gestoPagoTokenService.obtenerTokenActivo(idDistribuidor, codigoDispositivo);
         }
         GestoPagoToken token = existente
-                .orElseThrow(() -> new IllegalStateException("No hay token GestoPago guardado"));
+                .filter(this::esTokenValido)
+                .orElseThrow(() -> new IllegalStateException("No hay token GestoPago valido guardado"));
         return "Bearer " + token.getToken();
+    }
+
+    private boolean esTokenValido(GestoPagoToken token) {
+        if (token == null || token.getToken() == null || token.getToken().isBlank()) {
+            return false;
+        }
+        if (Boolean.FALSE.equals(token.getActivo())) {
+            return false;
+        }
+        if (token.getExpiresIn() != null && token.getExpiresIn() > 0 && token.getFechaActualizacion() != null) {
+            LocalDateTime expiraEn = token.getFechaActualizacion().plusSeconds(token.getExpiresIn());
+            if (LocalDateTime.now().isAfter(expiraEn)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private GestoPagoOperacionResponse operar(Operacion operacion) {

@@ -698,6 +698,101 @@ class PagosServiceImplTest {
         assertEquals("APROBADA", res.getEstado());
     }
 
+    @Test
+    void crearRecargaConMontoManipuladoEsRechazada() {
+        when(catalogoConsulta.buscarActivo(76, 205)).thenReturn(Optional.of(recarga()));
+        PagoRequestDto req = pago(recarga(), "5577777777", new BigDecimal("10.00"));
+
+        ApiException error = assertThrows(ApiException.class,
+                () -> service.crearTransaccion(1L, req));
+
+        assertEquals("PAGO-004", error.getCode());
+        verify(gestoPagoTxClient, never()).sendTx(anyString(), any());
+    }
+
+    @Test
+    void pagarServicioConProductoNoExistenteEnCatalogoEsRechazado() {
+        when(catalogoConsulta.buscarActivo(999, 888)).thenReturn(Optional.empty());
+        PagarServicioRequestDto req = PagarServicioRequestDto.builder()
+                .idServicio(999)
+                .idProducto(888)
+                .referencia("25720381")
+                .montoPago(new BigDecimal("100.00"))
+                .build();
+
+        ApiException error = assertThrows(ApiException.class,
+                () -> service.pagarServicio(null, req));
+
+        assertEquals("PAGO-003", error.getCode());
+        verify(gestoPagoTxClient, never()).sendTx(anyString(), any());
+    }
+
+    @Test
+    void pagarServicioConMontoManipuladoEsRechazado() {
+        when(catalogoConsulta.buscarActivo(76, 205)).thenReturn(Optional.of(recarga()));
+        PagarServicioRequestDto req = PagarServicioRequestDto.builder()
+                .idServicio(76)
+                .idProducto(205)
+                .telefono("5577777777")
+                .montoPago(new BigDecimal("5.00"))
+                .build();
+
+        ApiException error = assertThrows(ApiException.class,
+                () -> service.pagarServicio(null, req));
+
+        assertEquals("PAGO-004", error.getCode());
+        verify(gestoPagoTxClient, never()).sendTx(anyString(), any());
+    }
+
+    @Test
+    void pagarServicioDuplicadoPorUpcDevuelveExistenteSinLlamarAlProveedor() {
+        when(catalogoConsulta.buscarActivo(108, 272)).thenReturn(Optional.of(servicio()));
+        Transaccion existente = transaccion(108, 272, EstadoTransaccion.APROBADA, "upc-dup-123");
+        existente.setId(55L);
+        existente.setUpc("upc-dup-123");
+        existente.setIdTx("1975170643");
+        existente.setNumeroAutorizacion("100048015");
+        when(transaccionRepository.findFirstByUpcOrderByCreatedAtDesc("upc-dup-123"))
+                .thenReturn(Optional.of(existente));
+
+        PagarServicioRequestDto req = PagarServicioRequestDto.builder()
+                .idServicio(108)
+                .idProducto(272)
+                .referencia("25720381")
+                .montoPago(new BigDecimal("701.99"))
+                .upc("upc-dup-123")
+                .build();
+
+        PagarServicioResponseDto res = service.pagarServicio(null, req);
+
+        assertEquals("APROBADA", res.getEstado());
+        assertEquals(55L, res.getIdTransaccion());
+        assertEquals("100048015", res.getNumAutorizacion());
+        verify(gestoPagoTxClient, never()).sendTx(anyString(), any());
+    }
+
+    @Test
+    void confirmarServicioConciliaOperacionEnProcesoContraProveedor() {
+        when(catalogoConsulta.buscarActivo(108, 272)).thenReturn(Optional.of(servicio()));
+        when(transaccionRepository.findFirstByUpcOrderByCreatedAtDesc("upc-conciliar"))
+                .thenReturn(Optional.empty());
+        when(gestoPagoTxClient.confirmTx(eq("Bearer token-de-prueba"), any())).thenReturn(XML_CONFIRM_EXITO);
+
+        PagarServicioRequestDto req = PagarServicioRequestDto.builder()
+                .idServicio(108)
+                .idProducto(272)
+                .referencia("25720381")
+                .montoPago(new BigDecimal("701.99"))
+                .upc("upc-conciliar")
+                .build();
+
+        PagarServicioResponseDto res = service.confirmarServicio(null, req);
+
+        assertEquals("APROBADA", res.getEstado());
+        assertEquals("100024988", res.getNumAutorizacion());
+        assertEquals("291437188", res.getIdTx());
+    }
+
     private Transaccion transaccion(Integer idServicio, Integer idProducto,
                                     EstadoTransaccion estado, String clave) {
         Transaccion tx = new Transaccion();
