@@ -9,22 +9,33 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 
 
 @SpringBootApplication
 @EnableScheduling
 @EnableFeignClients
+@RestController
 @Slf4j
 
 public class App implements CommandLineRunner {
 
     @Autowired
     private ApplicationContext context;
+
+    @RequestMapping(value = "/", method = {RequestMethod.GET, RequestMethod.HEAD})
+    public ResponseEntity<Map<String, String>> rootHealth() {
+        return ResponseEntity.ok(Map.of("status", "UP", "service", "api-gesto-pago"));
+    }
 
 
     public static void main(String[] args) {
