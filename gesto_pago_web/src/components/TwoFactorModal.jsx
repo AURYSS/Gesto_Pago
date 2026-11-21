@@ -12,6 +12,12 @@ export default function TwoFactorModal() {
   const [conflictOpen, setConflictOpen] = useState(false);
   const [conflictDispositivo, setConflictDispositivo] = useState('Móvil');
 
+  useEffect(() => {
+    if (tempAuth?.codigo2FaDev) {
+      setCodigo(tempAuth.codigo2FaDev);
+    }
+  }, [tempAuth]);
+
   if (!tempAuth) return null;
 
   const handleSubmit = async (e, forzarCierre = false) => {
@@ -62,6 +68,20 @@ export default function TwoFactorModal() {
                 {tempAuth.correoEnmascarado || tempAuth.email}
               </strong>
             </p>
+            {tempAuth.codigo2FaDev && (
+              <div style={{
+                marginTop: '10px',
+                background: 'rgba(16, 185, 129, 0.15)',
+                border: '1px dashed #10b981',
+                borderRadius: '8px',
+                padding: '8px 12px',
+                fontSize: '0.85rem',
+                color: '#34d399',
+                textAlign: 'center'
+              }}>
+                Código OTP detectado: <strong>{tempAuth.codigo2FaDev}</strong>
+              </div>
+            )}
           </div>
 
           {error && (

@@ -109,7 +109,7 @@ public class AuthServiceImpl implements AuthService {
         usuarioRepository.save(usuario);
 
         log.info("=================================================================");
-        log.info("[2FA api-gesto-pago] CODIGO GENERADO para [{}]. Enviando por correo...", email);
+        log.info("[2FA api-gesto-pago] CODIGO GENERADO para [{}]: {}", email, codigo2Fa);
         log.info("Dispositivo solicitante: {} | Expira en: {}", dispositivo, expiracion);
         log.info("=================================================================");
 
