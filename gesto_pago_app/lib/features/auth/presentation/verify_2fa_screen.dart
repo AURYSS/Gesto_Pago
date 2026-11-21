@@ -33,6 +33,14 @@ class _Verify2FaScreenState extends ConsumerState<Verify2FaScreen> {
   String? _error;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.codigo2FaDev != null && widget.codigo2FaDev!.trim().isNotEmpty) {
+      _codigoController.text = widget.codigo2FaDev!.trim();
+    }
+  }
+
+  @override
   void dispose() {
     _codigoController.dispose();
     super.dispose();

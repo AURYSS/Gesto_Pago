@@ -57,7 +57,7 @@ public class EmailServiceImpl implements EmailService {
             mailSender.send(message);
             log.info("Correo de verificacion 2FA enviado exitosamente a [{}] para dispositivo [{}]", destinatario, dispositivo);
         } catch (Exception e) {
-            log.error("Error al enviar correo 2FA a [{}]: {}", destinatario, e.getMessage(), e);
+            log.error("Error al enviar correo 2FA a [{}]: {}. [CODIGO 2FA DE RESPALDO]: {}", destinatario, e.getMessage(), codigo2Fa);
         }
     }
 
