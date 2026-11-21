@@ -156,6 +156,17 @@ class AuthFlowIntegrationTest {
         ResponseEntity<Map> response = login(email, password);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         Map body = response.getBody();
+        if (Boolean.TRUE.equals(body.get("requiere2Fa"))) {
+            String tempToken = (String) body.get("tempToken");
+            String codigo = (String) body.get("codigo2FaDev");
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> verifyBody = new HttpEntity<>(
+                    Map.of("tempToken", tempToken, "codigo", codigo), headers);
+            ResponseEntity<Map> verifyResponse = rest.exchange(url("/auth/2fa/verify"), HttpMethod.POST, verifyBody, Map.class);
+            assertEquals(HttpStatus.OK, verifyResponse.getStatusCode());
+            body = verifyResponse.getBody();
+        }
         return new TokenBody((String) body.get("accessToken"),
                 (String) body.get("refreshToken"), (java.util.List<String>) body.get("roles"));
     }

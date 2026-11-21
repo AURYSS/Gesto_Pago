@@ -42,16 +42,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _error = null;
     });
     try {
-      await ref
+      final result = await ref
           .read(sessionControllerProvider.notifier)
-          .login(email: _emailController.text, password: _passwordController.text);
-      // El router redirigirá a /home al cambiar el estado de sesión.
+          .login(email: _emailController.text.trim(), password: _passwordController.text);
+      if (result.requiere2Fa) {
+        if (!mounted) return;
+        context.push('/verify-2fa', extra: {
+          'tempToken': result.tempToken ?? '',
+          'email': _emailController.text.trim().toLowerCase(),
+          'codigo2FaDev': result.codigo2FaDev,
+          'correoEnmascarado': result.correoEnmascarado,
+        });
+      }
+      // El router redirigirá a /home al cambiar el estado de sesión si no requiere 2FA.
     } on AppException catch (e) {
       if (!mounted) {
         return;
       }
       final mensaje =
-          e is UnauthorizedException && e.code == 'AUTH-002'
+          e is UnauthorizedException && (e.code == 'AUTH-001' || e.code == 'AUTH-002')
               ? AppLocalizations.of(context).loginInvalidCredentials
               : messageDeError(context, e);
       setState(() => _error = mensaje);
@@ -72,6 +81,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final revocationMsg = ref.watch(sessionControllerProvider).revocationMessage;
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -98,6 +108,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Text(l.loginTitle, style: Theme.of(context).textTheme.displaySmall),
                     const SizedBox(height: 8),
                     Text(l.loginSubtitle, style: Theme.of(context).textTheme.bodyLarge),
+                    if (revocationMsg != null) ...[
+                      const SizedBox(height: 20),
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.shade900.withValues(alpha: 0.2),
+                          border: Border.all(color: Colors.amber.shade700),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.warning_amber_rounded, color: Colors.amber),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                revocationMsg,
+                                style: const TextStyle(
+                                  color: Colors.amber,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 32),
                     TextFormField(
                       controller: _emailController,

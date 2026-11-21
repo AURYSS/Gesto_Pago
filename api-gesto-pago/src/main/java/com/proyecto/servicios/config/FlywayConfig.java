@@ -19,7 +19,7 @@ public class FlywayConfig {
     @Value("${spring.flyway.table:flyway_schema_history}")
     private String historyTable;
 
-    @Value("${spring.flyway.schemas:public}")
+    @Value("${spring.flyway.schemas:gestor_pagos}")
     private String schema;
 
     @Bean(name = "flyway")
@@ -30,6 +30,7 @@ public class FlywayConfig {
                 .locations(locations)
                 .table(historyTable)
                 .schemas(schema)
+                .createSchemas(true)
                 .baselineOnMigrate(true)
                 .baselineVersion("0")
                 .load();

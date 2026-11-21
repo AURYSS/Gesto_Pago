@@ -53,16 +53,54 @@ class AuthRemote {
 
   final Dio _dio;
 
-  Future<LoginResponse> login({
+  Future<LoginResult> login({
     required String email,
     required String password,
   }) async {
     try {
       final response = await _dio.post(
         '/auth/login',
-        data: {'email': email.trim().toLowerCase(), 'password': password},
+        data: {
+          'email': email.trim().toLowerCase(),
+          'password': password,
+          'dispositivo': 'MOVIL',
+        },
       );
-      return LoginResponse.fromJson(_mapJson(response.data, 'login'));
+      final json = _mapJson(response.data, 'login');
+      if (json['requiere2Fa'] == true) {
+        return LoginResult(
+          requiere2Fa: true,
+          tempToken: json['tempToken'] as String?,
+          codigo2FaDev: json['codigo2FaDev'] as String?,
+          correoEnmascarado: json['correoEnmascarado'] as String?,
+          dispositivo: json['dispositivo'] as String? ?? 'MOVIL',
+        );
+      }
+      final loginResponse = LoginResponse.fromJson(json);
+      return LoginResult(
+        requiere2Fa: false,
+        session: loginResponse.toSession(email.trim().toLowerCase()),
+      );
+    } catch (e) {
+      throw ApiClient.unwrap(e);
+    }
+  }
+
+  Future<LoginResponse> verify2Fa({
+    required String tempToken,
+    required String codigo,
+    bool forzarCierre = false,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/auth/2fa/verify',
+        data: {
+          'tempToken': tempToken,
+          'codigo': codigo.trim(),
+          'forzarCierre': forzarCierre,
+        },
+      );
+      return LoginResponse.fromJson(_mapJson(response.data, 'verificación 2FA'));
     } catch (e) {
       throw ApiClient.unwrap(e);
     }
@@ -111,5 +149,18 @@ class AuthRemote {
       '/auth/logout',
       options: Options(headers: {'Authorization': 'Refresh $refreshToken'}),
     );
+  }
+
+  Future<bool> validateSession() async {
+    try {
+      final response = await _dio.get('/auth/validar-sesion');
+      final json = response.data;
+      if (json is Map && json['valido'] == true) {
+        return true;
+      }
+      return false;
+    } catch (e) {
+      throw ApiClient.unwrap(e);
+    }
   }
 }

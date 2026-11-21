@@ -40,13 +40,13 @@ class TokenRefresherBridge {
 /// del [SessionController] (mismo patrón anti-circular que
 /// [TokenRefresherBridge]). Se enlaza una vez al arrancar la aplicación.
 class SessionExpiredBridge {
-  void Function()? _lookup;
+  void Function([String? reason])? _lookup;
 
-  void bind(void Function() lookup) {
+  void bind(void Function([String? reason]) lookup) {
     _lookup = lookup;
   }
 
-  void resolve() {
-    _lookup?.call();
+  void resolve([String? reason]) {
+    _lookup?.call(reason);
   }
 }

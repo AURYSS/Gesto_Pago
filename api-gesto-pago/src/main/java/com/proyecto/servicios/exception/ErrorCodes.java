@@ -15,6 +15,9 @@ public final class ErrorCodes {
     public static final String RATE_001 = "RATE-001";
     public static final String UNK_001 = "UNK-001";
     public static final String AUTH_006 = "AUTH-006";
+    public static final String AUTH_007 = "AUTH-007";
+    public static final String AUTH_008 = "AUTH-008";
+    public static final String AUTH_009 = "AUTH-009";
     public static final String PAGO_001 = "PAGO-001";
     public static final String PAGO_002 = "PAGO-002";
     public static final String PAGO_003 = "PAGO-003";

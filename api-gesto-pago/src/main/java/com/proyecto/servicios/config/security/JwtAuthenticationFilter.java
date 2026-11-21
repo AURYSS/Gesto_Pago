@@ -1,5 +1,7 @@
 package com.proyecto.servicios.config.security;
 
+import com.proyecto.servicios.entity.auth.Usuario;
+import com.proyecto.servicios.repositorys.auth.UsuarioRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -25,9 +27,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String BEARER = "Bearer ";
 
     private final JwtService jwtService;
+    private final UsuarioRepository usuarioRepository;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    public JwtAuthenticationFilter(JwtService jwtService, UsuarioRepository usuarioRepository) {
         this.jwtService = jwtService;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Override
@@ -38,9 +42,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = header.substring(BEARER.length());
             try {
                 Claims claims = jwtService.validarAccessToken(token);
+                String email = claims.getSubject();
+
+                // Control de concurrencia: Validar si la sesión sigue activa
+                String tokenSessionId = claims.get("sessionId", String.class);
+                if (email != null) {
+                    Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
+                    if (usuario != null) {
+                        boolean sesionInvalida = !Boolean.TRUE.equals(usuario.getSesionActiva())
+                                || usuario.getSessionIdActivo() == null
+                                || !usuario.getSessionIdActivo().equals(tokenSessionId);
+                        if (sesionInvalida) {
+                            log.warn("[SESION] Sesion revocada para usuario {}: sessionId del token [{}] != activo [{}]",
+                                    email, tokenSessionId, usuario.getSessionIdActivo());
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write(
+                                    "{\"codigo\":\"AUTH-009\",\"error\":\"SESION_REVOCADA\",\"mensaje\":\"Se inicio sesion en otro dispositivo.\"}"
+                            );
+                            return;
+                        }
+                    }
+                }
+
                 List<SimpleGrantedAuthority> authorities = extraerRoles(claims);
                 UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(claims.getSubject(), null, authorities);
+                        new UsernamePasswordAuthenticationToken(email, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (JwtException e) {
                 log.warn("Token JWT invalido: {}", e.getMessage());

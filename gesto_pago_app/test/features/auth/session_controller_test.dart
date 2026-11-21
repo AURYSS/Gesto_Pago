@@ -24,8 +24,32 @@ class _FakeAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<AuthSession> login({required String email, required String password}) {
-    throw UnimplementedError();
+  Future<LoginResult> login({required String email, required String password}) async {
+    if (session != null) {
+      return LoginResult(requiere2Fa: false, session: session);
+    }
+    return const LoginResult(
+      requiere2Fa: true,
+      tempToken: 'fake-temp-token',
+      codigo2FaDev: '123456',
+      correoEnmascarado: 'ce***@gmail.com',
+    );
+  }
+
+  @override
+  Future<AuthSession> verify2Fa({
+    required String tempToken,
+    required String codigo,
+    required String email,
+    bool forzarCierre = false,
+  }) async {
+    return AuthSession(
+      email: email,
+      nombre: 'Usuario Prueba',
+      accessToken: 'access-2fa',
+      refreshToken: 'refresh-2fa',
+      roles: const ['CLIENTE'],
+    );
   }
 
   @override
@@ -49,6 +73,9 @@ class _FakeAuthRepository implements AuthRepository {
   Future<void> clearSession() async {
     clearCalled = true;
   }
+
+  @override
+  Future<bool> validateSession() async => true;
 }
 
 void main() {
@@ -103,5 +130,47 @@ void main() {
     final state = container.read(sessionControllerProvider);
     expect(state.status, SessionStatus.unauthenticated);
     expect(state.session, isNull);
+  });
+
+  test('login con requiere2Fa -> devuelve LoginResult y mantiene unauthenticated', () async {
+    final container = containerWith(null, null);
+
+    final result = await container
+        .read(sessionControllerProvider.notifier)
+        .login(email: 'test@example.com', password: 'password123');
+
+    expect(result.requiere2Fa, isTrue);
+    expect(result.tempToken, 'fake-temp-token');
+    expect(container.read(sessionControllerProvider).status, SessionStatus.unauthenticated);
+  });
+
+  test('complete2Fa -> autentica la sesión en memoria', () async {
+    final container = containerWith(null, null);
+
+    final session = await container.read(sessionControllerProvider.notifier).complete2Fa(
+          tempToken: 'fake-temp-token',
+          codigo: '123456',
+          email: 'test@example.com',
+        );
+
+    expect(session.accessToken, 'access-2fa');
+    final state = container.read(sessionControllerProvider);
+    expect(state.status, SessionStatus.authenticated);
+    expect(state.session?.email, 'test@example.com');
+  });
+
+  test('onSessionExpired con razón -> registra mensaje de revocación', () {
+    final container = containerWith(null, null);
+
+    container.read(sessionControllerProvider.notifier).onSessionExpired(
+          'Tu sesión fue cerrada porque se inició sesión en la plataforma Web.',
+        );
+
+    final state = container.read(sessionControllerProvider);
+    expect(state.status, SessionStatus.unauthenticated);
+    expect(
+      state.revocationMessage,
+      'Tu sesión fue cerrada porque se inició sesión en la plataforma Web.',
+    );
   });
 }

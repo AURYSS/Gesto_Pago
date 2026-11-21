@@ -14,7 +14,7 @@ class ApiClient {
   ApiClient({
     required TokenStore tokenStore,
     required TokenRefresher Function() tokenRefresher,
-    void Function()? onSessionExpired,
+    void Function(String? reason)? onSessionExpired,
   }) {
     _dio = Dio(
       BaseOptions(
@@ -41,7 +41,7 @@ class ApiClient {
         dio: _dio,
         tokenStore: tokenStore,
         tokenRefresher: tokenRefresher,
-        onRefreshFailed: () => onSessionExpired?.call(),
+        onRefreshFailed: (reason) => onSessionExpired?.call(reason),
       ),
       _ErrorInterceptor(),
     ]);
@@ -83,13 +83,13 @@ class _AuthInterceptor extends QueuedInterceptor {
   final Dio dio;
   final TokenStore tokenStore;
   final TokenRefresher Function() tokenRefresher;
-  final void Function() onRefreshFailed;
+  final void Function(String? reason) onRefreshFailed;
 
   Future<String?>? _refreshInFlight;
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
-    if (_isAuthEndpoint(options.path)) {
+    if (_isPublicAuthEndpoint(options.path)) {
       return handler.next(options);
     }
     final access = await tokenStore.readAccessToken();
@@ -103,17 +103,32 @@ class _AuthInterceptor extends QueuedInterceptor {
   Future<void> onError(DioException err, ErrorInterceptorHandler handler) async {
     final options = err.requestOptions;
     final is401 = err.response?.statusCode == 401;
-    final isAuthCall = _isAuthEndpoint(options.path);
+    final isPublicAuth = _isPublicAuthEndpoint(options.path);
     final alreadyRetried = options.extra['_authRetried'] == true;
 
-    if (!is401 || isAuthCall || alreadyRetried) {
+    if (!is401 || isPublicAuth || alreadyRetried) {
+      return handler.next(err);
+    }
+
+    final data = err.response?.data;
+    final isRevoked = data is Map &&
+        (data['codigo'] == 'AUTH-009' ||
+            data['error'] == 'SESION_REVOCADA' ||
+            (data['message'] is String && (data['message'] as String).contains('otro dispositivo')) ||
+            (data['mensaje'] is String && (data['mensaje'] as String).contains('otro dispositivo')));
+
+    if (isRevoked) {
+      await tokenStore.clear();
+      final msg = (data['mensaje'] ?? data['message']) as String? ??
+          'Se inicio sesion en otro dispositivo.';
+      onRefreshFailed(msg);
       return handler.next(err);
     }
 
     final access = await _refreshOnce();
     if (access == null) {
       await tokenStore.clear();
-      onRefreshFailed();
+      onRefreshFailed(null);
       return handler.next(err);
     }
 
@@ -164,8 +179,13 @@ class _AuthInterceptor extends QueuedInterceptor {
     return result.accessToken;
   }
 
-  bool _isAuthEndpoint(String path) {
-    return path.startsWith('/auth/');
+  bool _isPublicAuthEndpoint(String path) {
+    return path == '/auth/login' ||
+        path == '/auth/register' ||
+        path == '/auth/refresh' ||
+        path == '/auth/2fa/verify' ||
+        path == '/auth/verify-2fa' ||
+        path == '/auth/cerrar-sesion-previa';
   }
 }
 
@@ -182,9 +202,13 @@ class _ErrorInterceptor extends Interceptor {
 
     Object? code;
     Object? message;
+    String? dispositivoActivo;
+    String? tempToken;
     if (data is Map) {
-      code = data['code'];
-      message = data['message'];
+      code = data['code'] ?? data['codigo'] ?? data['error'];
+      message = data['message'] ?? data['mensaje'];
+      dispositivoActivo = data['dispositivoActivo'] as String?;
+      tempToken = data['tempToken'] as String?;
     }
 
     final detail = (message is String && message.isNotEmpty) ? message : '';
@@ -201,11 +225,23 @@ class _ErrorInterceptor extends Interceptor {
       case DioExceptionType.cancel:
         return const NetworkException('Sin conexión con el servidor.');
       case DioExceptionType.badResponse:
-        return _mapResponse(status, detail, code is String ? code : null);
+        return _mapResponse(
+          status,
+          detail,
+          code is String ? code : null,
+          dispositivoActivo: dispositivoActivo,
+          tempToken: tempToken,
+        );
     }
   }
 
-  static AppException _mapResponse(int? status, String message, String? code) {
+  static AppException _mapResponse(
+    int? status,
+    String message,
+    String? code, {
+    String? dispositivoActivo,
+    String? tempToken,
+  }) {
     switch (status) {
       case 400:
       case 422:
@@ -213,6 +249,14 @@ class _ErrorInterceptor extends Interceptor {
           message.isEmpty ? 'Solicitud inválida.' : message,
           code: code,
           statusCode: status,
+        );
+      case 409:
+        return ConcurrentSessionException(
+          message.isEmpty ? 'Existe una sesión activa en otro dispositivo.' : message,
+          code: code,
+          statusCode: status,
+          dispositivoActivo: dispositivoActivo,
+          tempToken: tempToken,
         );
       case 401:
         return UnauthorizedException(

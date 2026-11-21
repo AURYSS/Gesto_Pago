@@ -490,11 +490,17 @@ public class PagosServiceImpl implements PagosService {
     }
 
     private CatalogoProductoCache productoOExcepcion(Integer idServicio, Integer idProducto) {
+        log.info("[productoOExcepcion] Validando idServicio={}, idProducto={}", idServicio, idProducto);
         if (idServicio == null || idServicio <= 0 || idProducto == null || idProducto <= 0) {
+            log.warn("[productoOExcepcion] Parametros invalidos o nulos: idServicio={}, idProducto={}", idServicio, idProducto);
             throw ApiException.productoNoDisponible();
         }
         return catalogoConsulta.buscarActivo(idServicio, idProducto)
-                .orElseThrow(ApiException::productoNoDisponible);
+                .orElseThrow(() -> {
+                    log.warn("[productoOExcepcion] Producto NO encontrado en catalogo activo: idServicio={}, idProducto={}",
+                            idServicio, idProducto);
+                    return ApiException.productoNoDisponible();
+                });
     }
 
     private EstadoTransaccion determinarEstadoSendTx(GestoPagoOperacionResponse respuesta) {

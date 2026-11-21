@@ -12,6 +12,9 @@ String messageDeError(BuildContext context, AppException error) {
     case TimeoutException():
       return l.errorTimeout;
     case UnauthorizedException():
+      if (error.code == 'AUTH-001' || error.code == 'AUTH-002') {
+        return l.loginInvalidCredentials;
+      }
       return l.errorUnauthorized;
     case ForbiddenException():
       return l.errorForbidden;
