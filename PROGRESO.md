@@ -56,3 +56,20 @@ y listos para apagar la máquina. Esta nota sirve para retomar la sesión.
 - Flutter: `TokenRefresherBridge` y `SessionExpiredBridge` (enlazados en `main.dart`) rompen los ciclos `apiClientProvider`↔`authRepositoryProvider`/`SessionController`.
 - Los providers de repositorio se definen UNA sola vez en `lib/core/providers/app_providers.dart` (no duplicarlos en cada feature).
 - TipoFront: 1 = precio final (recargas, monto del catálogo); 2 = pago de servicio (monto editable, verificar referencia antes).
+
+## Unidad II: Ecosistema Digital Unificado (Web + Móvil + Microservicios)
+- **`micro usuarios` & `api-gesto-pago`:**
+  - Login en dos pasos con autenticación 2FA (OTP de 6 dígitos con expiración de 5 minutos).
+  - Control de sesión concurrente (`WEB` vs `MOVIL`): rechaza con HTTP 409 Conflict si hay otra sesión activa, permitiendo revocación y traspaso mediante `forzarCierre=true`.
+  - Detección en tiempo real de sesión revocada (`HTTP 401 SESION_REVOCADA`).
+- **`gesto_pago_app` (Flutter):**
+  - Pantalla `Verify2FaScreen` para captura y validación del código OTP.
+  - Diálogo interactivo ante HTTP 409 Conflict para transferir la sesión activa al móvil.
+  - Interceptor HTTP que detecta sesión revocada cuando se inicia sesión en la Web y notifica en pantalla de login.
+- **`gesto_pago_web` (React + Vite):**
+  - Aplicación Web construida desde cero ubicada en `/gesto_pago_web`.
+  - Módulo de Login y 2FA conectado a la misma base de credenciales.
+  - Modal interactivo de detección de sesión activa en la app móvil con confirmación de cierre forzado.
+  - Catálogo comercial en cuadrícula (grid) adaptado a monitor de escritorio con filtros y búsqueda.
+  - Flujo de compra completo con modal de confirmación y comprobante visual diferenciado (Exitosa, Pendiente, Rechazada, Error de red).
+  - Historial de transacciones unificado donde se visualizan tanto las compras realizadas desde la Web como las efectuadas desde la aplicación móvil.

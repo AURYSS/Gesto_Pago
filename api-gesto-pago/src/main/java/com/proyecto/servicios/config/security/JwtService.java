@@ -47,14 +47,21 @@ public class JwtService {
                 .sorted()
                 .toList();
         long now = System.currentTimeMillis();
-        return Jwts.builder()
+        var builder = Jwts.builder()
                 .issuer(issuer)
                 .subject(usuario.getEmail())
                 .claim(ROLES_CLAIM, roles)
                 .issuedAt(new Date(now))
-                .expiration(new Date(now + accessTtlMinutes * 60_000L))
-                .signWith(key)
-                .compact();
+                .expiration(new Date(now + accessTtlMinutes * 60_000L));
+
+        if (usuario.getSessionIdActivo() != null) {
+            builder.claim("sessionId", usuario.getSessionIdActivo());
+        }
+        if (usuario.getDispositivoActivo() != null) {
+            builder.claim("dispositivo", usuario.getDispositivoActivo());
+        }
+
+        return builder.signWith(key).compact();
     }
 
     public Claims validarAccessToken(String token) throws JwtException {

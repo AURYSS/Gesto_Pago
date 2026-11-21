@@ -47,6 +47,31 @@ public class Usuario {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    // --- Control de Sesión Única y 2FA ---
+    @Column(name = "sesion_activa")
+    private Boolean sesionActiva = false;
+
+    @Column(name = "dispositivo_activo", length = 20)
+    private String dispositivoActivo;
+
+    @Column(name = "session_id_activo", length = 64)
+    private String sessionIdActivo;
+
+    @Column(name = "two_factor_codigo", length = 10)
+    private String twoFactorCodigo;
+
+    @Column(name = "two_factor_expiracion")
+    private Instant twoFactorExpiracion;
+
+    @Column(name = "two_factor_temp_token", length = 64)
+    private String twoFactorTempToken;
+
+    @Column(name = "two_factor_dispositivo", length = 20)
+    private String twoFactorDispositivo;
+
+    @Column(name = "fecha_ultimo_acceso")
+    private Instant fechaUltimoAcceso;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "usuario_roles",

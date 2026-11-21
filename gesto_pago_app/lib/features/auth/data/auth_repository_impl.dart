@@ -11,8 +11,26 @@ class AuthRepositoryImpl implements AuthRepository {
   final TokenStore _tokenStore;
 
   @override
-  Future<AuthSession> login({required String email, required String password}) async {
-    final response = await _remote.login(email: email, password: password);
+  Future<LoginResult> login({required String email, required String password}) async {
+    final result = await _remote.login(email: email, password: password);
+    if (!result.requiere2Fa && result.session != null) {
+      await _persistIgnorandoErrores(result.session!);
+    }
+    return result;
+  }
+
+  @override
+  Future<AuthSession> verify2Fa({
+    required String tempToken,
+    required String codigo,
+    required String email,
+    bool forzarCierre = false,
+  }) async {
+    final response = await _remote.verify2Fa(
+      tempToken: tempToken,
+      codigo: codigo,
+      forzarCierre: forzarCierre,
+    );
     final session = response.toSession(email.trim().toLowerCase());
     await _persistIgnorandoErrores(session);
     return session;
@@ -76,6 +94,15 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> clearSession() => _tokenStore.clear();
+
+  @override
+  Future<bool> validateSession() async {
+    try {
+      return await _remote.validateSession();
+    } catch (_) {
+      return false;
+    }
+  }
 
   /// Persiste la sesión; si el almacenamiento seguro falla (p. ej. keystore
   /// disponible a medias) NO rompe un login/registro ya autorizado por el

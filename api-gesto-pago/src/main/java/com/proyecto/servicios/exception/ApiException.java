@@ -48,6 +48,24 @@ public class ApiException extends RuntimeException {
         return new ApiException(ErrorCodes.AUTH_006, "El correo ya esta registrado", HttpStatus.CONFLICT);
     }
 
+    public static ApiException sesionConcurrente(String dispositivoActivo) {
+        return new ApiException(ErrorCodes.AUTH_007,
+                "Existe una sesión activa en el dispositivo " + dispositivoActivo + ". Confirme si desea cerrar la sesión previa.",
+                HttpStatus.CONFLICT);
+    }
+
+    public static ApiException codigo2FaInvalido() {
+        return new ApiException(ErrorCodes.AUTH_008,
+                "Código de verificación 2FA incorrecto o expirado",
+                HttpStatus.BAD_REQUEST);
+    }
+
+    public static ApiException sesionRevocada() {
+        return new ApiException(ErrorCodes.AUTH_009,
+                "Tu sesión ha sido finalizada porque se inició sesión en otro dispositivo.",
+                HttpStatus.UNAUTHORIZED);
+    }
+
     public static ApiException referenciaInvalida() {
         return new ApiException(ErrorCodes.PAGO_001, "La referencia no es valida", HttpStatus.UNPROCESSABLE_ENTITY);
     }

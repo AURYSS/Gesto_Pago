@@ -6,6 +6,7 @@ import '../../features/auth/application/session_controller.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/auth/presentation/splash_screen.dart';
+import '../../features/auth/presentation/verify_2fa_screen.dart';
 import '../../features/catalogo/presentation/inicio_screen.dart';
 import '../../features/catalogo/presentation/marca_detalle_screen.dart';
 import '../../features/catalogo/presentation/todos_servicios_screen.dart';
@@ -37,7 +38,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final status = ref.read(sessionControllerProvider).status;
       final loc = state.matchedLocation;
-      final enAuth = loc == '/login' || loc == '/register';
+      final enAuth = loc == '/login' || loc == '/register' || loc == '/verify-2fa';
       switch (status) {
         case SessionStatus.unknown:
           return loc == '/splash' ? null : '/splash';
@@ -59,6 +60,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/register',
         builder: (_, _) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: '/verify-2fa',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          return Verify2FaScreen(
+            tempToken: extra['tempToken'] as String? ?? '',
+            email: extra['email'] as String? ?? '',
+            codigo2FaDev: extra['codigo2FaDev'] as String?,
+            correoEnmascarado: extra['correoEnmascarado'] as String?,
+          );
+        },
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>

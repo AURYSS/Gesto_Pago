@@ -15,7 +15,7 @@ void main() {
         () => container.read(authRepositoryProvider),
       );
   container.read(sessionExpiredBridgeProvider).bind(
-        () => container.read(sessionControllerProvider.notifier).onSessionExpired(),
+        ([reason]) => container.read(sessionControllerProvider.notifier).onSessionExpired(reason),
       );
 
   runApp(

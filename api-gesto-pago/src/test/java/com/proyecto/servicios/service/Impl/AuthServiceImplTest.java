@@ -75,22 +75,96 @@ class AuthServiceImplTest {
     }
 
     @Test
-    void loginExitosoDevuelveTokensYRoles() {
+    void loginExitosoDevuelveCodigo2FaYTempToken() {
         when(usuarioRepository.findByEmail("admin@test.com")).thenReturn(Optional.of(admin));
-        when(refreshTokenRepository.save(any(RefreshToken.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
 
         LoginRequest request = new LoginRequest();
         request.setEmail(" admin@test.com ");
         request.setPassword("S3creto!");
+        request.setDispositivo("MOVIL");
 
         TokenResponse response = service.login(request);
+
+        assertNotNull(response.getTempToken());
+        assertNotNull(response.getCodigo2FaDev());
+        assertEquals(6, response.getCodigo2FaDev().length());
+        assertTrue(response.getRequiere2Fa());
+        assertEquals("MOVIL", response.getDispositivo());
+    }
+
+    @Test
+    void verify2FaExitosoDevuelveTokensYRoles() {
+        admin.setTwoFactorCodigo("123456");
+        admin.setTwoFactorTempToken("temp-token-test");
+        admin.setTwoFactorExpiracion(Instant.now().plusSeconds(300));
+        admin.setTwoFactorDispositivo("MOVIL");
+
+        when(usuarioRepository.findByTwoFactorTempToken("temp-token-test")).thenReturn(Optional.of(admin));
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(refreshTokenRepository.save(any(RefreshToken.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        com.proyecto.servicios.model.auth.Verify2FaRequest request =
+                new com.proyecto.servicios.model.auth.Verify2FaRequest("temp-token-test", "123456", false);
+
+        TokenResponse response = service.verify2Fa(request);
 
         assertNotNull(response.getAccessToken());
         assertNotNull(response.getRefreshToken());
         assertTrue(response.getRoles().contains("ADMIN"));
         assertTrue(response.getRoles().contains("CLIENTE"));
         assertEquals("Bearer", response.getTokenType());
+        assertEquals("MOVIL", response.getDispositivo());
+        assertNotNull(response.getSessionId());
+    }
+
+    @Test
+    void verify2FaDetectaConflictoSesionEnOtroDispositivo() {
+        admin.setSesionActiva(true);
+        admin.setDispositivoActivo("MOVIL");
+        admin.setSessionIdActivo("session-movil-1");
+
+        admin.setTwoFactorCodigo("654321");
+        admin.setTwoFactorTempToken("temp-web-token");
+        admin.setTwoFactorExpiracion(Instant.now().plusSeconds(300));
+        admin.setTwoFactorDispositivo("WEB");
+
+        when(usuarioRepository.findByTwoFactorTempToken("temp-web-token")).thenReturn(Optional.of(admin));
+
+        com.proyecto.servicios.model.auth.Verify2FaRequest request =
+                new com.proyecto.servicios.model.auth.Verify2FaRequest("temp-web-token", "654321", false);
+
+        TokenResponse response = service.verify2Fa(request);
+
+        assertTrue(response.getSesionActivaEnOtroDispositivo());
+        assertEquals("MOVIL", response.getDispositivoActivo());
+        assertEquals("WEB", response.getDispositivo());
+    }
+
+    @Test
+    void verify2FaConForzarCierreTransfiereSesionANuevoDispositivo() {
+        admin.setSesionActiva(true);
+        admin.setDispositivoActivo("MOVIL");
+        admin.setSessionIdActivo("session-movil-vieja");
+
+        admin.setTwoFactorCodigo("654321");
+        admin.setTwoFactorTempToken("temp-web-token");
+        admin.setTwoFactorExpiracion(Instant.now().plusSeconds(300));
+        admin.setTwoFactorDispositivo("WEB");
+
+        when(usuarioRepository.findByTwoFactorTempToken("temp-web-token")).thenReturn(Optional.of(admin));
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(refreshTokenRepository.save(any(RefreshToken.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        com.proyecto.servicios.model.auth.Verify2FaRequest request =
+                new com.proyecto.servicios.model.auth.Verify2FaRequest("temp-web-token", "654321", true);
+
+        TokenResponse response = service.verify2Fa(request);
+
+        assertNotNull(response.getAccessToken());
+        assertEquals("WEB", response.getDispositivo());
+        assertEquals("WEB", admin.getDispositivoActivo());
+        assertTrue(admin.getSesionActiva());
     }
 
     @Test

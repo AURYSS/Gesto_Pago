@@ -3,8 +3,16 @@ import 'auth_session.dart';
 
 /// Contrato de acceso a la autenticación.
 abstract interface class AuthRepository implements TokenRefresher {
-  /// Inicia sesión y persiste la sesión en el almacenamiento seguro.
-  Future<AuthSession> login({required String email, required String password});
+  /// Inicia sesión (paso 1). Puede requerir 2FA o entregar la sesión directamente.
+  Future<LoginResult> login({required String email, required String password});
+
+  /// Completa el 2FA (paso 2) y persiste la sesión resultante.
+  Future<AuthSession> verify2Fa({
+    required String tempToken,
+    required String codigo,
+    required String email,
+    bool forzarCierre = false,
+  });
 
   /// Registra una cuenta nueva y persiste la sesión resultante.
   Future<AuthSession> register({
@@ -21,4 +29,7 @@ abstract interface class AuthRepository implements TokenRefresher {
 
   /// Limpia los datos locales de sesión.
   Future<void> clearSession();
+
+  /// Valida si la sesión activa sigue siendo válida en el servidor.
+  Future<bool> validateSession();
 }

@@ -42,17 +42,6 @@ public class AdminUserInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        if (!StringUtils.hasText(adminEmail) || !StringUtils.hasText(adminPassword)) {
-            log.warn("ADMIN_EMAIL/ADMIN_PASSWORD no configurados, no se creara administrador");
-            return;
-        }
-
-        String email = adminEmail.trim().toLowerCase();
-        if (usuarioRepository.findByEmail(email).isPresent()) {
-            log.info("Administrador ya existe, se omite creacion: {}", email);
-            return;
-        }
-
         Rol admin = rolRepository.findByNombre("ADMIN")
                 .orElseThrow(() -> new IllegalStateException(
                         "No existe el rol ADMIN. Revisar la migracion R__seed_roles.sql"));
@@ -60,13 +49,59 @@ public class AdminUserInitializer implements CommandLineRunner {
                 .orElseThrow(() -> new IllegalStateException(
                         "No existe el rol CLIENTE. Revisar la migracion R__seed_roles.sql"));
 
-        Usuario usuario = new Usuario();
-        usuario.setEmail(email);
-        usuario.setPasswordHash(passwordEncoder.encode(adminPassword));
-        usuario.setNombre(adminNombre);
-        usuario.setActivo(true);
-        usuario.setRoles(Set.of(admin, cliente));
-        usuarioRepository.save(usuario);
-        log.info("Administrador creado: {}", email);
+        // 1. Inicializar Administrador
+        if (StringUtils.hasText(adminEmail) && StringUtils.hasText(adminPassword)) {
+            crearOActivarUsuario(
+                    adminEmail.trim().toLowerCase(),
+                    adminPassword,
+                    adminNombre,
+                    Set.of(admin, cliente)
+            );
+        }
+
+        // 2. Inicializar Usuario de prueba del sistema (Cecilia Aurora)
+        crearOActivarUsuario(
+                "ceciaurora2017@gmail.com",
+                "PasswordSeguro123!",
+                "Cecilia Aurora",
+                Set.of(cliente, admin)
+        );
+    }
+
+    private void crearOActivarUsuario(String email, String password, String nombre, Set<Rol> roles) {
+        usuarioRepository.findByEmail(email).ifPresentOrElse(
+                u -> {
+                    boolean modificado = false;
+                    if (!Boolean.TRUE.equals(u.getActivo())) {
+                        u.setActivo(true);
+                        modificado = true;
+                    }
+                    if (u.getRoles() == null || u.getRoles().isEmpty()) {
+                        u.setRoles(roles);
+                        modificado = true;
+                    }
+                    if (!passwordEncoder.matches(password, u.getPasswordHash())) {
+                        u.setPasswordHash(passwordEncoder.encode(password));
+                        modificado = true;
+                        log.info("[AUTH] Contrasena actualizada para usuario de prueba: {}", email);
+                    }
+                    if (modificado) {
+                        usuarioRepository.save(u);
+                        log.info("Usuario reactivado/actualizado: {}", email);
+                    } else {
+                        log.info("Usuario ya existe y se encuentra activo: {}", email);
+                    }
+                },
+                () -> {
+                    Usuario nuevo = new Usuario();
+                    nuevo.setEmail(email);
+                    nuevo.setPasswordHash(passwordEncoder.encode(password));
+                    nuevo.setNombre(nombre);
+                    nuevo.setActivo(true);
+                    nuevo.setRoles(roles);
+                    usuarioRepository.save(nuevo);
+                    log.info("Usuario inicial creado exitosamente: {} ({})", email, nombre);
+                }
+        );
     }
 }

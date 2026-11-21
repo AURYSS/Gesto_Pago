@@ -48,6 +48,20 @@ class RateLimitException extends ApiException {
   const RateLimitException(super.message, {super.code, super.statusCode});
 }
 
+/// Conflicto de sesión activa en otro dispositivo (409 Conflict).
+class ConcurrentSessionException extends ApiException {
+  const ConcurrentSessionException(
+    super.message, {
+    super.code,
+    super.statusCode,
+    this.dispositivoActivo,
+    this.tempToken,
+  });
+
+  final String? dispositivoActivo;
+  final String? tempToken;
+}
+
 /// El recurso no existe (404).
 class NotFoundException extends ApiException {
   const NotFoundException(super.message, {super.code, super.statusCode});

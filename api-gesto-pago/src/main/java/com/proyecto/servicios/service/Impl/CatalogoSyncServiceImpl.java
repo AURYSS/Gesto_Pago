@@ -141,10 +141,12 @@ public class CatalogoSyncServiceImpl implements CatalogoSyncService {
     public List<CatalogoProductoCache> obtenerProductosActivos() {
         try {
             String json = redisTemplate.opsForValue().get(redisClave);
-            if (json != null && !json.isBlank()) {
-                log.info("Catalogo servido desde Redis (clave {})", redisClave);
-                return objectMapper.readValue(json, new TypeReference<List<CatalogoProductoCache>>() {
-                });
+            if (json != null && !json.isBlank() && !json.trim().equals("[]")) {
+                List<CatalogoProductoCache> cache = objectMapper.readValue(json, new TypeReference<List<CatalogoProductoCache>>() {});
+                if (cache != null && !cache.isEmpty()) {
+                    log.info("Catalogo servido desde Redis (clave {}, {} items)", redisClave, cache.size());
+                    return cache;
+                }
             }
         } catch (Exception e) {
             log.warn("No se pudo leer catalogo desde Redis: {}", e.getMessage());
@@ -167,8 +169,15 @@ public class CatalogoSyncServiceImpl implements CatalogoSyncService {
         List<CatalogoProductoCache> enBd = jdbcTemplate.query(
                 "SELECT id_servicio, id_producto, servicio, producto, id_cat_tipo_servicio, tipo_front, "
                         + "tipo_referencia, precio, legend, has_digito_verificador, show_ayuda "
-                        + "FROM v_catalogo_activo ORDER BY id_servicio, id_producto", rm);
+                        + "FROM " + schema + ".v_catalogo_activo ORDER BY id_servicio, id_producto", rm);
         log.info("Catalogo servido desde BD ({} filas)", enBd.size());
+        if (!enBd.isEmpty()) {
+            try {
+                redisTemplate.opsForValue().set(redisClave, objectMapper.writeValueAsString(enBd));
+            } catch (Exception e) {
+                log.warn("No se pudo guardar catalogo en Redis: {}", e.getMessage());
+            }
+        }
         return enBd;
     }
 

@@ -16,3 +16,22 @@ class AuthSession {
 
   bool get isAuthenticated => accessToken.isNotEmpty;
 }
+
+/// Resultado del primer paso de login (puede requerir 2FA o entregar la sesión).
+class LoginResult {
+  const LoginResult({
+    required this.requiere2Fa,
+    this.tempToken,
+    this.codigo2FaDev,
+    this.correoEnmascarado,
+    this.dispositivo,
+    this.session,
+  });
+
+  final bool requiere2Fa;
+  final String? tempToken;
+  final String? codigo2FaDev;
+  final String? correoEnmascarado;
+  final String? dispositivo;
+  final AuthSession? session;
+}
