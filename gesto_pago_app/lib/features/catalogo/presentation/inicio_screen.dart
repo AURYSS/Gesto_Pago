@@ -200,6 +200,7 @@ class _ContenidoInicio extends ConsumerWidget {
       categoriaSlug: categoria,
     );
     final buscando = busqueda.isNotEmpty;
+    final filtrando = buscando || categoria != null;
 
     return Expanded(
       child: RefreshIndicator(
@@ -263,26 +264,34 @@ class _ContenidoInicio extends ConsumerWidget {
                 ),
               ),
 
-              // Servicios usados recientes (accesos rapidos)
-              SliverToBoxAdapter(child: _SeccionRecientes(marcas: marcas)),
+              if (categoria == null) ...[
+                // Servicios usados recientes (accesos rapidos)
+                SliverToBoxAdapter(child: _SeccionRecientes(marcas: marcas)),
 
-              // Pagos pendientes
-              SliverToBoxAdapter(child: _SeccionPendientes(marcas: marcas)),
+                // Pagos pendientes
+                SliverToBoxAdapter(child: _SeccionPendientes(marcas: marcas)),
 
-              // Servicios populares en scroll horizontal izquierda/derecha
-              SliverToBoxAdapter(
-                child: _SeccionPopulares(
-                  categoria: categoria,
-                  marcas: marcas,
+                // Servicios populares en scroll horizontal izquierda/derecha
+                SliverToBoxAdapter(
+                  child: _SeccionPopulares(
+                    categoria: categoria,
+                    marcas: marcas,
+                  ),
                 ),
-              ),
+              ] else ...[
+                // Cuando hay una categoría seleccionada, mostramos la cabecera de resultados con el conteo
+                _ResultadosSliver(
+                  resultados: resultados,
+                  onLimpiar: () => onCategoria(null),
+                ),
+              ],
             ],
-            if (resultados.isEmpty)
+            if (filtrando && resultados.isEmpty)
               SliverFillRemaining(
                 hasScrollBody: false,
                 child: AppEmptyView(message: l.catalogEmpty),
               )
-            else if (buscando)
+            else if (filtrando)
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(
                   GpSpacing.page,
