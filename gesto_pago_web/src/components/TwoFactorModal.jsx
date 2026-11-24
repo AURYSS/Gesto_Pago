@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import ConflictModal from './ConflictModal';
-import { ShieldCheck, KeyRound, ArrowLeft, ArrowRight, Code } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, ArrowRight } from 'lucide-react';
 
 export default function TwoFactorModal() {
   const { tempAuth, verify2Fa, cancel2Fa, loading } = useAuth();
@@ -11,12 +11,6 @@ export default function TwoFactorModal() {
   // Estado para el modal de conflicto concurrente (409)
   const [conflictOpen, setConflictOpen] = useState(false);
   const [conflictDispositivo, setConflictDispositivo] = useState('Móvil');
-
-  useEffect(() => {
-    if (tempAuth?.codigo2FaDev) {
-      setCodigo(tempAuth.codigo2FaDev);
-    }
-  }, [tempAuth]);
 
   if (!tempAuth) return null;
 
@@ -68,20 +62,6 @@ export default function TwoFactorModal() {
                 {tempAuth.correoEnmascarado || tempAuth.email}
               </strong>
             </p>
-            {tempAuth.codigo2FaDev && (
-              <div style={{
-                marginTop: '10px',
-                background: 'rgba(16, 185, 129, 0.15)',
-                border: '1px dashed #10b981',
-                borderRadius: '8px',
-                padding: '8px 12px',
-                fontSize: '0.85rem',
-                color: '#34d399',
-                textAlign: 'center'
-              }}>
-                Código OTP detectado: <strong>{tempAuth.codigo2FaDev}</strong>
-              </div>
-            )}
           </div>
 
           {error && (

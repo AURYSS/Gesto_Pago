@@ -10,6 +10,7 @@ import {
   X,
   ArrowRight,
   ShieldCheck,
+  Mail,
 } from 'lucide-react';
 
 export default function PagoModal({ producto, marca, onClose, onPagoCompletado }) {
@@ -297,6 +298,24 @@ export default function PagoModal({ producto, marca, onClose, onPagoCompletado }
                       ${Number(resultado.transaccion.monto || monto).toFixed(2)} MXN
                     </strong>
                   </div>
+                </div>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.65rem 0.85rem',
+                    background: 'rgba(16, 185, 129, 0.1)',
+                    border: '1px solid rgba(16, 185, 129, 0.25)',
+                    borderRadius: '10px',
+                    fontSize: '0.8rem',
+                    color: '#34d399',
+                    marginBottom: '1rem',
+                  }}
+                >
+                  <Mail size={16} style={{ flexShrink: 0 }} />
+                  <span>Se ha notificado y enviado el comprobante de este movimiento a tu correo registrado.</span>
                 </div>
               </>
             )}
