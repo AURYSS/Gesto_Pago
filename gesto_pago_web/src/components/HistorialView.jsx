@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import {
-  History,
   CheckCircle2,
   Clock,
   XCircle,
+  AlertTriangle,
   RefreshCw,
   Search,
-  ExternalLink,
   Receipt,
   Smartphone,
   Globe,
@@ -45,6 +44,9 @@ export default function HistorialView() {
       (tx.producto && tx.producto.toLowerCase().includes(q)) ||
       (tx.referencia && tx.referencia.toLowerCase().includes(q)) ||
       (tx.numeroAutorizacion && tx.numeroAutorizacion.toLowerCase().includes(q)) ||
+      (tx.codigoError && String(tx.codigoError).toLowerCase().includes(q)) ||
+      (tx.codigoMensaje && String(tx.codigoMensaje).toLowerCase().includes(q)) ||
+      (tx.errorMensaje && String(tx.errorMensaje).toLowerCase().includes(q)) ||
       String(tx.id).includes(q)
     );
   });
@@ -67,10 +69,18 @@ export default function HistorialView() {
         </span>
       );
     }
+    if (est === 'FALLIDA') {
+      return (
+        <span className="status-badge rechazada">
+          <XCircle size={13} />
+          <span>FALLIDA</span>
+        </span>
+      );
+    }
     return (
       <span className="status-badge rechazada">
         <XCircle size={13} />
-        <span>Rechazada</span>
+        <span>RECHAZADA</span>
       </span>
     );
   };
@@ -214,138 +224,220 @@ export default function HistorialView() {
                 <th>Referencia</th>
                 <th>Importe</th>
                 <th>Estado</th>
-                <th>Autorización</th>
+                <th>Autorización / Error</th>
                 <th style={{ textAlign: 'right' }}>Acción</th>
               </tr>
             </thead>
             <tbody>
-              {transaccionesFiltradas.map((tx) => (
-                <tr key={tx.id}>
-                  <td>
-                    <span style={{ fontWeight: 700, color: 'var(--primary)' }}>
-                      #{tx.id}
-                    </span>
-                  </td>
-                  <td style={{ color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                    {formatearFecha(tx.fecha)}
-                  </td>
-                  <td>
-                    <div style={{ fontWeight: 600 }}>{tx.servicio || 'Servicio'}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>
-                      {tx.producto || 'Pago general'}
-                    </div>
-                  </td>
-                  <td>
-                    <code
-                      style={{
-                        background: 'rgba(255, 255, 255, 0.06)',
-                        padding: '0.2rem 0.5rem',
-                        borderRadius: '6px',
-                        fontSize: '0.82rem',
-                      }}
-                    >
-                      {tx.referencia}
-                    </code>
-                  </td>
-                  <td>
-                    <span style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.95rem' }}>
-                      ${Number(tx.monto || 0).toFixed(2)}
-                    </span>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginLeft: '4px' }}>
-                      MXN
-                    </span>
-                  </td>
-                  <td>{getStatusBadge(tx.estado)}</td>
-                  <td style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>
-                    {tx.numeroAutorizacion || tx.idTx || '-'}
-                  </td>
-                  <td style={{ textAlign: 'right' }}>
-                    <button
-                      className="btn btn-secondary"
-                      onClick={() => setTxDetalle(tx)}
-                      style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}
-                    >
-                      Detalle
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {transaccionesFiltradas.map((tx) => {
+                const est = (tx.estado || '').toUpperCase();
+                const isFail = est === 'FALLIDA' || est === 'RECHAZADA' || Boolean(tx.codigoError) || Boolean(tx.errorMensaje);
+                return (
+                  <tr key={tx.id}>
+                    <td>
+                      <span style={{ fontWeight: 700, color: 'var(--primary)' }}>
+                        #{tx.id}
+                      </span>
+                    </td>
+                    <td style={{ color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                      {formatearFecha(tx.fecha)}
+                    </td>
+                    <td>
+                      <div style={{ fontWeight: 600 }}>{tx.servicio || 'Servicio'}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>
+                        {tx.producto || 'Pago general'}
+                      </div>
+                      {isFail && tx.errorMensaje && (
+                        <div
+                          style={{
+                            fontSize: '0.75rem',
+                            color: '#f87171',
+                            marginTop: '3px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                          }}
+                          title={tx.errorMensaje}
+                        >
+                          <AlertTriangle size={12} style={{ flexShrink: 0 }} />
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '240px' }}>
+                            {tx.errorMensaje}
+                          </span>
+                        </div>
+                      )}
+                    </td>
+                    <td>
+                      <code
+                        style={{
+                          background: 'rgba(255, 255, 255, 0.06)',
+                          padding: '0.2rem 0.5rem',
+                          borderRadius: '6px',
+                          fontSize: '0.82rem',
+                        }}
+                      >
+                        {tx.referencia}
+                      </code>
+                    </td>
+                    <td>
+                      <span style={{ fontWeight: 700, color: isFail ? '#f87171' : '#f8fafc', fontSize: '0.95rem' }}>
+                        ${Number(tx.monto || 0).toFixed(2)}
+                      </span>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginLeft: '4px' }}>
+                        MXN
+                      </span>
+                    </td>
+                    <td>{getStatusBadge(tx.estado)}</td>
+                    <td style={{ fontSize: '0.82rem' }}>
+                      {tx.numeroAutorizacion ? (
+                        <span style={{ color: 'var(--text-muted)' }}>{tx.numeroAutorizacion}</span>
+                      ) : (tx.codigoError || tx.codigoMensaje) ? (
+                        <div>
+                          <div style={{ fontSize: '0.68rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Código Error:</div>
+                          <code
+                            style={{
+                              background: 'rgba(239, 68, 68, 0.15)',
+                              color: '#fca5a5',
+                              padding: '1px 5px',
+                              borderRadius: '4px',
+                              fontWeight: 700,
+                              fontSize: '0.78rem',
+                            }}
+                          >
+                            {tx.codigoError || tx.codigoMensaje}
+                          </code>
+                        </div>
+                      ) : (
+                        <span style={{ color: 'var(--text-dim)' }}>{tx.idTx || '-'}</span>
+                      )}
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => setTxDetalle(tx)}
+                        style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}
+                      >
+                        Detalle
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       )}
 
       {/* Modal de Detalle de Transacción */}
-      {txDetalle && (
-        <div className="modal-overlay">
-          <div className="modal-card" style={{ maxWidth: '480px' }}>
-            <div className="modal-header">
+      {txDetalle && (() => {
+        const estDetalle = (txDetalle.estado || '').toUpperCase();
+        const isRechazada = estDetalle === 'FALLIDA' || estDetalle === 'RECHAZADA' || Boolean(txDetalle.codigoError) || Boolean(txDetalle.errorMensaje);
+        return (
+          <div className="modal-overlay">
+            <div className="modal-card" style={{ maxWidth: '480px' }}>
+              <div className="modal-header">
+                <div
+                  className="modal-icon-wrap"
+                  style={{
+                    background: isRechazada ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                    color: isRechazada ? '#ef4444' : 'var(--primary)',
+                  }}
+                >
+                  {isRechazada ? <XCircle size={32} /> : <Receipt size={32} />}
+                </div>
+                <h2 className="modal-title">
+                  {isRechazada ? (estDetalle === 'FALLIDA' ? 'Transacción Fallida' : 'Transacción Rechazada') : 'Comprobante de Operación'}
+                </h2>
+                <p className="modal-subtitle">Folio Oficial #{txDetalle.id}</p>
+              </div>
+
+              {/* Tarjeta destacada de error si la transacción fue rechazada o falló */}
+              {isRechazada && (
+                <div
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.08)',
+                    border: '1px solid rgba(239, 68, 68, 0.35)',
+                    borderRadius: '12px',
+                    padding: '1rem',
+                    marginBottom: '1.25rem',
+                    textAlign: 'left',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#f87171', fontWeight: 700, fontSize: '0.88rem', marginBottom: '0.5rem' }}>
+                    <AlertTriangle size={16} />
+                    <span>Motivo del Rechazo / Causa:</span>
+                  </div>
+                  <div style={{ color: '#fca5a5', fontSize: '0.88rem', lineHeight: 1.5, marginBottom: '0.75rem' }}>
+                    {txDetalle.errorMensaje || txDetalle.mensaje || 'La transacción no pudo ser autorizada por el proveedor.'}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0, 0, 0, 0.3)', padding: '0.45rem 0.75rem', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Código de Error GestoPago:</span>
+                    <code style={{ background: 'rgba(239, 68, 68, 0.25)', color: '#fecaca', fontWeight: 700, padding: '2px 6px', borderRadius: '4px', fontSize: '0.85rem' }}>
+                      {txDetalle.codigoError || txDetalle.codigoMensaje || 'N/A'}
+                    </code>
+                  </div>
+                </div>
+              )}
+
               <div
-                className="modal-icon-wrap"
                 style={{
-                  background: 'rgba(16, 185, 129, 0.15)',
-                  color: 'var(--primary)',
+                  background: 'var(--bg-input)',
+                  borderRadius: '12px',
+                  padding: '1.25rem',
+                  fontSize: '0.9rem',
+                  lineHeight: 1.9,
+                  marginBottom: '1.5rem',
+                  border: '1px solid var(--border-color)',
                 }}
               >
-                <Receipt size={32} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Estado:</span>
+                  <span>{getStatusBadge(txDetalle.estado)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Servicio:</span>
+                  <strong style={{ color: 'var(--text-main)' }}>{txDetalle.servicio}</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Producto:</span>
+                  <span>{txDetalle.producto}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Referencia:</span>
+                  <span>{txDetalle.referencia}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Importe:</span>
+                  <strong style={{ color: isRechazada ? '#f87171' : 'var(--primary)', fontSize: '1.05rem' }}>
+                    ${Number(txDetalle.monto || 0).toFixed(2)} MXN
+                  </strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>No. Autorización:</span>
+                  <span>{txDetalle.numeroAutorizacion || 'N/A'}</span>
+                </div>
+                {txDetalle.codigoError && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>Código de Error GestoPago:</span>
+                    <code style={{ color: '#f87171', fontWeight: 700 }}>{txDetalle.codigoError}</code>
+                  </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Fecha de Operación:</span>
+                  <span>{formatearFecha(txDetalle.fecha)}</span>
+                </div>
               </div>
-              <h2 className="modal-title">Comprobante de Operación</h2>
-              <p className="modal-subtitle">Folio Oficial #{txDetalle.id}</p>
-            </div>
 
-            <div
-              style={{
-                background: 'var(--bg-input)',
-                borderRadius: '12px',
-                padding: '1.25rem',
-                fontSize: '0.9rem',
-                lineHeight: 1.9,
-                marginBottom: '1.5rem',
-                border: '1px solid var(--border-color)',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Estado:</span>
-                <span>{getStatusBadge(txDetalle.estado)}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Servicio:</span>
-                <strong style={{ color: 'var(--text-main)' }}>{txDetalle.servicio}</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Producto:</span>
-                <span>{txDetalle.producto}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Referencia:</span>
-                <span>{txDetalle.referencia}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Importe:</span>
-                <strong style={{ color: 'var(--primary)', fontSize: '1.05rem' }}>
-                  ${Number(txDetalle.monto || 0).toFixed(2)} MXN
-                </strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <span style={{ color: 'var(--text-muted)' }}>No. Autorización:</span>
-                <span>{txDetalle.numeroAutorizacion || 'N/A'}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Fecha de Operación:</span>
-                <span>{formatearFecha(txDetalle.fecha)}</span>
-              </div>
+              <button
+                className="btn btn-primary"
+                onClick={() => setTxDetalle(null)}
+                style={{ width: '100%' }}
+              >
+                Cerrar
+              </button>
             </div>
-
-            <button
-              className="btn btn-primary"
-              onClick={() => setTxDetalle(null)}
-              style={{ width: '100%' }}
-            >
-              Cerrar
-            </button>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

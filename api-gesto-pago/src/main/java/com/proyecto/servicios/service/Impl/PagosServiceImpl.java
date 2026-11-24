@@ -161,179 +161,202 @@ public class PagosServiceImpl implements PagosService {
     @Override
     @Transactional
     public TransaccionDto crearTransaccion(Long usuarioId, PagoRequestDto request) {
-        if (request.getReferencia() == null || request.getReferencia().isBlank()) {
-            throw ApiException.referenciaInvalida();
-        }
-        CatalogoProductoCache producto = productoOExcepcion(request.getIdServicio(), request.getIdProducto());
-        BigDecimal monto = montoAutorizado(producto, request.getMonto());
-
-        ClaveIdempotencia clave = new ClaveIdempotencia(usuarioId, request.getIdempotencyKey());
-        bloqueoIdempotencia.adquirir(clave);
-
-        Optional<Transaccion> existente = transaccionRepository
-                .findByUsuarioIdAndIdempotencyKey(usuarioId, request.getIdempotencyKey());
-        if (existente.isPresent()
-                && existente.get().getEstado() != EstadoTransaccion.FALLIDA
-                && existente.get().getEstado() != EstadoTransaccion.RECHAZADA) {
-            return TransaccionDto.from(existente.get());
-        }
-
-        Transaccion transaccion = prepararTransaccion(existente.orElse(null), usuarioId, producto,
-                request.getReferencia(), monto, request.getIdempotencyKey());
-        registrarEvento(transaccion.getId(), EstadoTransaccion.PENDIENTE, "API",
-                "Transaccion registrada para envio al proveedor");
-
-        String horaLocal = HORA_LOCAL.format(Instant.now());
-        Map<String, String> body = cuerpoSendTxConHora(producto, request.getReferencia(), null,
-                monto, transaccion.getUpc(), horaLocal);
-        Firma firma = construirFirma(producto, body, request.getReferencia(), monto, transaccion.getUpc(), horaLocal);
-        firmaService.encriptar(firma);
-
         try {
-            String bearerToken = token();
-            GestoPagoOperacionResponse respuesta = operar(() -> gestoPagoTxClient.sendTx(bearerToken, body));
-            aplicarResultadoSendTx(transaccion, respuesta);
+            if (request.getReferencia() == null || request.getReferencia().isBlank()) {
+                throw ApiException.referenciaInvalida();
+            }
+            CatalogoProductoCache producto = productoOExcepcion(request.getIdServicio(), request.getIdProducto());
+            BigDecimal monto = montoAutorizado(producto, request.getMonto());
+
+            ClaveIdempotencia clave = new ClaveIdempotencia(usuarioId, request.getIdempotencyKey());
+            bloqueoIdempotencia.adquirir(clave);
+
+            Optional<Transaccion> existente = transaccionRepository
+                    .findByUsuarioIdAndIdempotencyKey(usuarioId, request.getIdempotencyKey());
+            if (existente.isPresent()
+                    && existente.get().getEstado() != EstadoTransaccion.FALLIDA
+                    && existente.get().getEstado() != EstadoTransaccion.RECHAZADA) {
+                return TransaccionDto.from(existente.get());
+            }
+
+            Transaccion transaccion = prepararTransaccion(existente.orElse(null), usuarioId, producto,
+                    request.getReferencia(), monto, request.getIdempotencyKey());
+            registrarEvento(transaccion.getId(), EstadoTransaccion.PENDIENTE, "API",
+                    "Transaccion registrada para envio al proveedor");
+
+            String horaLocal = HORA_LOCAL.format(Instant.now());
+            Map<String, String> body = cuerpoSendTxConHora(producto, request.getReferencia(), null,
+                    monto, transaccion.getUpc(), horaLocal);
+            Firma firma = construirFirma(producto, body, request.getReferencia(), monto, transaccion.getUpc(), horaLocal);
+            firmaService.encriptar(firma);
+
+            try {
+                String bearerToken = token();
+                GestoPagoOperacionResponse respuesta = operar(() -> gestoPagoTxClient.sendTx(bearerToken, body));
+                aplicarResultadoSendTx(transaccion, respuesta);
+            } catch (Exception e) {
+                log.warn("sendTx no concluyo para transaccion id={}, quedara en proceso", transaccion.getId(), e);
+                transaccion.setCodigoError(CODIGO_TIMEOUT);
+                transaccion.setErrorMensaje("El proveedor no respondio; el resultado se confirmara despues");
+                cambiarEstado(transaccion, EstadoTransaccion.EN_PROCESO, "API",
+                        "El proveedor no respondio; el resultado se confirmara despues");
+            }
+            notificarMovimientoPorCorreo(usuarioId, producto.getServicio(), request.getReferencia(), monto, transaccion.getUpc(), transaccion.getEstado());
+            return TransaccionDto.from(transaccion);
+        } catch (ApiException e) {
+            registrarFalloValidacionCrear(usuarioId, request, e);
+            throw e;
         } catch (Exception e) {
-            log.warn("sendTx no concluyo para transaccion id={}, quedara en proceso", transaccion.getId(), e);
-            cambiarEstado(transaccion, EstadoTransaccion.EN_PROCESO, "API",
-                    "El proveedor no respondio; el resultado se confirmara despues");
+            registrarFalloValidacionCrear(usuarioId, request, e);
+            throw e;
         }
-        notificarMovimientoPorCorreo(usuarioId, producto.getServicio(), request.getReferencia(), monto, transaccion.getUpc(), transaccion.getEstado());
-        return TransaccionDto.from(transaccion);
     }
 
     @Override
     @Transactional
     public PagarServicioResponseDto pagarServicio(Long usuarioId, PagarServicioRequestDto request) {
-        String referencia = request.referenciaEfectiva();
-        if (referencia == null || referencia.isBlank()) {
-            throw ApiException.referenciaInvalida();
-        }
-
-        CatalogoProductoCache producto = productoOExcepcion(request.getIdServicio(), request.getIdProducto());
-        BigDecimal monto = montoAutorizado(producto, request.getMontoPago());
-
-        boolean tieneUpcExplicito = request.getUpc() != null && !request.getUpc().isBlank();
-        String claveBase = tieneUpcExplicito
-                ? request.getUpc().trim()
-                : UUID.randomUUID().toString();
-        String idempotencyKey = claveBase.length() <= 36 ? claveBase : claveBase.substring(0, 36);
-        String upcGenerado = upc(claveBase);
-        String horaLocal = (request.getHoraLocal() != null && !request.getHoraLocal().isBlank())
-                ? request.getHoraLocal().trim()
-                : HORA_LOCAL.format(Instant.now());
-
-        Map<String, String> body = cuerpoSendTxConHora(
-                producto, referencia, request.getTelefono(), monto, upcGenerado, horaLocal);
-
-        // Paso 1: Firmar (crear instancia de Firma y encriptarla)
-        Firma firmaObj = construirFirma(producto, body, referencia, monto, upcGenerado, horaLocal);
-        String firmaEncriptada = firmaService.encriptar(firmaObj);
-        log.info("Paso 1 [Firmar]: Firma encriptada generada para upc={}", upcGenerado);
-
-        // Control de concurrencia y prevencion de cargos duplicados
-        bloqueoIdempotencia.adquirir(new ClaveIdempotencia(usuarioId != null ? usuarioId : 0L, idempotencyKey));
-
-        Optional<Transaccion> previa = Optional.empty();
-        if (usuarioId != null) {
-            previa = transaccionRepository.findByUsuarioIdAndIdempotencyKey(usuarioId, idempotencyKey);
-        } else if (tieneUpcExplicito) {
-            previa = transaccionRepository.findFirstByUpcOrderByCreatedAtDesc(upcGenerado);
-        }
-
-        if (previa.isPresent()
-                && previa.get().getEstado() != EstadoTransaccion.FALLIDA
-                && previa.get().getEstado() != EstadoTransaccion.RECHAZADA) {
-            Transaccion existente = previa.get();
-            return PagarServicioResponseDto.builder()
-                    .idTransaccion(existente.getId())
-                    .idServicio(existente.getIdServicio())
-                    .idProducto(existente.getIdProducto())
-                    .telefono(body.get("telefono"))
-                    .referencia(existente.getReferencia())
-                    .horaLocal(horaLocal)
-                    .montoPago(existente.getMonto().toPlainString())
-                    .upc(existente.getUpc())
-                    .firma(firmaEncriptada)
-                    .estado(existente.getEstado().name())
-                    .codigoMensaje(existente.getEstado() == EstadoTransaccion.APROBADA ? CODIGO_EXITO : CODIGO_TIMEOUT)
-                    .mensaje(existente.getErrorMensaje() != null
-                            ? existente.getErrorMensaje()
-                            : "Operacion previamente registrada (idempotente)")
-                    .idTx(existente.getIdTx())
-                    .numAutorizacion(existente.getNumeroAutorizacion())
-                    .comision(existente.getComision() != null ? existente.getComision().toPlainString() : null)
-                    .pin(existente.getPin())
-                    .legend(existente.getLegend())
-                    .build();
-        }
-
-        Transaccion transaccion = null;
-        if (usuarioId != null) {
-            transaccion = prepararTransaccion(previa.orElse(null), usuarioId, producto,
-                    referencia, monto, idempotencyKey);
-            transaccion.setUpc(upcGenerado);
-            transaccionRepository.save(transaccion);
-            registrarEvento(transaccion.getId(), EstadoTransaccion.PENDIENTE, "API",
-                    "Transaccion firmada y registrada para envio al proveedor");
-        }
-
-        // Paso 2: Obtener Token y Paso 3: Enviar sendTx
-        EstadoTransaccion estadoFinal = EstadoTransaccion.PENDIENTE;
-        GestoPagoOperacionResponse respuesta = null;
-        String codigoMensaje = null;
-        String textoMensaje = null;
-
         try {
-            String bearerToken = token();
-            log.info("Paso 2 [Obtener Token]: Token activo obtenido para distribuidor={}", idDistribuidor);
-
-            log.info("Paso 3 [Enviar sendTx]: Enviando sendTx para idServicio={}, idProducto={}, upc={}",
-                    producto.getIdServicio(), producto.getIdProducto(), upcGenerado);
-            respuesta = operar(() -> gestoPagoTxClient.sendTx(bearerToken, body));
-
-            if (transaccion != null) {
-                aplicarResultadoSendTx(transaccion, respuesta);
-                estadoFinal = transaccion.getEstado();
-            } else {
-                estadoFinal = determinarEstadoSendTx(respuesta);
+            String referencia = request.referenciaEfectiva();
+            if (referencia == null || referencia.isBlank()) {
+                throw ApiException.referenciaInvalida();
             }
-            GestoPagoMensajeOperacion msg = respuesta.getMensaje();
-            codigoMensaje = msg == null ? null : msg.getCodigo();
-            textoMensaje = msg == null ? null : msg.getTexto();
+
+            CatalogoProductoCache producto = productoOExcepcion(request.getIdServicio(), request.getIdProducto());
+            BigDecimal monto = montoAutorizado(producto, request.getMontoPago());
+
+            boolean tieneUpcExplicito = request.getUpc() != null && !request.getUpc().isBlank();
+            String claveBase = tieneUpcExplicito
+                    ? request.getUpc().trim()
+                    : UUID.randomUUID().toString();
+            String idempotencyKey = claveBase.length() <= 36 ? claveBase : claveBase.substring(0, 36);
+            String upcGenerado = upc(claveBase);
+            String horaLocal = (request.getHoraLocal() != null && !request.getHoraLocal().isBlank())
+                    ? request.getHoraLocal().trim()
+                    : HORA_LOCAL.format(Instant.now());
+
+            Map<String, String> body = cuerpoSendTxConHora(
+                    producto, referencia, request.getTelefono(), monto, upcGenerado, horaLocal);
+
+            // Paso 1: Firmar (crear instancia de Firma y encriptarla)
+            Firma firmaObj = construirFirma(producto, body, referencia, monto, upcGenerado, horaLocal);
+            String firmaEncriptada = firmaService.encriptar(firmaObj);
+            log.info("Paso 1 [Firmar]: Firma encriptada generada para upc={}", upcGenerado);
+
+            // Control de concurrencia y prevencion de cargos duplicados
+            bloqueoIdempotencia.adquirir(new ClaveIdempotencia(usuarioId != null ? usuarioId : 0L, idempotencyKey));
+
+            Optional<Transaccion> previa = Optional.empty();
+            if (usuarioId != null) {
+                previa = transaccionRepository.findByUsuarioIdAndIdempotencyKey(usuarioId, idempotencyKey);
+            } else if (tieneUpcExplicito) {
+                previa = transaccionRepository.findFirstByUpcOrderByCreatedAtDesc(upcGenerado);
+            }
+
+            if (previa.isPresent()
+                    && previa.get().getEstado() != EstadoTransaccion.FALLIDA
+                    && previa.get().getEstado() != EstadoTransaccion.RECHAZADA) {
+                Transaccion existente = previa.get();
+                return PagarServicioResponseDto.builder()
+                        .idTransaccion(existente.getId())
+                        .idServicio(existente.getIdServicio())
+                        .idProducto(existente.getIdProducto())
+                        .telefono(body.get("telefono"))
+                        .referencia(existente.getReferencia())
+                        .horaLocal(horaLocal)
+                        .montoPago(existente.getMonto().toPlainString())
+                        .upc(existente.getUpc())
+                        .firma(firmaEncriptada)
+                        .estado(existente.getEstado().name())
+                        .codigoMensaje(existente.getCodigoError() != null
+                                ? existente.getCodigoError()
+                                : (existente.getEstado() == EstadoTransaccion.APROBADA ? CODIGO_EXITO : CODIGO_TIMEOUT))
+                        .mensaje(existente.getErrorMensaje() != null
+                                ? existente.getErrorMensaje()
+                                : "Operacion previamente registrada (idempotente)")
+                        .idTx(existente.getIdTx())
+                        .numAutorizacion(existente.getNumeroAutorizacion())
+                        .comision(existente.getComision() != null ? existente.getComision().toPlainString() : null)
+                        .pin(existente.getPin())
+                        .legend(existente.getLegend())
+                        .build();
+            }
+
+            Transaccion transaccion = null;
+            if (usuarioId != null) {
+                transaccion = prepararTransaccion(previa.orElse(null), usuarioId, producto,
+                        referencia, monto, idempotencyKey);
+                transaccion.setUpc(upcGenerado);
+                transaccionRepository.save(transaccion);
+                registrarEvento(transaccion.getId(), EstadoTransaccion.PENDIENTE, "API",
+                        "Transaccion firmada y registrada para envio al proveedor");
+            }
+
+            // Paso 2: Obtener Token y Paso 3: Enviar sendTx
+            EstadoTransaccion estadoFinal = EstadoTransaccion.PENDIENTE;
+            GestoPagoOperacionResponse respuesta = null;
+            String codigoMensaje = null;
+            String textoMensaje = null;
+
+            try {
+                String bearerToken = token();
+                log.info("Paso 2 [Obtener Token]: Token activo obtenido para distribuidor={}", idDistribuidor);
+
+                log.info("Paso 3 [Enviar sendTx]: Enviando sendTx para idServicio={}, idProducto={}, upc={}",
+                        producto.getIdServicio(), producto.getIdProducto(), upcGenerado);
+                respuesta = operar(() -> gestoPagoTxClient.sendTx(bearerToken, body));
+
+                if (transaccion != null) {
+                    aplicarResultadoSendTx(transaccion, respuesta);
+                    estadoFinal = transaccion.getEstado();
+                } else {
+                    estadoFinal = determinarEstadoSendTx(respuesta);
+                }
+                GestoPagoMensajeOperacion msg = respuesta.getMensaje();
+                codigoMensaje = msg == null ? null : msg.getCodigo();
+                textoMensaje = msg == null ? null : msg.getTexto();
+            } catch (Exception e) {
+                log.warn("sendTx no concluyo para upc={}, quedara en proceso", upcGenerado, e);
+                estadoFinal = EstadoTransaccion.EN_PROCESO;
+                codigoMensaje = CODIGO_TIMEOUT;
+                textoMensaje = "El proveedor no respondio; el resultado se confirmara despues";
+                if (transaccion != null) {
+                    transaccion.setCodigoError(CODIGO_TIMEOUT);
+                    transaccion.setErrorMensaje(textoMensaje);
+                    cambiarEstado(transaccion, EstadoTransaccion.EN_PROCESO, "API", textoMensaje);
+                }
+            }
+
+            notificarMovimientoPorCorreo(usuarioId, producto.getServicio(), referencia, monto, upcGenerado, estadoFinal);
+
+            GestoPagoMensajeOperacion msg = respuesta == null ? null : respuesta.getMensaje();
+            return PagarServicioResponseDto.builder()
+                    .idTransaccion(transaccion == null ? null : transaccion.getId())
+                    .idServicio(producto.getIdServicio())
+                    .idProducto(producto.getIdProducto())
+                    .telefono(body.get("telefono"))
+                    .referencia(referencia)
+                    .horaLocal(horaLocal)
+                    .montoPago(monto.toPlainString())
+                    .upc(upcGenerado)
+                    .firma(firmaEncriptada)
+                    .estado(estadoFinal.name())
+                    .codigoMensaje(codigoMensaje != null ? codigoMensaje : (transaccion != null ? transaccion.getCodigoError() : null))
+                    .mensaje(textoMensaje != null ? textoMensaje : (transaccion != null ? transaccion.getErrorMensaje() : null))
+                    .idTx(respuesta == null ? null : primeroNoVacio(respuesta.getIdTx(), msg == null ? null : msg.getIdTx()))
+                    .numAutorizacion(respuesta == null ? null : respuesta.getNumAutorizacion())
+                    .saldo(respuesta == null ? null : primeroNoVacio(respuesta.getSaldo(), msg == null ? null : msg.getSaldo()))
+                    .comision(respuesta == null ? null : respuesta.getComision())
+                    .pin(msg == null ? null : msg.getPin())
+                    .legend(msg == null ? null : msg.getLegend())
+                    .fecha(respuesta == null ? null : respuesta.getFecha())
+                    .build();
+        } catch (ApiException e) {
+            registrarFalloValidacionPagar(usuarioId, request, e);
+            throw e;
         } catch (Exception e) {
-            log.warn("sendTx no concluyo para upc={}, quedara en proceso", upcGenerado, e);
-            estadoFinal = EstadoTransaccion.EN_PROCESO;
-            textoMensaje = "El proveedor no respondio; el resultado se confirmara despues";
-            if (transaccion != null) {
-                cambiarEstado(transaccion, EstadoTransaccion.EN_PROCESO, "API", textoMensaje);
-            }
+            registrarFalloValidacionPagar(usuarioId, request, e);
+            throw e;
         }
-
-        notificarMovimientoPorCorreo(usuarioId, producto.getServicio(), referencia, monto, upcGenerado, estadoFinal);
-
-        GestoPagoMensajeOperacion msg = respuesta == null ? null : respuesta.getMensaje();
-        return PagarServicioResponseDto.builder()
-                .idTransaccion(transaccion == null ? null : transaccion.getId())
-                .idServicio(producto.getIdServicio())
-                .idProducto(producto.getIdProducto())
-                .telefono(body.get("telefono"))
-                .referencia(referencia)
-                .horaLocal(horaLocal)
-                .montoPago(monto.toPlainString())
-                .upc(upcGenerado)
-                .firma(firmaEncriptada)
-                .estado(estadoFinal.name())
-                .codigoMensaje(codigoMensaje)
-                .mensaje(textoMensaje)
-                .idTx(respuesta == null ? null : primeroNoVacio(respuesta.getIdTx(), msg == null ? null : msg.getIdTx()))
-                .numAutorizacion(respuesta == null ? null : respuesta.getNumAutorizacion())
-                .saldo(respuesta == null ? null : primeroNoVacio(respuesta.getSaldo(), msg == null ? null : msg.getSaldo()))
-                .comision(respuesta == null ? null : respuesta.getComision())
-                .pin(msg == null ? null : msg.getPin())
-                .legend(msg == null ? null : msg.getLegend())
-                .fecha(respuesta == null ? null : respuesta.getFecha())
-                .build();
     }
 
     @Override
@@ -367,6 +390,7 @@ public class PagosServiceImpl implements PagosService {
                     .montoPago(tx.getMonto().toPlainString())
                     .upc(tx.getUpc())
                     .estado(tx.getEstado().name())
+                    .codigoMensaje(tx.getCodigoError() != null ? tx.getCodigoError() : (tx.getEstado() == EstadoTransaccion.APROBADA ? CODIGO_EXITO : null))
                     .mensaje(tx.getErrorMensaje() != null ? tx.getErrorMensaje() : "Transaccion ya conciliada")
                     .idTx(tx.getIdTx())
                     .numAutorizacion(tx.getNumeroAutorizacion())
@@ -402,6 +426,7 @@ public class PagosServiceImpl implements PagosService {
             textoMensaje = msg == null ? null : msg.getTexto();
         } catch (Exception e) {
             log.warn("confirmTx no concluyo para upc={}, se mantiene en proceso", upcConciliacion, e);
+            codigoMensaje = CODIGO_TIMEOUT;
             textoMensaje = "No fue posible confirmar con el proveedor; la operacion continua en proceso";
         }
 
@@ -416,8 +441,8 @@ public class PagosServiceImpl implements PagosService {
                 .montoPago(monto.toPlainString())
                 .upc(upcConciliacion)
                 .estado(estadoFinal.name())
-                .codigoMensaje(codigoMensaje)
-                .mensaje(textoMensaje)
+                .codigoMensaje(codigoMensaje != null ? codigoMensaje : (existente.map(Transaccion::getCodigoError).orElse(null)))
+                .mensaje(textoMensaje != null ? textoMensaje : (existente.map(Transaccion::getErrorMensaje).orElse(null)))
                 .idTx(respuesta == null ? null : primeroNoVacio(respuesta.getIdTx(), msg == null ? null : msg.getIdTx()))
                 .numAutorizacion(respuesta == null ? null : respuesta.getNumAutorizacion())
                 .saldo(respuesta == null ? null : primeroNoVacio(respuesta.getSaldo(), msg == null ? null : msg.getSaldo()))
@@ -564,6 +589,7 @@ public class PagosServiceImpl implements PagosService {
         transaccion.setMonto(monto);
         transaccion.setEstado(EstadoTransaccion.PENDIENTE);
         transaccion.setErrorMensaje(null);
+        transaccion.setCodigoError(null);
         return transaccionRepository.save(transaccion);
     }
 
@@ -577,13 +603,13 @@ public class PagosServiceImpl implements PagosService {
                     mensaje == null ? "Operacion realizada con exito" : texto);
             return;
         }
+        transaccion.setCodigoError(codigo);
+        transaccion.setErrorMensaje(texto);
         if (CODIGO_TIMEOUT.equals(codigo)) {
-            transaccion.setErrorMensaje(texto);
             cambiarEstado(transaccion, EstadoTransaccion.EN_PROCESO, ORIGEN_PROVEEDOR,
                     "Resultado incierto; se confirmara contra el proveedor despues");
             return;
         }
-        transaccion.setErrorMensaje(texto);
         cambiarEstado(transaccion, EstadoTransaccion.FALLIDA, ORIGEN_PROVEEDOR, texto);
     }
 
@@ -596,13 +622,13 @@ public class PagosServiceImpl implements PagosService {
             cambiarEstado(transaccion, EstadoTransaccion.APROBADA, ORIGEN_PROVEEDOR, texto);
             return;
         }
+        transaccion.setCodigoError(codigo);
+        transaccion.setErrorMensaje(texto);
         if (CODIGO_TIMEOUT.equals(codigo)) {
-            transaccion.setErrorMensaje(texto);
             cambiarEstado(transaccion, EstadoTransaccion.EN_PROCESO, ORIGEN_PROVEEDOR,
                     "Timeout al confirmar; se mantiene en proceso para reintento posterior");
             return;
         }
-        transaccion.setErrorMensaje(texto);
         cambiarEstado(transaccion, EstadoTransaccion.FALLIDA, ORIGEN_PROVEEDOR, texto);
     }
 
@@ -889,6 +915,118 @@ public class PagosServiceImpl implements PagosService {
             });
         } catch (Exception e) {
             log.warn("No se pudo enviar la notificacion por correo para el movimiento upc={}: {}", upc, e.getMessage());
+        }
+    }
+
+    private void registrarFalloValidacionCrear(Long usuarioId, PagoRequestDto request, Exception e) {
+        if (usuarioId == null || request == null) {
+            return;
+        }
+        try {
+            String codigoError = (e instanceof ApiException ae) ? ae.getCode() : "ERROR";
+            String errorMensaje = e.getMessage();
+            String idempotencyKey = (request.getIdempotencyKey() != null && !request.getIdempotencyKey().isBlank())
+                    ? request.getIdempotencyKey()
+                    : UUID.randomUUID().toString();
+            if (idempotencyKey.length() > 36) {
+                idempotencyKey = idempotencyKey.substring(0, 36);
+            }
+
+            Optional<Transaccion> previa = transaccionRepository
+                    .findByUsuarioIdAndIdempotencyKey(usuarioId, idempotencyKey);
+            Transaccion tx = previa.orElseGet(Transaccion::new);
+            if (tx.getId() == null) {
+                tx.setUsuarioId(usuarioId);
+                tx.setIdServicio(request.getIdServicio() != null ? request.getIdServicio() : 0);
+                tx.setIdProducto(request.getIdProducto() != null ? request.getIdProducto() : 0);
+                tx.setServicio("Servicio " + (request.getIdServicio() != null ? request.getIdServicio() : "N/A"));
+                tx.setProducto("Producto " + (request.getIdProducto() != null ? request.getIdProducto() : "N/A"));
+                tx.setIdempotencyKey(idempotencyKey);
+                tx.setUpc(upc(idempotencyKey));
+                tx.setUnidad(unidad);
+                tx.setComision(BigDecimal.ZERO);
+            }
+            if (request.getIdServicio() != null && request.getIdProducto() != null) {
+                try {
+                    catalogoConsulta.buscarActivo(request.getIdServicio(), request.getIdProducto()).ifPresent(cp -> {
+                        tx.setServicio(cp.getServicio());
+                        tx.setProducto(cp.getProducto());
+                    });
+                } catch (Exception ignored) {
+                }
+            }
+            tx.setReferencia(request.getReferencia() != null && !request.getReferencia().isBlank()
+                    ? request.getReferencia() : "SIN_REFERENCIA");
+            BigDecimal monto = (request.getMonto() != null && request.getMonto().compareTo(BigDecimal.ZERO) > 0)
+                    ? request.getMonto()
+                    : BigDecimal.valueOf(0.01);
+            tx.setMonto(monto);
+            tx.setEstado(EstadoTransaccion.FALLIDA);
+            tx.setCodigoError(codigoError);
+            tx.setErrorMensaje(errorMensaje);
+
+            Transaccion guardada = transaccionRepository.save(tx);
+            if (guardada != null && guardada.getId() != null) {
+                registrarEvento(guardada.getId(), EstadoTransaccion.FALLIDA, "VALIDACION", errorMensaje);
+            }
+        } catch (Exception ex) {
+            log.warn("No se pudo registrar intento fallido en transacciones para usuario {}: {}", usuarioId, ex.getMessage());
+        }
+    }
+
+    private void registrarFalloValidacionPagar(Long usuarioId, PagarServicioRequestDto request, Exception e) {
+        if (usuarioId == null || request == null) {
+            return;
+        }
+        try {
+            String codigoError = (e instanceof ApiException ae) ? ae.getCode() : "ERROR";
+            String errorMensaje = e.getMessage();
+            String referencia = request.referenciaEfectiva();
+            boolean tieneUpcExplicito = request.getUpc() != null && !request.getUpc().isBlank();
+            String claveBase = tieneUpcExplicito
+                    ? request.getUpc().trim()
+                    : UUID.randomUUID().toString();
+            String idempotencyKey = claveBase.length() <= 36 ? claveBase : claveBase.substring(0, 36);
+            String upcGenerado = upc(claveBase);
+
+            Optional<Transaccion> previa = transaccionRepository
+                    .findByUsuarioIdAndIdempotencyKey(usuarioId, idempotencyKey);
+            Transaccion tx = previa.orElseGet(Transaccion::new);
+            if (tx.getId() == null) {
+                tx.setUsuarioId(usuarioId);
+                tx.setIdServicio(request.getIdServicio() != null ? request.getIdServicio() : 0);
+                tx.setIdProducto(request.getIdProducto() != null ? request.getIdProducto() : 0);
+                tx.setServicio("Servicio " + (request.getIdServicio() != null ? request.getIdServicio() : "N/A"));
+                tx.setProducto("Producto " + (request.getIdProducto() != null ? request.getIdProducto() : "N/A"));
+                tx.setIdempotencyKey(idempotencyKey);
+                tx.setUpc(upcGenerado);
+                tx.setUnidad(unidad);
+                tx.setComision(BigDecimal.ZERO);
+            }
+            if (request.getIdServicio() != null && request.getIdProducto() != null) {
+                try {
+                    catalogoConsulta.buscarActivo(request.getIdServicio(), request.getIdProducto()).ifPresent(cp -> {
+                        tx.setServicio(cp.getServicio());
+                        tx.setProducto(cp.getProducto());
+                    });
+                } catch (Exception ignored) {
+                }
+            }
+            tx.setReferencia(referencia != null && !referencia.isBlank() ? referencia : "SIN_REFERENCIA");
+            BigDecimal monto = (request.getMontoPago() != null && request.getMontoPago().compareTo(BigDecimal.ZERO) > 0)
+                    ? request.getMontoPago()
+                    : BigDecimal.valueOf(0.01);
+            tx.setMonto(monto);
+            tx.setEstado(EstadoTransaccion.FALLIDA);
+            tx.setCodigoError(codigoError);
+            tx.setErrorMensaje(errorMensaje);
+
+            Transaccion guardada = transaccionRepository.save(tx);
+            if (guardada != null && guardada.getId() != null) {
+                registrarEvento(guardada.getId(), EstadoTransaccion.FALLIDA, "VALIDACION", errorMensaje);
+            }
+        } catch (Exception ex) {
+            log.warn("No se pudo registrar intento fallido en pagarServicio para usuario {}: {}", usuarioId, ex.getMessage());
         }
     }
 

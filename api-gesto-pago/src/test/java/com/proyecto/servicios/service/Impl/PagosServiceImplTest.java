@@ -398,6 +398,7 @@ class PagosServiceImplTest {
         TransaccionDto dto = service.crearTransaccion(1L, pago(recarga(), "5577777777", null));
 
         assertEquals("FALLIDA", dto.getEstado());
+        assertEquals("03", dto.getCodigoError());
         assertTrue(dto.getErrorMensaje().contains("carrier no responde"));
     }
 
@@ -490,6 +491,7 @@ class PagosServiceImplTest {
         TransaccionDto dto = service.confirmarTransaccion(1L, 24L);
 
         assertEquals("FALLIDA", dto.getEstado());
+        assertEquals("51", dto.getCodigoError());
         assertEquals("Dispositivo no registrado", dto.getErrorMensaje());
     }
 
@@ -791,6 +793,51 @@ class PagosServiceImplTest {
         assertEquals("APROBADA", res.getEstado());
         assertEquals("100024988", res.getNumAutorizacion());
         assertEquals("291437188", res.getIdTx());
+    }
+
+    @Test
+    void crearConValidacionFallidaRegistraIntentoFallido() {
+        when(catalogoConsulta.buscarActivo(999, 1)).thenReturn(Optional.empty());
+        CatalogoProductoCache p = new CatalogoProductoCache();
+        p.setIdServicio(999);
+        p.setIdProducto(1);
+        PagoRequestDto pagoReq = pago(p, "12345", new BigDecimal("50.00"));
+
+        ApiException error = assertThrows(ApiException.class,
+                () -> service.crearTransaccion(1L, pagoReq));
+        assertEquals("PAGO-003", error.getCode());
+
+        ArgumentCaptor<Transaccion> captor = ArgumentCaptor.forClass(Transaccion.class);
+        verify(transaccionRepository).save(captor.capture());
+        Transaccion guardada = captor.getValue();
+        assertEquals(1L, guardada.getUsuarioId());
+        assertEquals(999, guardada.getIdServicio());
+        assertEquals(1, guardada.getIdProducto());
+        assertEquals("12345", guardada.getReferencia());
+        assertEquals(new BigDecimal("50.00"), guardada.getMonto());
+        assertEquals(EstadoTransaccion.FALLIDA, guardada.getEstado());
+        assertEquals("PAGO-003", guardada.getCodigoError());
+        assertNotNull(guardada.getErrorMensaje());
+    }
+
+    @Test
+    void pagarServicioRechazadoReflejaCodigoYMensajeGestoPago() {
+        when(catalogoConsulta.buscarActivo(76, 205)).thenReturn(Optional.of(recarga()));
+        when(gestoPagoTxClient.sendTx(eq("Bearer token-de-prueba"), any()))
+                .thenReturn(XML_SENDTX_CARRIER_DOWN);
+
+        PagarServicioRequestDto req = PagarServicioRequestDto.builder()
+                .idServicio(76)
+                .idProducto(205)
+                .telefono("5577777777")
+                .montoPago(new BigDecimal("100.00"))
+                .build();
+
+        PagarServicioResponseDto res = service.pagarServicio(null, req);
+
+        assertEquals("FALLIDA", res.getEstado());
+        assertEquals("03", res.getCodigoMensaje());
+        assertTrue(res.getMensaje().contains("carrier no responde"));
     }
 
     private Transaccion transaccion(Integer idServicio, Integer idProducto,

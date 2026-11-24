@@ -78,6 +78,9 @@ public class Transaccion {
     @Column(name = "error_mensaje", columnDefinition = "TEXT")
     private String errorMensaje;
 
+    @Column(name = "codigo_error", length = 50)
+    private String codigoError;
+
     @Column(name = "fecha")
     private Instant fecha;
 

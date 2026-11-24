@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
 import { api } from '../services/api';
 import {
-  CreditCard,
   CheckCircle2,
   XCircle,
   Clock,
   AlertTriangle,
-  Receipt,
   X,
   ArrowRight,
-  ShieldCheck,
   Mail,
 } from 'lucide-react';
 
@@ -76,10 +73,13 @@ export default function PagoModal({ producto, marca, onClose, onPagoCompletado }
         } else if (estadoApi === 'PENDIENTE' || estadoApi === 'EN_PROCESO') {
           setResultado({ estado: 'PENDIENTE', transaccion: tx });
         } else {
+          const cod = tx.codigoError || tx.codigoMensaje || res.data?.codigoError || res.data?.codigoMensaje || 'N/A';
+          const motivo = tx.errorMensaje || tx.mensaje || res.data?.errorMensaje || res.data?.mensaje || 'La transacción fue rechazada por el proveedor.';
           setResultado({
-            estado: 'RECHAZADA',
+            estado: estadoApi === 'FALLIDA' ? 'FALLIDA' : 'RECHAZADA',
             transaccion: tx,
-            mensaje: tx.errorMensaje || 'La transacción fue rechazada por el proveedor.',
+            codigoError: cod,
+            mensaje: motivo,
           });
         }
 
@@ -87,18 +87,26 @@ export default function PagoModal({ producto, marca, onClose, onPagoCompletado }
           onPagoCompletado();
         }
       } else {
+        const cod = res.data?.codigoError || res.data?.codigoMensaje || res.data?.codigo || 'N/A';
+        const motivo =
+          res.data?.errorMensaje ||
+          res.data?.message ||
+          res.data?.mensaje ||
+          res.data?.error ||
+          'No se pudo completar la operación de pago.';
+        const tx = res.data?.transaccion || (res.data?.id ? res.data : null);
+        const est = (res.data?.estado || 'RECHAZADA').toUpperCase();
         setResultado({
-          estado: 'RECHAZADA',
-          mensaje:
-            res.data?.message ||
-            res.data?.mensaje ||
-            res.data?.error ||
-            'No se pudo completar la operación de pago.',
+          estado: est === 'FALLIDA' ? 'FALLIDA' : 'RECHAZADA',
+          transaccion: tx,
+          codigoError: cod,
+          mensaje: motivo,
         });
       }
     } catch (err) {
       setResultado({
         estado: 'ERROR_COMUNICACION',
+        codigoError: 'ERR_NET_COMM',
         mensaje:
           err.message ||
           'Error de comunicación con el servicio de pagos. Intenta nuevamente.',
@@ -344,7 +352,7 @@ export default function PagoModal({ producto, marca, onClose, onPagoCompletado }
               </>
             )}
 
-            {resultado.estado === 'RECHAZADA' && (
+            {(resultado.estado === 'RECHAZADA' || resultado.estado === 'FALLIDA') && (
               <>
                 <div
                   className="modal-icon-wrap"
@@ -356,12 +364,97 @@ export default function PagoModal({ producto, marca, onClose, onPagoCompletado }
                 >
                   <XCircle size={36} />
                 </div>
+                <div style={{ marginBottom: '0.5rem' }}>
+                  <span
+                    className="status-badge rechazada"
+                    style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem' }}
+                  >
+                    <XCircle size={14} />
+                    <span>{resultado.estado === 'FALLIDA' ? 'TRANSACCIÓN FALLIDA' : 'TRANSACCIÓN RECHAZADA'}</span>
+                  </span>
+                </div>
                 <h2 className="modal-title" style={{ color: '#f87171' }}>
-                  Compra Rechazada
+                  {resultado.estado === 'FALLIDA' ? 'Compra Fallida' : 'Compra Rechazada'}
                 </h2>
                 <p className="modal-subtitle">
-                  {resultado.mensaje || 'No se pudo autorizar la operación de compra.'}
+                  El procesador GestoPago no pudo autorizar esta operación.
                 </p>
+
+                {/* Tarjeta destacada de error con Código GestoPago y Motivo del Rechazo */}
+                <div
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.08)',
+                    border: '1px solid rgba(239, 68, 68, 0.35)',
+                    borderRadius: '14px',
+                    padding: '1.25rem',
+                    margin: '1.5rem 0',
+                    textAlign: 'left',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      color: '#f87171',
+                      fontWeight: 700,
+                      fontSize: '0.92rem',
+                      marginBottom: '0.85rem',
+                      borderBottom: '1px solid rgba(239, 68, 68, 0.2)',
+                      paddingBottom: '0.5rem',
+                    }}
+                  >
+                    <AlertTriangle size={18} />
+                    <span>Detalle del Rechazo / Fallo</span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.88rem' }}>
+                    <div>
+                      <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}>
+                        Motivo del Rechazo:
+                      </span>
+                      <strong style={{ color: '#fca5a5', fontSize: '0.95rem', display: 'block', lineHeight: 1.4 }}>
+                        {resultado.mensaje || resultado.transaccion?.errorMensaje || 'La transacción fue rechazada por el proveedor.'}
+                      </strong>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0, 0, 0, 0.25)', padding: '0.55rem 0.75rem', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+                        Código de Error GestoPago:
+                      </span>
+                      <code
+                        style={{
+                          background: 'rgba(239, 68, 68, 0.25)',
+                          color: '#fecaca',
+                          fontWeight: 700,
+                          padding: '0.2rem 0.6rem',
+                          borderRadius: '6px',
+                          fontSize: '0.88rem',
+                          letterSpacing: '0.03em',
+                        }}
+                      >
+                        {resultado.codigoError || resultado.transaccion?.codigoError || resultado.transaccion?.codigoMensaje || 'N/A'}
+                      </code>
+                    </div>
+
+                    {resultado.transaccion && (
+                      <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.06)', paddingTop: '0.5rem', marginTop: '0.2rem', fontSize: '0.82rem', color: 'var(--text-dim)', lineHeight: 1.7 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span>Folio / ID:</span>
+                          <strong style={{ color: 'var(--text-muted)' }}>#{resultado.transaccion.id || 'N/A'}</strong>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span>Referencia:</span>
+                          <span>{resultado.transaccion.referencia || referencia}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span>Importe Solicitado:</span>
+                          <span>${Number(resultado.transaccion.monto || monto).toFixed(2)} MXN</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </>
             )}
 
@@ -377,12 +470,61 @@ export default function PagoModal({ producto, marca, onClose, onPagoCompletado }
                 >
                   <AlertTriangle size={36} />
                 </div>
+                <div style={{ marginBottom: '0.5rem' }}>
+                  <span
+                    className="status-badge rechazada"
+                    style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem' }}
+                  >
+                    <AlertTriangle size={14} />
+                    <span>FALLO DE CONEXIÓN</span>
+                  </span>
+                </div>
                 <h2 className="modal-title" style={{ color: '#f87171' }}>
                   Error de Comunicación
                 </h2>
                 <p className="modal-subtitle">
-                  {resultado.mensaje}
+                  Ocurrió un problema al intentar contactar con el servicio de pagos.
                 </p>
+
+                <div
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.08)',
+                    border: '1px solid rgba(239, 68, 68, 0.35)',
+                    borderRadius: '14px',
+                    padding: '1.25rem',
+                    margin: '1.5rem 0',
+                    textAlign: 'left',
+                  }}
+                >
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.88rem' }}>
+                    <div>
+                      <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}>
+                        Motivo del Rechazo:
+                      </span>
+                      <strong style={{ color: '#fca5a5', fontSize: '0.95rem', display: 'block', lineHeight: 1.4 }}>
+                        {resultado.mensaje}
+                      </strong>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0, 0, 0, 0.25)', padding: '0.55rem 0.75rem', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+                        Código de Error GestoPago:
+                      </span>
+                      <code
+                        style={{
+                          background: 'rgba(239, 68, 68, 0.25)',
+                          color: '#fecaca',
+                          fontWeight: 700,
+                          padding: '0.2rem 0.6rem',
+                          borderRadius: '6px',
+                          fontSize: '0.88rem',
+                        }}
+                      >
+                        {resultado.codigoError || 'ERR_COMUNICACION'}
+                      </code>
+                    </div>
+                  </div>
+                </div>
               </>
             )}
 

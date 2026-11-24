@@ -17,6 +17,7 @@ class PagoPendiente {
     this.comision,
     required this.estado,
     this.fecha,
+    this.codigoError,
     this.errorMensaje,
     this.puedeConfirmar = false,
     this.puedeReintentar = false,
@@ -32,6 +33,7 @@ class PagoPendiente {
   final String? comision;
   final EstadoTransaccion estado;
   final String? fecha;
+  final String? codigoError;
   final String? errorMensaje;
   final bool puedeConfirmar;
   final bool puedeReintentar;
@@ -48,7 +50,8 @@ class PagoPendiente {
       comision: json['comision'] as String?,
       estado: EstadoTransaccion.fromApi(json['estado'] as String? ?? ''),
       fecha: json['fecha'] as String?,
-      errorMensaje: json['errorMensaje'] as String?,
+      codigoError: json['codigoError']?.toString() ?? json['codigoMensaje']?.toString(),
+      errorMensaje: json['errorMensaje'] as String? ?? json['mensaje'] as String?,
       puedeConfirmar: json['puedeConfirmar'] as bool? ?? false,
       puedeReintentar: json['puedeReintentar'] as bool? ?? false,
     );
@@ -65,6 +68,7 @@ class PagoPendiente {
         'comision': comision,
         'estado': estado.name,
         'fecha': fecha,
+        'codigoError': codigoError,
         'errorMensaje': errorMensaje,
         'puedeConfirmar': puedeConfirmar,
         'puedeReintentar': puedeReintentar,

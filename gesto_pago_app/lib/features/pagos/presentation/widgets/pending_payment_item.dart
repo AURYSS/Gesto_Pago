@@ -114,6 +114,26 @@ class PendingPaymentItem extends StatelessWidget {
                     ),
                   ],
                 ),
+                if (pendiente.estado == EstadoTransaccion.fallida &&
+                    ((pendiente.errorMensaje != null && pendiente.errorMensaje!.isNotEmpty) ||
+                        (pendiente.codigoError != null && pendiente.codigoError!.isNotEmpty))) ...[
+                  const SizedBox(height: GpSpacing.xs),
+                  Text(
+                    [
+                      if (pendiente.codigoError != null && pendiente.codigoError!.isNotEmpty)
+                        'Código GestoPago: ${pendiente.codigoError}',
+                      if (pendiente.errorMensaje != null && pendiente.errorMensaje!.isNotEmpty)
+                        'Motivo: ${pendiente.errorMensaje}',
+                    ].join(' • '),
+                    style: TextStyle(
+                      color: scheme.error,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ],
             ),
           ),
