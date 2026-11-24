@@ -88,6 +88,12 @@ public class PagosServiceImpl implements PagosService {
     private final String unidad;
     private final Duration esperaConfirmacion;
 
+    @Autowired(required = false)
+    private com.proyecto.servicios.service.EmailService emailService;
+
+    @Autowired(required = false)
+    private com.proyecto.servicios.repositorys.auth.UsuarioRepository usuarioRepository;
+
     public PagosServiceImpl(GestoPagoTokenService gestoPagoTokenService,
                             GestoPagoTxClient gestoPagoTxClient,
                             TransaccionRepository transaccionRepository,
@@ -192,6 +198,7 @@ public class PagosServiceImpl implements PagosService {
             cambiarEstado(transaccion, EstadoTransaccion.EN_PROCESO, "API",
                     "El proveedor no respondio; el resultado se confirmara despues");
         }
+        notificarMovimientoPorCorreo(usuarioId, producto.getServicio(), request.getReferencia(), monto, transaccion.getUpc(), transaccion.getEstado());
         return TransaccionDto.from(transaccion);
     }
 
@@ -302,6 +309,8 @@ public class PagosServiceImpl implements PagosService {
                 cambiarEstado(transaccion, EstadoTransaccion.EN_PROCESO, "API", textoMensaje);
             }
         }
+
+        notificarMovimientoPorCorreo(usuarioId, producto.getServicio(), referencia, monto, upcGenerado, estadoFinal);
 
         GestoPagoMensajeOperacion msg = respuesta == null ? null : respuesta.getMensaje();
         return PagarServicioResponseDto.builder()
@@ -856,6 +865,31 @@ public class PagosServiceImpl implements PagosService {
             return a;
         }
         return b;
+    }
+
+    private void notificarMovimientoPorCorreo(Long usuarioId, String servicio, String referencia, BigDecimal monto, String upc, EstadoTransaccion estado) {
+        if (emailService == null || usuarioRepository == null || usuarioId == null) return;
+        try {
+            usuarioRepository.findById(usuarioId).ifPresent(u -> {
+                if (u.getEmail() != null && !u.getEmail().isBlank()) {
+                    String fechaStr = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
+                            .withZone(ZoneId.systemDefault())
+                            .format(Instant.now());
+                    emailService.enviarNotificacionMovimiento(
+                            u.getEmail(),
+                            u.getNombre(),
+                            servicio != null ? servicio : "Servicio GestoPago",
+                            referencia != null ? referencia : "N/A",
+                            monto != null ? "$" + monto.toPlainString() + " MXN" : "$0.00 MXN",
+                            upc != null ? upc : "N/A",
+                            estado != null ? estado.name() : "PROCESADA",
+                            fechaStr
+                    );
+                }
+            });
+        } catch (Exception e) {
+            log.warn("No se pudo enviar la notificacion por correo para el movimiento upc={}: {}", upc, e.getMessage());
+        }
     }
 
     @FunctionalInterface

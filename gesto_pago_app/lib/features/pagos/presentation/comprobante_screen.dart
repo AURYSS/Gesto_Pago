@@ -160,6 +160,27 @@ class _ComprobanteScreenState extends ConsumerState<ComprobanteScreen> {
                 ],
               ),
             ),
+            Container(
+              margin: const EdgeInsets.only(top: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: GpColors.verde.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: GpColors.verde.withValues(alpha: 0.4)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.mark_email_read_outlined, color: GpColors.verde, size: 20),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Se ha enviado la notificación y comprobante de este movimiento a tu correo registrado.',
+                      style: TextStyle(fontSize: 12, color: Colors.white70),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: 20),
             Text(
               enProceso ? l.pagoPending : (transaccion.legend ?? ''),

@@ -608,3 +608,282 @@ body {
     transform: translateY(0) scale(1);
   }
 }
+
+/* Auth Tabs & Form Enhancements */
+.auth-tabs {
+  display: flex;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 1.5rem;
+  gap: 4px;
+}
+
+.auth-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.auth-tab:hover {
+  color: var(--text-main);
+}
+
+.auth-tab.active {
+  background: var(--bg-card);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-color);
+}
+
+/* Input validation states */
+.input-field.has-error {
+  border-color: var(--danger) !important;
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.input-field.has-error:focus {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25) !important;
+}
+
+.field-error-msg {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #f87171;
+  font-size: 0.78rem;
+  font-weight: 500;
+  margin-top: 0.35rem;
+  animation: fadeIn 0.2s ease;
+}
+
+/* Password Toggle Icon Button */
+.input-action-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition: color 0.15s ease;
+}
+
+.input-action-btn:hover {
+  color: var(--text-main);
+}
+
+/* Password Strength Indicator */
+.password-strength-container {
+  margin-top: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.password-strength-bar-bg {
+  width: 100%;
+  height: 4px;
+  background: var(--bg-input);
+  border-radius: 2px;
+  overflow: hidden;
+  display: flex;
+  gap: 3px;
+}
+
+.password-strength-segment {
+  flex: 1;
+  height: 100%;
+  border-radius: 2px;
+  transition: background-color 0.3s ease;
+}
+
+.password-strength-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+}
+
+.password-requirements-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.3rem 0.6rem;
+  margin-top: 0.4rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(15, 21, 35, 0.6);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  font-size: 0.74rem;
+}
+
+.req-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-dim);
+  transition: color 0.2s ease;
+}
+
+.req-item.met {
+  color: #34d399;
+}
+
+/* Form Wizard & 2-column Grid */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 1rem;
+}
+
+@media (max-width: 640px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.wizard-steps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  gap: 0.5rem;
+}
+
+.wizard-step-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  transition: all 0.2s ease;
+}
+
+.wizard-step-item.active {
+  color: #ffffff;
+}
+
+.wizard-step-item.completed {
+  color: #34d399;
+}
+
+.step-num-badge {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #1e293b;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.wizard-step-item.active .step-num-badge {
+  background: var(--primary);
+  color: white;
+}
+
+.wizard-step-item.completed .step-num-badge {
+  background: #047857;
+  color: #34d399;
+}
+
+.account-info-card {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+/* Notifications Dropdown */
+.notifications-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 380px;
+  background: #131a29;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65);
+  z-index: 100;
+  animation: slideUp 0.2s ease;
+  overflow: hidden;
+}
+
+.notifications-header {
+  padding: 0.9rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #0f1523;
+}
+
+.notifications-body {
+  max-height: 380px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.notification-item {
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.notification-item:hover {
+  background: var(--bg-card-hover);
+}
+
+.notification-badge-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ef4444;
+  color: white;
+  border-radius: 9999px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid #131a29;
+}
+
+
+

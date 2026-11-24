@@ -42,12 +42,31 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return;
     }
     final l = AppLocalizations.of(context);
-    if (_passwordController.text != _confirmacionController.text) {
+    final pass = _passwordController.text;
+    final conf = _confirmacionController.text;
+
+    if (pass != conf) {
       setState(() => _error = l.registerPasswordMismatch);
       return;
     }
-    if (_passwordController.text.length < 6) {
-      setState(() => _error = l.registerPasswordTooShort);
+    if (pass.length < 8) {
+      setState(() => _error = 'La contraseña debe contener al menos 8 caracteres.');
+      return;
+    }
+    if (!RegExp(r'[A-Z]').hasMatch(pass)) {
+      setState(() => _error = 'La contraseña debe incluir al menos una letra mayúscula.');
+      return;
+    }
+    if (!RegExp(r'[a-z]').hasMatch(pass)) {
+      setState(() => _error = 'La contraseña debe incluir al menos una letra minúscula.');
+      return;
+    }
+    if (!RegExp(r'[0-9]').hasMatch(pass)) {
+      setState(() => _error = 'La contraseña debe incluir al menos un número.');
+      return;
+    }
+    if (!RegExp(r'''[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?]''').hasMatch(pass)) {
+      setState(() => _error = 'La contraseña debe incluir al menos un carácter especial.');
       return;
     }
     setState(() {
@@ -107,8 +126,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         labelText: l.registerNameLabel,
                         prefixIcon: const Icon(Icons.badge_outlined),
                       ),
-                      validator: (value) =>
-                          (value?.trim().isEmpty ?? true) ? l.registerNameRequired : null,
+                      validator: (value) {
+                        final v = value?.trim() ?? '';
+                        if (v.isEmpty) {
+                          return l.registerNameRequired;
+                        }
+                        if (v.length < 2 || v.length > 50) {
+                          return 'El nombre debe tener entre 2 y 50 caracteres';
+                        }
+                        if (!RegExp(r"^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$").hasMatch(v)) {
+                          return 'Solo se permiten letras y espacios';
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 16),
                     TextFormField(

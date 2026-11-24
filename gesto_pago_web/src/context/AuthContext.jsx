@@ -88,6 +88,81 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const register = async (nombre, email, password) => {
+    setLoading(true);
+    setRevocationMessage(null);
+    try {
+      const res = await api.register(nombre, email, password);
+
+      if (!res.ok) {
+        const errorMsg =
+          res.data?.message ||
+          res.data?.mensaje ||
+          res.data?.error ||
+          'Error al registrar la cuenta';
+        throw new Error(errorMsg);
+      }
+
+      const userData = {
+        email: email.trim().toLowerCase(),
+        nombre: res.data.nombre || nombre.trim(),
+        roles: res.data.roles || ['CLIENTE'],
+      };
+
+      localStorage.setItem('gp_access_token', res.data.accessToken);
+      if (res.data.refreshToken) {
+        localStorage.setItem('gp_refresh_token', res.data.refreshToken);
+      }
+      localStorage.setItem('gp_user', JSON.stringify(userData));
+      setToken(res.data.accessToken);
+      setUser(userData);
+      setStep('login');
+      setTempAuth(null);
+
+      return { success: true, user: userData };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const registerPersonaFisica = async (data) => {
+    setLoading(true);
+    setRevocationMessage(null);
+    try {
+      const res = await api.registerPersonaFisica(data);
+
+      if (!res.ok) {
+        const errorMsg =
+          res.data?.message ||
+          res.data?.mensaje ||
+          res.data?.error ||
+          'Error al registrar la persona física';
+        throw new Error(errorMsg);
+      }
+
+      const fullName = `${data.nombre.trim()} ${data.apellidoPaterno.trim()}`;
+      const userData = {
+        email: data.correo.trim().toLowerCase(),
+        nombre: res.data.nombre || fullName,
+        roles: res.data.roles || ['CLIENTE'],
+      };
+
+      localStorage.setItem('gp_access_token', res.data.accessToken);
+      if (res.data.refreshToken) {
+        localStorage.setItem('gp_refresh_token', res.data.refreshToken);
+      }
+      localStorage.setItem('gp_user', JSON.stringify(userData));
+      setToken(res.data.accessToken);
+      setUser(userData);
+      setStep('login');
+      setTempAuth(null);
+
+      return { success: true, user: userData, microData: res.microData };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const verify2Fa = async (codigo, forzarCierre = false) => {
     if (!tempAuth?.tempToken) {
       throw new Error('No hay sesión de verificación activa');
@@ -166,6 +241,8 @@ export function AuthProvider({ children }) {
         revocationMessage,
         loading,
         login,
+        register,
+        registerPersonaFisica,
         verify2Fa,
         cancel2Fa,
         logout,

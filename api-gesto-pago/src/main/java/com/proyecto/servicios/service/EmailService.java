@@ -13,4 +13,18 @@ public interface EmailService {
      * @param dispositivo  origen del intento de inicio de sesión ("MOVIL" o "WEB")
      */
     void enviarCodigo2Fa(String destinatario, String codigo2Fa, String dispositivo);
+
+    /**
+     * Envía una notificación por correo electrónico con los detalles del movimiento / transacción.
+     */
+    void enviarNotificacionMovimiento(
+            String destinatario,
+            String nombreUsuario,
+            String servicio,
+            String referencia,
+            String monto,
+            String folioUpc,
+            String estado,
+            String fecha
+    );
 }

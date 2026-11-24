@@ -78,6 +78,91 @@ export const api = {
     return { status: res.status, ok: res.ok, data };
   },
 
+  async register(nombre, email, password) {
+    const res = await request('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({
+        nombre: nombre.trim(),
+        email: email.trim().toLowerCase(),
+        password,
+      }),
+    });
+    const data = await res.json();
+    return { status: res.status, ok: res.ok, data };
+  },
+
+  async registerPersonaFisica(data) {
+    // 1. Intentar registrar en micro-usuarios (/api/clientes)
+    let microData = null;
+    try {
+      const clientePayload = {
+        cliente: {
+          nombre: data.nombre.trim(),
+          segundoNombre: data.segundoNombre?.trim() || null,
+          apellidoPaterno: data.apellidoPaterno.trim(),
+          apellidoMaterno: data.apellidoMaterno.trim(),
+          fechaNacimiento: data.fechaNacimiento,
+          curp: data.curp.trim().toUpperCase(),
+          rfc: data.rfc.trim().toUpperCase(),
+          sexo: data.sexo,
+          nacionalidad: data.nacionalidad.trim(),
+          estadoCivil: data.estadoCivil,
+          correo: data.correo.trim().toLowerCase(),
+          telefonoMovil: data.telefonoMovil.trim(),
+          telefonoAlternativo: data.telefonoAlternativo?.trim() || null,
+          ocupacion: data.ocupacion.trim(),
+          empresa: data.empresa.trim(),
+          ingresoMensual: parseFloat(data.ingresoMensual),
+          domicilio: {
+            calle: data.calle.trim(),
+            numeroExterior: data.numeroExterior.trim(),
+            numeroInterior: data.numeroInterior?.trim() || null,
+            colonia: data.colonia.trim(),
+            codigoPostal: data.codigoPostal.trim(),
+            municipio: data.municipio.trim(),
+            estado: data.estado.trim(),
+            pais: data.pais.trim(),
+          },
+        },
+        password: data.password,
+      };
+
+      const resMicro = await fetch('/api/clientes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(clientePayload),
+      });
+
+      if (resMicro.ok) {
+        microData = await resMicro.json();
+      }
+    } catch (_) {
+      // Ignorar fallo si micro-usuarios no está levantado en puerto 8081
+    }
+
+    // 2. Registrar en api-gesto-pago (/auth/register) para autenticación unificada
+    const fullName = `${data.nombre.trim()} ${data.apellidoPaterno.trim()}${
+      data.apellidoMaterno ? ' ' + data.apellidoMaterno.trim() : ''
+    }`;
+
+    const resAuth = await request('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({
+        nombre: fullName,
+        email: data.correo.trim().toLowerCase(),
+        password: data.password,
+      }),
+    });
+
+    const authData = await resAuth.json();
+    return {
+      status: resAuth.status,
+      ok: resAuth.ok,
+      data: authData,
+      microData,
+    };
+  },
+
   async verify2Fa(tempToken, codigo, forzarCierre = false) {
     const res = await request('/auth/2fa/verify', {
       method: 'POST',

@@ -73,7 +73,13 @@ public class AuthServiceImpl implements AuthService {
                            PasswordEncoder passwordEncoder,
                            JwtService jwtService,
                            long refreshTtlDays) {
-        this(usuarioRepository, refreshTokenRepository, rolRepository, passwordEncoder, jwtService, (dest, cod, disp) -> {}, refreshTtlDays, false);
+        this(usuarioRepository, refreshTokenRepository, rolRepository, passwordEncoder, jwtService,
+                new EmailService() {
+                    @Override
+                    public void enviarCodigo2Fa(String d, String c, String disp) {}
+                    @Override
+                    public void enviarNotificacionMovimiento(String d, String n, String s, String r, String m, String f, String e, String fe) {}
+                }, refreshTtlDays, true);
     }
 
     @Override
