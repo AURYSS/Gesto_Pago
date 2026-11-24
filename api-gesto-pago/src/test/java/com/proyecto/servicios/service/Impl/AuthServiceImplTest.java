@@ -67,6 +67,7 @@ class AuthServiceImplTest {
         admin.setNombre("Admin Test");
         admin.setPasswordHash(passwordEncoder.encode("S3creto!"));
         admin.setActivo(true);
+        admin.setSesionActiva(true);
         Rol rolAdmin = new Rol();
         rolAdmin.setNombre("ADMIN");
         Rol rolCliente = new Rol();

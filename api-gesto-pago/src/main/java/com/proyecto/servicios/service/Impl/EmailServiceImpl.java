@@ -61,6 +61,117 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    @Override
+    @Async
+    public void enviarNotificacionMovimiento(
+            String destinatario,
+            String nombreUsuario,
+            String servicio,
+            String referencia,
+            String monto,
+            String folioUpc,
+            String estado,
+            String fecha) {
+        if (!StringUtils.hasText(destinatario)) return;
+
+        if (mailSender == null || !StringUtils.hasText(remitente)) {
+            log.info("[SIMULADO EN CONSOLA] Notificacion de movimiento para [{}]: Servicio={}, Monto={}, Folio={}, Estado={}",
+                    destinatario, servicio, monto, folioUpc, estado);
+            return;
+        }
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(remitente, remitenteNombre);
+            helper.setTo(destinatario);
+            helper.setSubject("Comprobante de Movimiento: " + servicio + " (" + estado + ") - Gesto Pago");
+
+            String html = construirHtmlMovimiento(nombreUsuario, servicio, referencia, monto, folioUpc, estado, fecha);
+            helper.setText(html, true);
+
+            mailSender.send(message);
+            log.info("Notificacion de movimiento enviada exitosamente a [{}] para folio [{}]", destinatario, folioUpc);
+        } catch (Exception e) {
+            log.error("Error al enviar notificacion de movimiento a [{}]: {}", destinatario, e.getMessage());
+        }
+    }
+
+    private String construirHtmlMovimiento(
+            String nombreUsuario,
+            String servicio,
+            String referencia,
+            String monto,
+            String folioUpc,
+            String estado,
+            String fecha) {
+        String colorEstado = "APROBADA".equalsIgnoreCase(estado) ? "#10b981" : "#f59e0b";
+        String saludo = StringUtils.hasText(nombreUsuario) ? "Hola, <strong>" + nombreUsuario + "</strong>" : "Estimado cliente";
+        return """
+            <!DOCTYPE html>
+            <html lang="es">
+            <head>
+                <meta charset="UTF-8">
+                <style>
+                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0b0f19; color: #f8fafc; margin: 0; padding: 20px; }
+                    .container { max-width: 540px; margin: 0 auto; background: #131a29; border: 1px solid #222d42; border-radius: 16px; padding: 32px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+                    .header { text-align: center; margin-bottom: 24px; }
+                    .brand { font-size: 24px; font-weight: 800; color: #10b981; letter-spacing: -0.5px; }
+                    .subtitle { font-size: 14px; color: #94a3b8; margin-top: 4px; }
+                    .amount-card { background: #0f1523; border: 1px solid #1e293b; border-radius: 12px; padding: 20px; text-align: center; margin: 20px 0; }
+                    .amount { font-size: 32px; font-weight: 800; color: #34d399; margin: 8px 0; }
+                    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 700; text-transform: uppercase; background: rgba(16, 185, 129, 0.15); color: %s; border: 1px solid %s; }
+                    .detail-table { width: 100%%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
+                    .detail-table td { padding: 10px 0; border-bottom: 1px solid #1e293b; color: #cbd5e1; }
+                    .detail-table td.label { color: #64748b; font-weight: 600; width: 40%%; }
+                    .footer { text-align: center; font-size: 12px; color: #64748b; margin-top: 28px; border-top: 1px solid #1e293b; padding-top: 16px; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <div class="brand">Gesto Pago</div>
+                        <div class="subtitle">Notificación de Movimiento Transaccional</div>
+                    </div>
+                    <p style="font-size: 14px; color: #cbd5e1; line-height: 1.5;">
+                        %s. Te informamos que se ha procesado un movimiento en tu cuenta:
+                    </p>
+                    <div class="amount-card">
+                        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Monto Pagado</div>
+                        <div class="amount">%s</div>
+                        <span class="status-badge">%s</span>
+                    </div>
+                    <table class="detail-table">
+                        <tr>
+                            <td class="label">Servicio / Producto:</td>
+                            <td><strong>%s</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="label">Referencia / Teléfono:</td>
+                            <td>%s</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Folio / UPC de Operación:</td>
+                            <td style="font-family: monospace;">%s</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Fecha y Hora:</td>
+                            <td>%s</td>
+                        </tr>
+                    </table>
+                    <p style="font-size: 12px; color: #94a3b8; margin-top: 20px; line-height: 1.4;">
+                        Este comprobante digital es generado automáticamente por el ecosistema Gesto Pago.
+                    </p>
+                    <div class="footer">
+                        Gesto Pago &bull; Ecosistema de Comercio Digital Seguro &bull; Unidad II
+                    </div>
+                </div>
+            </body>
+            </html>
+            """.formatted(colorEstado, colorEstado, saludo, monto, estado, servicio, referencia, folioUpc, fecha);
+    }
+
     private String construirHtml2Fa(String codigo2Fa, String dispositivo) {
         String dispNombre = "WEB".equalsIgnoreCase(dispositivo) ? "Plataforma Web" : "Aplicación Móvil";
         return """
