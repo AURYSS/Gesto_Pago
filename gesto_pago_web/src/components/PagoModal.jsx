@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { api } from '../services/api';
+import ServiceLogo from './ServiceLogo';
 import {
   CheckCircle2,
   XCircle,
@@ -139,24 +140,34 @@ export default function PagoModal({ producto, marca, onClose, onPagoCompletado }
         {!resultado ? (
           <div>
             <div className="modal-header" style={{ textAlign: 'left', marginBottom: '1.25rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                <span
-                  className="brand-badge"
-                  style={{
-                    backgroundColor: marca?.color ? `${marca.color}22` : 'rgba(16, 185, 129, 0.15)',
-                    color: marca?.color || 'var(--primary)',
-                    border: `1px solid ${marca?.color || 'var(--primary)'}55`,
-                  }}
-                >
-                  {marca?.nombre || 'Servicio'}
-                </span>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
-                  ID: #{producto.idProducto || producto.id}
-                </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem', marginBottom: '0.75rem' }}>
+                <ServiceLogo
+                  service={producto.servicio || producto.nombre}
+                  brand={marca}
+                  category={producto.categoria}
+                  size={50}
+                />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
+                    <span
+                      className="brand-badge"
+                      style={{
+                        backgroundColor: marca?.color ? `${marca.color}22` : 'rgba(16, 185, 129, 0.15)',
+                        color: marca?.color || 'var(--primary)',
+                        border: `1px solid ${marca?.color || 'var(--primary)'}55`,
+                      }}
+                    >
+                      {marca?.nombre || producto.servicio || 'Servicio'}
+                    </span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
+                      ID: #{producto.idProducto || producto.id}
+                    </span>
+                  </div>
+                  <h2 className="modal-title" style={{ fontSize: '1.3rem', margin: 0 }}>
+                    {producto.nombre || 'Pago de Servicio'}
+                  </h2>
+                </div>
               </div>
-              <h2 className="modal-title" style={{ fontSize: '1.35rem' }}>
-                {producto.nombre || 'Pago de Servicio'}
-              </h2>
               <p className="modal-subtitle">
                 {producto.descripcion || 'Ingresa los datos para confirmar la operación comercial'}
               </p>
@@ -282,6 +293,23 @@ export default function PagoModal({ producto, marca, onClose, onPagoCompletado }
                     lineHeight: 1.8,
                   }}
                 >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                    <ServiceLogo
+                      service={resultado.transaccion.servicio || producto.servicio || producto.nombre}
+                      brand={marca}
+                      category={producto.categoria}
+                      size={44}
+                    />
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '0.98rem', color: 'var(--text-main)' }}>
+                        {resultado.transaccion.servicio || marca?.nombre || 'GestoPago'}
+                      </div>
+                      <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                        {resultado.transaccion.producto || producto.nombre}
+                      </div>
+                    </div>
+                  </div>
+
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.4rem', marginBottom: '0.4rem' }}>
                     <span style={{ color: 'var(--text-muted)' }}>Folio / ID:</span>
                     <strong style={{ color: 'var(--text-main)' }}>#{resultado.transaccion.id}</strong>

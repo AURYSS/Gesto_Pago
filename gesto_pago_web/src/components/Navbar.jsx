@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
+import ServiceLogo from './ServiceLogo';
 import {
   CreditCard,
   ShoppingBag,
@@ -175,20 +176,29 @@ export default function Navbar({ activeTab, setActiveTab }) {
                           setShowNotifications(false);
                         }}
                       >
-                        <div
-                          style={{
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '8px',
-                            background: iconBg,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0,
-                            marginTop: '2px',
-                          }}
-                        >
-                          {IconComp}
+                        <div style={{ position: 'relative', flexShrink: 0, marginTop: '2px' }}>
+                          <ServiceLogo
+                            service={m.servicio}
+                            brand={m.servicio}
+                            size={34}
+                          />
+                          <div
+                            style={{
+                              position: 'absolute',
+                              bottom: '-3px',
+                              right: '-3px',
+                              width: '15px',
+                              height: '15px',
+                              borderRadius: '50%',
+                              background: iconBg,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              border: '1.5px solid var(--bg-card)',
+                            }}
+                          >
+                            {React.cloneElement(IconComp, { size: 9 })}
+                          </div>
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
