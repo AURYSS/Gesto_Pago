@@ -9,6 +9,8 @@ class PasswordField extends StatefulWidget {
     this.hint,
     this.autofillHints,
     this.onSubmitted,
+    this.validator,
+    this.onChanged,
     this.enabled = true,
     this.autofocus = false,
   });
@@ -18,6 +20,8 @@ class PasswordField extends StatefulWidget {
   final String? hint;
   final Iterable<String>? autofillHints;
   final ValueChanged<String>? onSubmitted;
+  final FormFieldValidator<String>? validator;
+  final ValueChanged<String>? onChanged;
   final bool enabled;
   final bool autofocus;
 
@@ -37,6 +41,7 @@ class _PasswordFieldState extends State<PasswordField> {
       autofocus: widget.autofocus,
       autofillHints: widget.autofillHints,
       onSubmitted: widget.onSubmitted,
+      onChanged: widget.onChanged,
       textInputAction: widget.onSubmitted != null ? TextInputAction.done : null,
       autocorrect: false,
       enableSuggestions: false,

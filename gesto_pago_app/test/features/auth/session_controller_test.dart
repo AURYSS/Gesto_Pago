@@ -6,6 +6,7 @@ import 'package:gesto_pago_app/core/providers/app_providers.dart';
 import 'package:gesto_pago_app/features/auth/application/session_controller.dart';
 import 'package:gesto_pago_app/features/auth/domain/auth_repository.dart';
 import 'package:gesto_pago_app/features/auth/domain/auth_session.dart';
+import 'package:gesto_pago_app/features/auth/domain/persona_fisica_registro.dart';
 
 class _FakeAuthRepository implements AuthRepository {
   _FakeAuthRepository({this.session, this.restoreError});
@@ -59,6 +60,17 @@ class _FakeAuthRepository implements AuthRepository {
     required String password,
   }) {
     throw UnimplementedError();
+  }
+
+  @override
+  Future<AuthSession> registerPersonaFisica(PersonaFisicaRegistro datos) async {
+    return AuthSession(
+      email: datos.correo,
+      nombre: datos.nombreCompleto,
+      accessToken: 'access-pf',
+      refreshToken: 'refresh-pf',
+      roles: const ['CLIENTE'],
+    );
   }
 
   @override
@@ -172,5 +184,39 @@ void main() {
       state.revocationMessage,
       'Tu sesión fue cerrada porque se inició sesión en la plataforma Web.',
     );
+  });
+
+  test('registerPersonaFisica -> crea cliente y pasa a authenticated', () async {
+    final container = containerWith(null, null);
+
+    const datos = PersonaFisicaRegistro(
+      nombre: 'Maria',
+      apellidoPaterno: 'Lopez',
+      apellidoMaterno: 'Sanchez',
+      fechaNacimiento: '1998-08-20',
+      curp: 'LOSM980820MDFRRN02',
+      rfc: 'LOSM980820XX2',
+      sexo: 'FEMENINO',
+      estadoCivil: 'SOLTERO',
+      correo: 'maria@dominio.com',
+      telefonoMovil: '4189998877',
+      calle: 'Juarez',
+      numeroExterior: '25',
+      colonia: 'Centro',
+      municipio: 'Dolores Hidalgo',
+      estado: 'Guanajuato',
+      codigoPostal: '37800',
+      ocupacion: 'Contadora',
+      empresa: 'Finanzas SA',
+      ingresoMensual: 30000,
+      password: 'Password123!',
+    );
+
+    final state = await container.read(sessionControllerProvider.notifier).registerPersonaFisica(datos);
+
+    expect(state.status, SessionStatus.authenticated);
+    expect(state.session?.email, 'maria@dominio.com');
+    expect(state.session?.nombre, 'Maria Lopez Sanchez');
+    expect(state.session?.accessToken, 'access-pf');
   });
 }

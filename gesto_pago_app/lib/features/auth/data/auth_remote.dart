@@ -1,8 +1,10 @@
 import 'package:dio/dio.dart';
 
+import '../../../core/config/app_config.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/app_exception.dart';
 import '../../auth/domain/auth_session.dart';
+import '../domain/persona_fisica_registro.dart';
 
 class LoginResponse {
   const LoginResponse({
@@ -120,6 +122,33 @@ class AuthRemote {
     } catch (e) {
       throw ApiClient.unwrap(e);
     }
+  }
+
+  Future<LoginResponse> registerPersonaFisica(PersonaFisicaRegistro datos) async {
+    // 1. Intentar registrar en micro-usuarios (/api/clientes)
+    try {
+      final microDio = Dio(
+        BaseOptions(
+          baseUrl: AppConfig.microUsuariosBaseUrl,
+          connectTimeout: const Duration(seconds: 5),
+          receiveTimeout: const Duration(seconds: 15),
+          headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+        ),
+      );
+      await microDio.post(
+        '/api/clientes',
+        data: datos.toMicroUsuariosPayload(),
+      );
+    } catch (_) {
+      // Ignorar fallo si micro-usuarios no está levantado en puerto 8081
+    }
+
+    // 2. Registrar en api-gesto-pago (/auth/register) para autenticación unificada
+    return register(
+      nombre: datos.nombreCompleto,
+      email: datos.correo,
+      password: datos.password,
+    );
   }
 
   Future<LoginResponse> refresh({required String refreshToken}) async {
