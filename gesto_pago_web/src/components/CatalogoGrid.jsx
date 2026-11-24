@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { api } from '../services/api';
 import PagoModal from './PagoModal';
+import ServiceLogo from './ServiceLogo';
 import {
   Search,
   ShoppingBag,
@@ -259,19 +260,30 @@ export default function CatalogoGrid({ onPagoRealizado }) {
                   style={{ backgroundColor: marcaColor }}
                 />
 
-                <div className="product-header">
-                  <span
-                    className="brand-badge"
-                    style={{
-                      borderLeft: `3px solid ${marcaColor}`,
-                      background: 'rgba(255, 255, 255, 0.04)',
-                    }}
-                  >
-                    {item.marca?.nombre || 'GestoPago'}
-                  </span>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>
-                    {item.categoria}
-                  </span>
+                <div className="product-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', marginBottom: '0.9rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <ServiceLogo
+                      service={item.servicio || item.nombre}
+                      brand={item.marca}
+                      category={item.categoria}
+                      size={44}
+                    />
+                    <div>
+                      <span
+                        className="brand-badge"
+                        style={{
+                          borderLeft: `3px solid ${marcaColor}`,
+                          background: 'rgba(255, 255, 255, 0.04)',
+                          display: 'inline-block',
+                        }}
+                      >
+                        {item.marca?.nombre || item.servicio || 'GestoPago'}
+                      </span>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '2px' }}>
+                        {item.categoria}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <h3 className="product-name">{item.nombre}</h3>

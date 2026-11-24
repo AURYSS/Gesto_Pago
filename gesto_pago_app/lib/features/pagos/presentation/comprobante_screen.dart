@@ -5,8 +5,10 @@ import 'package:go_router/go_router.dart';
 import '../../../core/format/gp_fecha.dart';
 import '../../../core/theme/gp_colors.dart';
 import '../../../core/theme/gp_theme.dart';
+import '../../../core/widgets/brand_mark.dart';
 import '../../../core/widgets/money_text.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../catalogo/application/marcas_controller.dart';
 import '../application/pago_controller.dart';
 import '../domain/estado_transaccion.dart';
 import '../domain/transaccion.dart';
@@ -80,6 +82,9 @@ class _ComprobanteScreenState extends ConsumerState<ComprobanteScreen> {
             ? l.pagoFailed
             : l.pagoPending;
 
+    final marcas = ref.watch(marcasControllerProvider).value;
+    final logoAsset = marcas?.logoDe(transaccion.servicio);
+
     return Scaffold(
       appBar: AppBar(title: Text(l.pagoReceipt)),
       body: SafeArea(
@@ -115,6 +120,12 @@ class _ComprobanteScreenState extends ConsumerState<ComprobanteScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
+                BrandMark(
+                  asset: logoAsset,
+                  tamano: 60,
+                  radio: 16,
+                ),
+                const SizedBox(height: 12),
                 Text(titulo, style: Theme.of(context).textTheme.headlineMedium),
                 const SizedBox(height: 4),
                 Text(

@@ -7,9 +7,11 @@ import '../../../core/format/message_de_error.dart';
 import '../../../core/theme/gp_colors.dart';
 import '../../../core/theme/gp_theme.dart';
 import '../../../core/validation/referencia_validator.dart';
+import '../../../core/widgets/brand_mark.dart';
 import '../../../core/widgets/money_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../catalogo/application/catalogo_controller.dart';
+import '../../catalogo/application/marcas_controller.dart';
 import '../../catalogo/domain/catalogo_producto.dart';
 import '../../plazos/presentation/calculadora_plazos.dart';
 import '../application/pago_controller.dart';
@@ -247,7 +249,10 @@ class _PagoScreenState extends ConsumerState<PagoScreen> {
         child: ListView(
           padding: const EdgeInsets.all(GpSpacing.page),
           children: [
-            _ProductoHeader(producto: producto),
+            _ProductoHeader(
+              producto: producto,
+              logoAsset: ref.watch(marcasControllerProvider).value?.logoDe(producto.servicio),
+            ),
             const SizedBox(height: 24),
             Text(l.pagoServiceLabel, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 10),
@@ -327,9 +332,10 @@ class _PagoScreenState extends ConsumerState<PagoScreen> {
 }
 
 class _ProductoHeader extends StatelessWidget {
-  const _ProductoHeader({required this.producto});
+  const _ProductoHeader({required this.producto, this.logoAsset});
 
   final CatalogoProducto producto;
+  final String? logoAsset;
 
   @override
   Widget build(BuildContext context) {
@@ -344,14 +350,11 @@ class _ProductoHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: GpColors.verde.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(Icons.payments_outlined, color: scheme.primary, size: 28),
+          BrandMark(
+            asset: logoAsset,
+            categoria: producto.idCatTipoServicio,
+            tamano: 52,
+            radio: 14,
           ),
           const SizedBox(width: 14),
           Expanded(

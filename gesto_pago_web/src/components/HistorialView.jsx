@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
+import ServiceLogo from './ServiceLogo';
 import {
   CheckCircle2,
   Clock,
@@ -243,28 +244,38 @@ export default function HistorialView() {
                       {formatearFecha(tx.fecha)}
                     </td>
                     <td>
-                      <div style={{ fontWeight: 600 }}>{tx.servicio || 'Servicio'}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>
-                        {tx.producto || 'Pago general'}
-                      </div>
-                      {isFail && tx.errorMensaje && (
-                        <div
-                          style={{
-                            fontSize: '0.75rem',
-                            color: '#f87171',
-                            marginTop: '3px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                          }}
-                          title={tx.errorMensaje}
-                        >
-                          <AlertTriangle size={12} style={{ flexShrink: 0 }} />
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '240px' }}>
-                            {tx.errorMensaje}
-                          </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <ServiceLogo
+                          service={tx.servicio}
+                          brand={tx.servicio}
+                          category={tx.categoria}
+                          size={36}
+                        />
+                        <div>
+                          <div style={{ fontWeight: 600 }}>{tx.servicio || 'Servicio'}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>
+                            {tx.producto || 'Pago general'}
+                          </div>
+                          {isFail && tx.errorMensaje && (
+                            <div
+                              style={{
+                                fontSize: '0.75rem',
+                                color: '#f87171',
+                                marginTop: '3px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                              }}
+                              title={tx.errorMensaje}
+                            >
+                              <AlertTriangle size={12} style={{ flexShrink: 0 }} />
+                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '240px' }}>
+                                {tx.errorMensaje}
+                              </span>
+                            </div>
+                          )}
                         </div>
-                      )}
+                      </div>
                     </td>
                     <td>
                       <code
@@ -389,6 +400,18 @@ export default function HistorialView() {
                   border: '1px solid var(--border-color)',
                 }}
               >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '0.75rem', paddingBottom: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                  <ServiceLogo
+                    service={txDetalle.servicio}
+                    brand={txDetalle.servicio}
+                    category={txDetalle.categoria}
+                    size={40}
+                  />
+                  <div>
+                    <strong style={{ color: 'var(--text-main)', fontSize: '0.95rem' }}>{txDetalle.servicio || 'Servicio'}</strong>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{txDetalle.producto || 'Pago general'}</div>
+                  </div>
+                </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                   <span style={{ color: 'var(--text-muted)' }}>Estado:</span>
                   <span>{getStatusBadge(txDetalle.estado)}</span>
