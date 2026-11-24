@@ -155,32 +155,153 @@ class _ComprobanteScreenState extends ConsumerState<ComprobanteScreen> {
                     ),
                   if (transaccion.idTx.isNotEmpty)
                     _Fila(label: l.pagoTransactionId, child: Text(transaccion.idTx)),
-                  if (transaccion.errorMensaje != null && transaccion.errorMensaje!.isNotEmpty)
-                    _Fila(label: 'Detalle', child: Text(transaccion.errorMensaje!)),
-                ],
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.only(top: 16),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: GpColors.verde.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: GpColors.verde.withValues(alpha: 0.4)),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.mark_email_read_outlined, color: GpColors.verde, size: 20),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'Se ha enviado la notificación y comprobante de este movimiento a tu correo registrado.',
-                      style: TextStyle(fontSize: 12, color: Colors.white70),
+                  if (transaccion.codigoError != null && transaccion.codigoError!.isNotEmpty)
+                    _Fila(
+                      label: 'Código GestoPago',
+                      child: Text(
+                        transaccion.codigoError!,
+                        style: TextStyle(
+                          color: fallida ? GpColors.error : null,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ),
-                  ),
+                  if (transaccion.errorMensaje != null && transaccion.errorMensaje!.isNotEmpty)
+                    _Fila(
+                      label: 'Motivo del Rechazo',
+                      child: Text(
+                        transaccion.errorMensaje!,
+                        style: TextStyle(
+                          color: fallida ? GpColors.error : null,
+                          fontWeight: fallida ? FontWeight.w600 : null,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
+            if (fallida)
+              Container(
+                margin: const EdgeInsets.only(top: 16),
+                padding: const EdgeInsets.all(GpSpacing.md),
+                decoration: BoxDecoration(
+                  color: GpColors.error.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: GpColors.error.withValues(alpha: 0.35)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.error_outline, color: GpColors.error, size: 20),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Transacción Rechazada',
+                          style: TextStyle(
+                            color: GpColors.error,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const Spacer(),
+                        if (transaccion.codigoError != null && transaccion.codigoError!.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: GpColors.error.withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              'Código: ${transaccion.codigoError}',
+                              style: const TextStyle(
+                                color: GpColors.error,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Motivo del Rechazo:',
+                      style: TextStyle(
+                        color: GpColors.error,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      (transaccion.errorMensaje != null && transaccion.errorMensaje!.isNotEmpty)
+                          ? transaccion.errorMensaje!
+                          : (transaccion.legend != null && transaccion.legend!.isNotEmpty)
+                              ? transaccion.legend!
+                              : 'La transacción no pudo ser completada por el proveedor.',
+                      style: const TextStyle(
+                        color: GpColors.error,
+                        fontSize: 13,
+                      ),
+                    ),
+                    if (transaccion.codigoError != null && transaccion.codigoError!.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        'Código GestoPago: ${transaccion.codigoError}',
+                        style: TextStyle(
+                          color: GpColors.error.withValues(alpha: 0.85),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            if (aprobada)
+              Container(
+                margin: const EdgeInsets.only(top: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: GpColors.verde.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: GpColors.verde.withValues(alpha: 0.4)),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.mark_email_read_outlined, color: GpColors.verde, size: 20),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Se ha enviado la notificación y comprobante de este movimiento a tu correo registrado.',
+                        style: TextStyle(fontSize: 12, color: Colors.white70),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else if (fallida)
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: GpColors.error.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: GpColors.error.withValues(alpha: 0.25)),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.info_outline, color: GpColors.error, size: 18),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'No se ha realizado ningún cobro a tu cuenta. Puedes verificar los datos e intentar de nuevo.',
+                        style: TextStyle(fontSize: 12, color: Colors.white70),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             const SizedBox(height: 20),
             Text(
               enProceso ? l.pagoPending : (transaccion.legend ?? ''),

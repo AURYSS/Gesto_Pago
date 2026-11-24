@@ -357,9 +357,10 @@ class _ItemHistorial extends StatelessWidget {
     final l = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final esFallida = transaccion.estado == EstadoTransaccion.fallida;
     final etiquetaEstado = switch (transaccion.estado) {
       EstadoTransaccion.aprobada => l.historialStateApproved,
-      EstadoTransaccion.fallida => l.historialStateFailed,
+      EstadoTransaccion.fallida => 'Rechazada',
       EstadoTransaccion.enProceso => l.historialStateProcessing,
       EstadoTransaccion.pendiente => l.historialStatePending,
     };
@@ -374,82 +375,149 @@ class _ItemHistorial extends StatelessWidget {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(GpRadii.tarjeta),
-            border: Border.all(color: scheme.outline),
+            border: Border.all(
+              color: esFallida ? scheme.error.withValues(alpha: 0.35) : scheme.outline,
+            ),
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BrandMark(
-                asset: logoAsset,
-                tamano: 46,
-                radio: 14,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      transaccion.producto.isNotEmpty
-                          ? transaccion.producto
-                          : transaccion.servicio,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 3),
-                    Row(
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  BrandMark(
+                    asset: logoAsset,
+                    tamano: 46,
+                    radio: 14,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          transaccion.servicio,
-                          style: theme.textTheme.bodySmall?.copyWith(
+                          transaccion.producto.isNotEmpty
+                              ? transaccion.producto
+                              : transaccion.servicio,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 3),
+                        Row(
+                          children: [
+                            Text(
+                              transaccion.servicio,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            if (transaccion.referencia.isNotEmpty) ...[
+                              Text(
+                                ' • Ref ${transaccion.referencia}',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: scheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          formatFecha(transaccion.fecha),
+                          style: theme.textTheme.labelSmall?.copyWith(
                             color: scheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w500,
+                            fontSize: 11,
                           ),
                         ),
-                        if (transaccion.referencia.isNotEmpty) ...[
-                          Text(
-                            ' • Ref ${transaccion.referencia}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: scheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      formatFecha(transaccion.fecha),
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  MoneyText(
-                    monto: transaccion.monto,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: transaccion.estado == EstadoTransaccion.aprobada
-                          ? scheme.primary
-                          : scheme.onSurface,
-                    ),
                   ),
-                  const SizedBox(height: 6),
-                  EstadoTransaccionBadge(
-                    estado: transaccion.estado,
-                    label: etiquetaEstado,
+                  const SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      MoneyText(
+                        monto: transaccion.monto,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: transaccion.estado == EstadoTransaccion.aprobada
+                              ? scheme.primary
+                              : scheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      EstadoTransaccionBadge(
+                        estado: transaccion.estado,
+                        label: etiquetaEstado,
+                      ),
+                    ],
                   ),
                 ],
               ),
+              if (esFallida) ...[
+                const SizedBox(height: 10),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: scheme.error.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: scheme.error.withValues(alpha: 0.25)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.error_outline, size: 14, color: scheme.error),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Transacción Rechazada',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: scheme.error,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          if (transaccion.codigoError != null && transaccion.codigoError!.isNotEmpty) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                              decoration: BoxDecoration(
+                                color: scheme.error.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                'Código GestoPago: ${transaccion.codigoError}',
+                                style: TextStyle(
+                                  color: scheme.error,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      if (transaccion.errorMensaje != null && transaccion.errorMensaje!.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          'Motivo del Rechazo: ${transaccion.errorMensaje}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: scheme.error,
+                            fontSize: 12,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
         ),

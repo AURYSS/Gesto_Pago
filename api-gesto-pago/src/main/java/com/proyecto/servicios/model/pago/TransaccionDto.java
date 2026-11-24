@@ -36,6 +36,7 @@ public class TransaccionDto {
     private String pin;
     private String legend;
     private String errorMensaje;
+    private String codigoError;
     private String fecha;
 
     public static TransaccionDto from(Transaccion tx) {
@@ -55,6 +56,7 @@ public class TransaccionDto {
         dto.setPin(tx.getPin());
         dto.setLegend(tx.getLegend());
         dto.setErrorMensaje(tx.getErrorMensaje());
+        dto.setCodigoError(tx.getCodigoError());
         dto.setFecha(fecha(tx.getFecha()));
         return dto;
     }

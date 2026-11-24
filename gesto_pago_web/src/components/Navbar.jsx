@@ -11,6 +11,8 @@ import {
   Bell,
   CheckCircle2,
   Clock,
+  XCircle,
+  AlertTriangle,
   ArrowRight,
   Mail,
   X,
@@ -151,6 +153,19 @@ export default function Navbar({ activeTab, setActiveTab }) {
                   movimientos.map((m) => {
                     const est = (m.estado || '').toUpperCase();
                     const isOk = est === 'APROBADA' || est === 'EXITOSA';
+                    const isPending = est === 'PENDIENTE' || est === 'EN_PROCESO';
+                    const isFailed = est === 'FALLIDA' || est === 'RECHAZADA' || (!isOk && !isPending && (Boolean(m.codigoError) || Boolean(m.errorMensaje)));
+
+                    let iconBg = 'rgba(245, 158, 11, 0.15)';
+                    let IconComp = <Clock size={16} color="#fbbf24" />;
+                    if (isOk) {
+                      iconBg = 'rgba(16, 185, 129, 0.15)';
+                      IconComp = <CheckCircle2 size={16} color="#34d399" />;
+                    } else if (isFailed) {
+                      iconBg = 'rgba(239, 68, 68, 0.15)';
+                      IconComp = <XCircle size={16} color="#ef4444" />;
+                    }
+
                     return (
                       <div
                         key={m.id || m.upc}
@@ -165,7 +180,7 @@ export default function Navbar({ activeTab, setActiveTab }) {
                             width: '32px',
                             height: '32px',
                             borderRadius: '8px',
-                            background: isOk ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                            background: iconBg,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -173,24 +188,52 @@ export default function Navbar({ activeTab, setActiveTab }) {
                             marginTop: '2px',
                           }}
                         >
-                          {isOk ? <CheckCircle2 size={16} color="#34d399" /> : <Clock size={16} color="#fbbf24" />}
+                          {IconComp}
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <strong style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>
                               {m.servicio || m.producto || 'Transacción'}
                             </strong>
-                            <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#34d399' }}>
+                            <span style={{ fontSize: '0.82rem', fontWeight: 700, color: isOk ? '#34d399' : (isFailed ? '#f87171' : '#fbbf24') }}>
                               ${Number(m.monto || 0).toFixed(2)}
                             </span>
                           </div>
-                          <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)', marginTop: '2px' }}>
-                            Folio: {m.upc || m.numeroAutorizacion || `#${m.id}`} &bull; Ref: {m.referencia}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '0.74rem', color: 'var(--text-dim)' }}>
+                              Folio: {m.upc || m.numeroAutorizacion || `#${m.id}`} &bull; Ref: {m.referencia}
+                            </span>
+                            {isFailed && (
+                              <span
+                                className="status-badge rechazada"
+                                style={{ fontSize: '0.62rem', padding: '0.1rem 0.45rem', lineHeight: 1 }}
+                              >
+                                {est === 'FALLIDA' ? 'FALLIDA' : 'RECHAZADA'}
+                              </span>
+                            )}
                           </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem', color: '#10b981', marginTop: '4px' }}>
-                            <Mail size={11} />
-                            <span>Comprobante notificado al correo</span>
-                          </div>
+
+                          {/* Si la transacción falló o fue rechazada, mostrar el motivo y el código de error GestoPago */}
+                          {isFailed ? (
+                            <div style={{ marginTop: '5px', fontSize: '0.73rem', color: '#fca5a5' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <AlertTriangle size={11} style={{ flexShrink: 0 }} />
+                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  Motivo: {m.errorMensaje || 'Transacción rechazada'}
+                                </span>
+                              </div>
+                              {(m.codigoError || m.codigoMensaje) && (
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-dim)', marginTop: '2px' }}>
+                                  Código GestoPago: <code style={{ color: '#f87171', background: 'rgba(239, 68, 68, 0.15)', padding: '1px 4px', borderRadius: '3px', fontWeight: 700 }}>{m.codigoError || m.codigoMensaje}</code>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem', color: '#10b981', marginTop: '4px' }}>
+                              <Mail size={11} />
+                              <span>Comprobante notificado al correo</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     );

@@ -21,6 +21,7 @@ class Transaccion {
     required this.idTx,
     required this.pin,
     required this.legend,
+    this.codigoError,
     required this.errorMensaje,
     required this.fecha,
   });
@@ -45,7 +46,8 @@ class Transaccion {
       idTx: json['idTx'] as String? ?? '',
       pin: json['pin'] as String? ?? '',
       legend: json['legend'] as String?,
-      errorMensaje: json['errorMensaje'] as String?,
+      codigoError: json['codigoError']?.toString() ?? json['codigoMensaje']?.toString(),
+      errorMensaje: json['errorMensaje'] as String? ?? json['mensaje'] as String?,
       fecha: json['fecha'] as String? ?? '',
     );
   }
@@ -64,6 +66,7 @@ class Transaccion {
   final String idTx;
   final String pin;
   final String? legend;
+  final String? codigoError;
   final String? errorMensaje;
   final String fecha;
 

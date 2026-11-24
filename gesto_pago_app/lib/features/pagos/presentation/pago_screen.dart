@@ -298,7 +298,10 @@ class _PagoScreenState extends ConsumerState<PagoScreen> {
             _EstadoVerificacion(estado: estado),
             if (estado.error != null) ...[
               const SizedBox(height: 16),
-              _ErrorBanner(mensaje: messageDeError(context, estado.error!)),
+              _ErrorBanner(
+                mensaje: messageDeError(context, estado.error!),
+                codigoError: estado.error!.code,
+              ),
             ],
             // Solo tiene sentido proyectar plazos sobre un monto que ya se
             // conoce: precio del catalogo o el que devolvio la verificacion.
@@ -475,27 +478,81 @@ class _Fila extends StatelessWidget {
 }
 
 class _ErrorBanner extends StatelessWidget {
-  const _ErrorBanner({required this.mensaje});
+  const _ErrorBanner({required this.mensaje, this.codigoError});
 
   final String mensaje;
+  final String? codigoError;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: scheme.error.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: scheme.error.withValues(alpha: 0.4)),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.error_outline, color: scheme.error, size: 20),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(mensaje, style: TextStyle(color: scheme.error)),
+          Row(
+            children: [
+              Icon(Icons.error_outline, color: scheme.error, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Transacción Rechazada',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: scheme.error,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              if (codigoError != null && codigoError!.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: scheme.error.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: scheme.error.withValues(alpha: 0.3)),
+                  ),
+                  child: Text(
+                    'Código: $codigoError',
+                    style: TextStyle(
+                      color: scheme.error,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+            ],
           ),
+          const SizedBox(height: 8),
+          Text(
+            'Motivo del Rechazo:',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: scheme.error,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            mensaje,
+            style: TextStyle(color: scheme.error, fontSize: 13),
+          ),
+          if (codigoError != null && codigoError!.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              'Código GestoPago: $codigoError',
+              style: TextStyle(
+                color: scheme.error.withValues(alpha: 0.85),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ],
       ),
     );
