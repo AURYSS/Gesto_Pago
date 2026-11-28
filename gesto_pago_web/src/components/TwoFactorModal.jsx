@@ -64,6 +64,26 @@ export default function TwoFactorModal() {
             </p>
           </div>
 
+          {tempAuth.codigo2FaDev && (
+            <div
+              style={{
+                marginBottom: '1rem',
+                padding: '0.75rem 1rem',
+                borderRadius: '10px',
+                background: 'rgba(16, 185, 129, 0.12)',
+                border: '1px dashed #10b981',
+                textAlign: 'center',
+              }}
+            >
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Código 2FA de respaldo (Entorno Render)
+              </div>
+              <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#34d399', letterSpacing: '0.25em', marginTop: '3px' }}>
+                {tempAuth.codigo2FaDev}
+              </div>
+            </div>
+          )}
+
           {error && (
             <div className="alert-banner danger">
               <span>{error}</span>
