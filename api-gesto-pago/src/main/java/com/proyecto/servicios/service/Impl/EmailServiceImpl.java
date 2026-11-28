@@ -1,5 +1,6 @@
 package com.proyecto.servicios.service.Impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.proyecto.servicios.service.EmailService;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -11,11 +12,23 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 @Slf4j
 public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
+    private final HttpClient httpClient;
+    private final ObjectMapper objectMapper;
 
     @Value("${spring.mail.username:}")
     private String remitente;
@@ -23,9 +36,22 @@ public class EmailServiceImpl implements EmailService {
     @Value("${spring.mail.remitente-nombre:Gesto Pago Seguridad}")
     private String remitenteNombre;
 
+    @Value("${email.resend.api-key:}")
+    private String resendApiKey;
+
+    @Value("${email.resend.from:Gesto Pago <onboarding@resend.dev>}")
+    private String resendFrom;
+
+    @Value("${email.brevo.api-key:}")
+    private String brevoApiKey;
+
     @Autowired
     public EmailServiceImpl(@Autowired(required = false) JavaMailSender mailSender) {
         this.mailSender = mailSender;
+        this.httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(10))
+                .build();
+        this.objectMapper = new ObjectMapper();
     }
 
     @Override
@@ -36,9 +62,30 @@ public class EmailServiceImpl implements EmailService {
             return;
         }
 
+        String asunto = "Tu codigo de verificacion de 2 Factores - Gesto Pago";
+        String html = construirHtml2Fa(codigo2Fa, dispositivo);
+
+        // 1. Intento por Resend API (HTTPS Puerto 443 - Inmune a bloqueos de puertos SMTP en Render)
+        if (StringUtils.hasText(resendApiKey)) {
+            log.info("Enviando correo 2FA a [{}] via Resend HTTPS API...", destinatario);
+            if (enviarViaResend(destinatario, asunto, html)) {
+                return;
+            }
+            log.warn("Fallo el envio via Resend. Intentando metodos alternativos...");
+        }
+
+        // 2. Intento por Brevo API (HTTPS Puerto 443)
+        if (StringUtils.hasText(brevoApiKey)) {
+            log.info("Enviando correo 2FA a [{}] via Brevo HTTPS API...", destinatario);
+            if (enviarViaBrevo(destinatario, asunto, html)) {
+                return;
+            }
+            log.warn("Fallo el envio via Brevo. Intentando metodos alternativos...");
+        }
+
+        // 3. Intento por SMTP estandar (Gmail)
         if (mailSender == null || !StringUtils.hasText(remitente)) {
-            log.warn("[SMTP NO CONFIGURADO] spring.mail.username no esta definido en .env.");
-            log.warn("Para enviar correos reales via Gmail/SMTP, agrega MAIL_USERNAME y MAIL_PASSWORD en tu .env.");
+            log.warn("[SMTP/API NO CONFIGURADO] No se definieron credenciales de correo.");
             log.info("[SIMULADO EN CONSOLA PARA PRUEBAS] Codigo 2FA para [{}]: {}", destinatario, codigo2Fa);
             return;
         }
@@ -49,13 +96,11 @@ public class EmailServiceImpl implements EmailService {
 
             helper.setFrom(remitente, remitenteNombre);
             helper.setTo(destinatario);
-            helper.setSubject("Tu codigo de verificacion de 2 Factores - Gesto Pago");
-
-            String html = construirHtml2Fa(codigo2Fa, dispositivo);
+            helper.setSubject(asunto);
             helper.setText(html, true);
 
             mailSender.send(message);
-            log.info("Correo de verificacion 2FA enviado exitosamente a [{}] para dispositivo [{}]", destinatario, dispositivo);
+            log.info("Correo de verificacion 2FA enviado exitosamente por SMTP a [{}] para dispositivo [{}]", destinatario, dispositivo);
         } catch (Exception e) {
             log.error("Error al enviar correo 2FA a [{}]: {}. [CODIGO 2FA DE RESPALDO]: {}", destinatario, e.getMessage(), codigo2Fa);
         }
@@ -74,6 +119,24 @@ public class EmailServiceImpl implements EmailService {
             String fecha) {
         if (!StringUtils.hasText(destinatario)) return;
 
+        String asunto = "Comprobante de Movimiento: " + servicio + " (" + estado + ") - Gesto Pago";
+        String html = construirHtmlMovimiento(nombreUsuario, servicio, referencia, monto, folioUpc, estado, fecha);
+
+        // 1. Intento por Resend API (HTTPS)
+        if (StringUtils.hasText(resendApiKey)) {
+            if (enviarViaResend(destinatario, asunto, html)) {
+                return;
+            }
+        }
+
+        // 2. Intento por Brevo API (HTTPS)
+        if (StringUtils.hasText(brevoApiKey)) {
+            if (enviarViaBrevo(destinatario, asunto, html)) {
+                return;
+            }
+        }
+
+        // 3. Intento por SMTP estandar
         if (mailSender == null || !StringUtils.hasText(remitente)) {
             log.info("[SIMULADO EN CONSOLA] Notificacion de movimiento para [{}]: Servicio={}, Monto={}, Folio={}, Estado={}",
                     destinatario, servicio, monto, folioUpc, estado);
@@ -86,15 +149,85 @@ public class EmailServiceImpl implements EmailService {
 
             helper.setFrom(remitente, remitenteNombre);
             helper.setTo(destinatario);
-            helper.setSubject("Comprobante de Movimiento: " + servicio + " (" + estado + ") - Gesto Pago");
-
-            String html = construirHtmlMovimiento(nombreUsuario, servicio, referencia, monto, folioUpc, estado, fecha);
+            helper.setSubject(asunto);
             helper.setText(html, true);
 
             mailSender.send(message);
-            log.info("Notificacion de movimiento enviada exitosamente a [{}] para folio [{}]", destinatario, folioUpc);
+            log.info("Notificacion de movimiento enviada exitosamente por SMTP a [{}] para folio [{}]", destinatario, folioUpc);
         } catch (Exception e) {
-            log.error("Error al enviar notificacion de movimiento a [{}]: {}", destinatario, e.getMessage());
+            log.error("Error al enviar notificacion de movimiento por SMTP a [{}]: {}", destinatario, e.getMessage());
+        }
+    }
+
+    private boolean enviarViaResend(String destinatario, String asunto, String html) {
+        try {
+            Map<String, Object> payload = new HashMap<>();
+            String from = StringUtils.hasText(resendFrom) ? resendFrom : "Gesto Pago <onboarding@resend.dev>";
+            payload.put("from", from);
+            payload.put("to", Collections.singletonList(destinatario));
+            payload.put("subject", asunto);
+            payload.put("html", html);
+
+            String json = objectMapper.writeValueAsString(payload);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.resend.com/emails"))
+                    .header("Authorization", "Bearer " + resendApiKey.trim())
+                    .header("Content-Type", "application/json")
+                    .timeout(Duration.ofSeconds(10))
+                    .POST(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                log.info("[RESEND HTTPS OK] Correo entregado a [{}] vía API (HTTP {}). ID: {}", destinatario, response.statusCode(), response.body());
+                return true;
+            } else {
+                log.error("[RESEND HTTP ERROR] Codigo {}: {}", response.statusCode(), response.body());
+                return false;
+            }
+        } catch (Exception e) {
+            log.error("[RESEND EXCEPTION] Error en peticion HTTPS a Resend: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean enviarViaBrevo(String destinatario, String asunto, String html) {
+        try {
+            Map<String, Object> sender = new HashMap<>();
+            sender.put("name", remitenteNombre);
+            sender.put("email", StringUtils.hasText(remitente) ? remitente : "notificaciones@gestopago.com");
+
+            Map<String, Object> toItem = new HashMap<>();
+            toItem.put("email", destinatario);
+
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("sender", sender);
+            payload.put("to", Collections.singletonList(toItem));
+            payload.put("subject", asunto);
+            payload.put("htmlContent", html);
+
+            String json = objectMapper.writeValueAsString(payload);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.brevo.com/v3/smtp/email"))
+                    .header("api-key", brevoApiKey.trim())
+                    .header("Content-Type", "application/json")
+                    .timeout(Duration.ofSeconds(10))
+                    .POST(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                log.info("[BREVO HTTPS OK] Correo entregado a [{}] vía API (HTTP {}). Respuesta: {}", destinatario, response.statusCode(), response.body());
+                return true;
+            } else {
+                log.error("[BREVO HTTP ERROR] Codigo {}: {}", response.statusCode(), response.body());
+                return false;
+            }
+        } catch (Exception e) {
+            log.error("[BREVO EXCEPTION] Error en peticion HTTPS a Brevo: {}", e.getMessage());
+            return false;
         }
     }
 
