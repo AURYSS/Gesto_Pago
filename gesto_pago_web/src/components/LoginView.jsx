@@ -21,7 +21,350 @@ import {
   ArrowRight,
   ArrowLeft,
   Check,
+  Sparkles,
+  Zap,
+  Wifi,
 } from 'lucide-react';
+
+function AuthHeroShowcase({ tab }) {
+  const brandPartners = [
+    { name: 'CFE', logo: '/logos/cfe.png' },
+    { name: 'Telcel', logo: '/logos/telcel.png' },
+    { name: 'Izzi', logo: '/logos/izzi.png' },
+    { name: 'Totalplay', logo: '/logos/totalplay.png' },
+    { name: 'Dish', logo: '/logos/dish.png' },
+    { name: 'TAG Pase', logo: '/logos/pase.png' },
+    { name: 'Netflix', logo: '/logos/netflix.png' },
+  ];
+
+  return (
+    <div className="auth-split-hero">
+      {/* 1. Header con Branding y Estado Activo */}
+      <div>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '1rem',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+            <div
+              style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '14px',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 0 25px rgba(16, 185, 129, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+              }}
+            >
+              <CreditCard size={24} color="#ffffff" />
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '1.35rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#ffffff' }}>
+                  Gesto<span style={{ color: '#10b981' }}>Pago</span>
+                </span>
+                <span
+                  style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    padding: '2px 8px',
+                    borderRadius: '999px',
+                    background: 'rgba(56, 189, 248, 0.15)',
+                    color: '#38bdf8',
+                    border: '1px solid rgba(56, 189, 248, 0.3)',
+                  }}
+                >
+                  Fintech 2.0
+                </span>
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '-1px' }}>
+                Ecosistema de Comercio & Pagos Digitales
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.35rem 0.85rem',
+              borderRadius: '999px',
+              background: 'rgba(16, 185, 129, 0.12)',
+              border: '1px solid rgba(16, 185, 129, 0.28)',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              color: '#34d399',
+            }}
+          >
+            <span
+              style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                background: '#10b981',
+                boxShadow: '0 0 10px #10b981',
+              }}
+            />
+            <span>SISTEMA SEGURO • 24/7</span>
+          </div>
+        </div>
+
+        {/* Hero Headline */}
+        <div style={{ marginTop: '2.5rem' }}>
+          <h1
+            style={{
+              fontSize: 'clamp(1.75rem, 2.8vw, 2.4rem)',
+              fontWeight: 800,
+              lineHeight: 1.2,
+              color: '#f8fafc',
+              letterSpacing: '-0.03em',
+              marginBottom: '0.85rem',
+            }}
+          >
+            Tu portal financiero inteligente para{' '}
+            <span
+              style={{
+                background: 'linear-gradient(135deg, #10b981 0%, #38bdf8 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              pagos y transacciones inmediatas.
+            </span>
+          </h1>
+          <p
+            style={{
+              fontSize: '0.95rem',
+              lineHeight: 1.6,
+              color: 'var(--text-muted)',
+              maxWidth: '520px',
+            }}
+          >
+            Apertura automática de cuenta bancaria y asignación de saldo inicial para personas físicas,
+            autenticación protegida con tokens 2FA y dispersión a más de 100 servicios en todo México.
+          </p>
+        </div>
+      </div>
+
+      {/* 2. Tarjeta Inteligente GestoPago 3D & Insignias */}
+      <div style={{ margin: '1.75rem 0' }}>
+        <div className="fintech-card-wrapper">
+          <div className="fintech-card">
+            {/* Cabecera de la tarjeta: Logo + Contactless */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '8px',
+                    background: 'rgba(16, 185, 129, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                  }}
+                >
+                  <CreditCard size={16} color="#10b981" />
+                </div>
+                <span style={{ fontSize: '0.9rem', fontWeight: 800, letterSpacing: '0.04em', color: '#ffffff' }}>
+                  GESTO<span style={{ color: '#10b981' }}>PAGO</span>
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <span
+                  style={{
+                    fontSize: '0.65rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.05em',
+                    color: 'rgba(255, 255, 255, 0.65)',
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                  }}
+                >
+                  DEBIT
+                </span>
+                <Wifi size={18} style={{ transform: 'rotate(90deg)', color: '#38bdf8' }} />
+              </div>
+            </div>
+
+            {/* Chip EMV y Saldo de la cuenta */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div className="fintech-chip">
+                <div className="fintech-chip-inner" />
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '0.68rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  Saldo Cuenta Activa
+                </div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em' }}>
+                  $ 15,250<span style={{ color: '#10b981', fontSize: '0.95rem' }}>.00</span>{' '}
+                  <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>MXN</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Número y Titular */}
+            <div>
+              <div
+                style={{
+                  fontFamily: 'monospace',
+                  fontSize: '1.05rem',
+                  letterSpacing: '0.18em',
+                  color: '#e2e8f0',
+                  marginBottom: '0.75rem',
+                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.6)',
+                }}
+              >
+                •••• &nbsp;•••• &nbsp;•••• &nbsp;8924
+              </div>
+              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+                <div>
+                  <div style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    Titular Autorizado
+                  </div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc', letterSpacing: '0.04em' }}>
+                    CLIENTE PERSONA FÍSICA
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    Vigencia
+                  </div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc', letterSpacing: '0.04em' }}>
+                    12/29
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Insignias de beneficios */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+            gap: '0.75rem',
+            maxWidth: '520px',
+            marginTop: '1.25rem',
+          }}
+        >
+          <div className="hero-pill-badge">
+            <div
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                background: 'rgba(16, 185, 129, 0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <Zap size={16} color="#10b981" />
+            </div>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: '0.82rem', color: '#ffffff' }}>Cuenta y Saldo Automáticos</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Apertura de cuenta al instante</div>
+            </div>
+          </div>
+
+          <div className="hero-pill-badge">
+            <div
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                background: 'rgba(56, 189, 248, 0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <ShieldCheck size={16} color="#38bdf8" />
+            </div>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: '0.82rem', color: '#ffffff' }}>Autenticación 2FA Segura</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Cifrado BCrypt + OTP por email</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Servicios integrados y pie institucional */}
+      <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.07)', paddingTop: '1.5rem' }}>
+        <div
+          style={{
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            color: 'var(--text-dim)',
+            marginBottom: '0.65rem',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+          }}
+        >
+          Servicios y pagos soportados en tiempo real:
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
+          {brandPartners.map((b) => (
+            <div key={b.name} className="hero-service-chip">
+              <img
+                src={b.logo}
+                alt={b.name}
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+              <span>{b.name}</span>
+            </div>
+          ))}
+          <div
+            style={{
+              padding: '0.35rem 0.65rem',
+              borderRadius: '8px',
+              background: 'rgba(16, 185, 129, 0.1)',
+              border: '1px solid rgba(16, 185, 129, 0.2)',
+              fontSize: '0.75rem',
+              color: '#34d399',
+              fontWeight: 600,
+            }}
+          >
+            +100 más
+          </div>
+        </div>
+
+        <div
+          style={{
+            marginTop: '1.25rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontSize: '0.75rem',
+            color: 'var(--text-dim)',
+          }}
+        >
+          <Sparkles size={14} color="#10b981" />
+          <span>Proyecto Integrador: Onboarding Persona Física &bull; GestoPago Web v2.0</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function LoginView() {
   const { login, registerPersonaFisica, revocationMessage, clearRevocationMessage, loading } = useAuth();
@@ -372,29 +715,31 @@ export default function LoginView() {
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1.5rem',
-        background: 'radial-gradient(ellipse at top, #131a29 0%, #0a0e17 70%)',
-      }}
-    >
-      <div
-        className="modal-card"
-        style={{
-          maxWidth: tab === 'register' ? '700px' : '460px',
-          transition: 'max-width 0.3s ease',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
-        }}
-      >
-        {/* Header */}
-        <div className="modal-header">
-          <div className="brand-icon" style={{ width: '56px', height: '56px', margin: '0 auto 1.25rem' }}>
-            <CreditCard size={28} />
-          </div>
+    <div className="auth-split-container">
+      {/* ========================================================= */}
+      {/* MITAD IZQUIERDA: HERO SHOWCASE INNOVADOR DE GESTOPAGO     */}
+      {/* ========================================================= */}
+      <AuthHeroShowcase tab={tab} />
+
+      {/* ========================================================= */}
+      {/* MITAD DERECHA: FORMULARIO DE ACCESO Y REGISTRO            */}
+      {/* ========================================================= */}
+      <div className="auth-split-form-pane">
+        <div
+          className="modal-card"
+          style={{
+            maxWidth: tab === 'register' ? '680px' : '460px',
+            transition: 'max-width 0.3s ease',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            margin: 'auto',
+          }}
+        >
+          {/* Header */}
+          <div className="modal-header">
+            <div className="brand-icon" style={{ width: '56px', height: '56px', margin: '0 auto 1.25rem' }}>
+              <CreditCard size={28} />
+            </div>
           <h1 className="modal-title" style={{ fontSize: '1.5rem' }}>
             Gesto Pago Web
           </h1>
@@ -1319,6 +1664,7 @@ export default function LoginView() {
           <br />
           Autenticación 2FA por correo electrónico y apertura automática de cuenta bancaria.
         </div>
+      </div>
       </div>
     </div>
   );

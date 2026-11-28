@@ -885,5 +885,215 @@ body {
   border: 2px solid #131a29;
 }
 
+/* ========================================================= */
+/* Split-Screen Auth Layout (Hero Showcase + Form)          */
+/* ========================================================= */
+.auth-split-container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  background: radial-gradient(circle at 10% 20%, #152238 0%, #0a0e17 55%, #060910 100%);
+  position: relative;
+  overflow-x: hidden;
+}
+
+.auth-split-hero {
+  flex: 1.15;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 3.5rem 3.5rem;
+  position: relative;
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  background: linear-gradient(145deg, rgba(19, 26, 41, 0.7) 0%, rgba(10, 14, 23, 0.45) 100%);
+  backdrop-filter: blur(24px);
+  overflow: hidden;
+}
+
+.auth-split-hero::before {
+  content: '';
+  position: absolute;
+  top: -15%;
+  left: -10%;
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.auth-split-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -10%;
+  right: -10%;
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.14) 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.auth-split-form-pane {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 2rem;
+  position: relative;
+  overflow-y: auto;
+  max-height: 100vh;
+}
+
+/* Card 3D Showcase */
+.fintech-card-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  margin: 1.75rem 0;
+  perspective: 1200px;
+}
+
+.fintech-card {
+  width: 100%;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #0e1e32 0%, #0d1928 45%, #062b22 100%);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.85),
+    0 0 40px rgba(16, 185, 129, 0.18),
+    inset 0 1px 1px rgba(255, 255, 255, 0.25);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+  animation: floatFintechCard 7s ease-in-out infinite alternate;
+}
+
+.fintech-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  transform: skewX(-25deg);
+  animation: cardShimmer 6s infinite;
+  pointer-events: none;
+}
+
+@keyframes floatFintechCard {
+  0% {
+    transform: translateY(0px) rotateX(2deg) rotateY(-2deg);
+  }
+  100% {
+    transform: translateY(-8px) rotateX(-2deg) rotateY(2deg);
+  }
+}
+
+@keyframes cardShimmer {
+  0%, 65% {
+    left: -120%;
+  }
+  100% {
+    left: 220%;
+  }
+}
+
+.fintech-chip {
+  width: 46px;
+  height: 34px;
+  background: linear-gradient(135deg, #eab308 0%, #fef08a 45%, #ca8a04 100%);
+  border-radius: 7px;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  position: relative;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.fintech-chip-inner {
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  border-radius: 3px;
+}
+
+.fintech-chip-inner::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.hero-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.95rem;
+  background: rgba(19, 26, 41, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  font-size: 0.85rem;
+  color: var(--text-main);
+  transition: all 0.25s ease;
+}
+
+.hero-pill-badge:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+  transform: translateY(-2px);
+}
+
+.hero-service-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  background: rgba(15, 21, 35, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.hero-service-chip img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+@media (max-width: 1024px) {
+  .auth-split-container {
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  .auth-split-hero {
+    flex: none;
+    padding: 2.25rem 1.5rem 1.5rem;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  .fintech-card-wrapper {
+    margin: 1.25rem auto;
+    max-width: 380px;
+  }
+  .auth-split-form-pane {
+    flex: 1;
+    padding: 1.5rem 1rem;
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+
 
 
