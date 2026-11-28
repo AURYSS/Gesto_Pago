@@ -232,6 +232,20 @@ void main() {
       expect(find.text('Todos'), findsOneWidget);
     });
 
+    testWidgets('al tocar un chip de categoria se muestran los servicios correspondientes', (tester) async {
+      _usarTamano(tester, const Size(420, 2400));
+      await tester.pumpWidget(_app(const InicioScreen()));
+      await tester.pumpAndSettle();
+
+      final chipTiempoAire = find.text('Tiempo Aire');
+      expect(chipTiempoAire, findsOneWidget);
+      await tester.tap(chipTiempoAire);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ServicioCard), findsWidgets);
+      expect(find.text('Telcel'), findsWidgets);
+    });
+
     testWidgets('las transacciones pendientes muestran monto, estado y accion',
         (tester) async {
       _usarTamano(tester, const Size(420, 2400));

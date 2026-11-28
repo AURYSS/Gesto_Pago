@@ -2,6 +2,7 @@ import '../../../core/network/token_refresher.dart';
 import '../../../core/network/token_store.dart';
 import '../domain/auth_repository.dart';
 import '../domain/auth_session.dart';
+import '../domain/persona_fisica_registro.dart';
 import 'auth_remote.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -48,6 +49,14 @@ class AuthRepositoryImpl implements AuthRepository {
       password: password,
     );
     final session = response.toSession(email.trim().toLowerCase());
+    await _persistIgnorandoErrores(session);
+    return session;
+  }
+
+  @override
+  Future<AuthSession> registerPersonaFisica(PersonaFisicaRegistro datos) async {
+    final response = await _remote.registerPersonaFisica(datos);
+    final session = response.toSession(datos.correo.trim().toLowerCase());
     await _persistIgnorandoErrores(session);
     return session;
   }

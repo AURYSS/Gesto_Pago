@@ -1,5 +1,6 @@
 import '../../../core/network/token_refresher.dart';
 import 'auth_session.dart';
+import 'persona_fisica_registro.dart';
 
 /// Contrato de acceso a la autenticación.
 abstract interface class AuthRepository implements TokenRefresher {
@@ -20,6 +21,9 @@ abstract interface class AuthRepository implements TokenRefresher {
     required String email,
     required String password,
   });
+
+  /// Registra un cliente Persona Física (onboarding completo de 3 pasos).
+  Future<AuthSession> registerPersonaFisica(PersonaFisicaRegistro datos);
 
   /// Recupera la sesión persistida, si existe.
   Future<AuthSession?> restoreSession();

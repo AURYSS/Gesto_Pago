@@ -4,6 +4,7 @@ class AppConfig {
   const AppConfig._();
 
   static const String _envUrl = String.fromEnvironment('API_BASE_URL');
+  static const String _envMicroUrl = String.fromEnvironment('MICRO_USUARIOS_URL');
 
   /// URL base de la API de producción en Render.
   static const String productionApiUrl = 'https://gesto-pago.onrender.com';
@@ -23,6 +24,20 @@ class AppConfig {
       return 'http://10.0.2.2:8080';
     }
     return 'http://localhost:8080';
+  }
+
+  /// URL base de micro-usuarios (puerto 8081).
+  static String get microUsuariosBaseUrl {
+    if (_envMicroUrl.isNotEmpty) {
+      return _envMicroUrl;
+    }
+    if (kReleaseMode) {
+      return productionApiUrl;
+    }
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      return 'http://10.0.2.2:8081';
+    }
+    return 'http://localhost:8081';
   }
 
   static const Duration connectTimeout = Duration(seconds: 10);

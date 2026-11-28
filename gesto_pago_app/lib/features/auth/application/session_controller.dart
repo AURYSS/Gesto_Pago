@@ -6,6 +6,7 @@ import '../../../core/network/app_exception.dart';
 import '../../../core/providers/app_providers.dart';
 import '../domain/auth_repository.dart';
 import '../domain/auth_session.dart';
+import '../domain/persona_fisica_registro.dart';
 
 enum SessionStatus { unknown, authenticated, unauthenticated }
 
@@ -139,6 +140,13 @@ class SessionController extends Notifier<SessionState> {
       email: email,
       password: password,
     );
+    state = SessionState(status: SessionStatus.authenticated, session: session);
+    _startHeartbeat();
+    return state;
+  }
+
+  Future<SessionState> registerPersonaFisica(PersonaFisicaRegistro datos) async {
+    final session = await _repository.registerPersonaFisica(datos);
     state = SessionState(status: SessionStatus.authenticated, session: session);
     _startHeartbeat();
     return state;
